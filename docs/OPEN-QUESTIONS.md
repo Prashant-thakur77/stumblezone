@@ -1,46 +1,54 @@
 # Open questions to resolve before/while building
 
-Written 2026-08-31, at project kickoff. Answer these; delete them as they close.
-Last updated 2026-08-31 after [ARCHITECTURE.md](ARCHITECTURE.md) landed.
+Kickoff 2026-08-31. Last updated 2026-08-31 after the first build session.
 
 ## Blocking
 
-1. **World deployment access.** Do you own a Decentraland NAME or ENS domain to deploy the World to?
-   Requirement #1 of the buildathon is a live, publicly accessible World for the whole Sep 5–11 judging
-   window. If there's no NAME yet, this is the single longest-lead item — ask in the Friendzone Discord
-   channel whether participant NAMEs are provided, and do it on day one.
-   (An ENS domain you already hold works and needs no MANA: 36 MB cap, 100 concurrent users — plenty.
-   See ARCHITECTURE.md §3.)
-2. **Wallet.** Which address deploys? Needed for `dcl deploy` and for any signed-fetch leaderboard writes.
-   If deploys run from GitHub Actions, use a *disposable* wallet granted deploy rights, not the wallet
-   that owns the NAME/ENS.
+1. **World deployment access.** Still open, and now the only thing between the build and a live World.
+
+   **Finding (2026-08-31):** the buildathon does **not** provide NAMEs. The official workshop recap
+   states participants need *"a Decentraland Name for publishing"* and links only to the shop. No
+   sponsorship, no vouchers. The $30 merch voucher is merch credit, unrelated.
+
+   You currently hold no wallet and no crypto, so the routes are, in order of preference:
+   - **Borrow one.** Anyone owning any ENS domain or DCL NAME can grant your address deploy rights
+     (Creator Hub → Manage → Permissions → Multi-Scene World → Collaborators). Free, instant, no KYC.
+     Ask GDG friends and the Friendzone Discord — it is a two-minute favour.
+   - **Buy an ENS domain** (~1yr fee + gas). Requires funding a wallet.
+   - **Buy a DCL NAME** (100 MANA + gas). More expensive; storage cap we don't need.
+
+   **Critical path is exchange KYC, not money** — 1–3 days for a first-time verification. Start it
+   immediately if the borrow route isn't confirmed. See [DEPLOY-SETUP.md](DEPLOY-SETUP.md).
+
+2. **Wallet.** Follows from item 1. Recommendation: skip GitHub Actions CI entirely for this build
+   and deploy manually — six deploys over eleven days does not justify the setup or its failure mode.
 
 ## Closed
 
-3. ~~**Missing reference document.**~~ **Closed 2026-08-31.** The "Bloop's Pond plan" pointer in BRIEF.md §4
-   is gone; [ARCHITECTURE.md](ARCHITECTURE.md) is now the authoritative networking document.
-4. ~~**Multiplayer backend choice — blocking.**~~ **Downgraded 2026-08-31, no longer blocking.** The round
-   scheduler is pure client-side UTC math, so nothing in the core game waits on a backend. Persistence
-   (crowns, dailies, ghosts) is Layer 2 and optional: Multiplayer Server, a ~200-line Node ws server, or
-   session-only crowns. Decide in Phase 5, timeboxed to half a day. A dead backend during judging now
-   degrades leaderboards only — requirement #3 still holds.
-5. ~~**Backend clock vs UTC wall-clock schedule.**~~ **Closed 2026-08-31: pure UTC.**
-   `SLOT_SECONDS = 120`, `slot = floor(now/120)`, `roundType = slot % 5`, `seed = hash(slot)` — a
-   10-minute cycle, computed identically on every client. Skew is absorbed by a 5-second "get ready"
-   freeze at each round start; inputs are judged locally.
+3. ~~Missing networking reference document.~~ Closed — [ARCHITECTURE.md](ARCHITECTURE.md) is authoritative.
+4. ~~Multiplayer backend choice (blocking).~~ Downgraded — the scheduler needs no backend. Session
+   crowns shipped; cross-session persistence is post-submission.
+5. ~~Backend clock vs UTC wall-clock schedule.~~ Closed: pure UTC. `slot = floor(now/120)`,
+   `round = slot % 4`, `seed = hash(slot)`.
+6. ~~Solo mode: three lives or score attack?~~ Closed: **three lives per round**. Same mechanic as
+   multiplayer elimination with a counter in front, so it costs no extra system.
+7. ~~Crown persistence: wallet required?~~ Closed: **guests earn crowns**. Session-scoped tally keyed
+   on the reported address, with a `guest-xxxx` fallback. No signing, no wallet gate.
+8. ~~Node version.~~ Closed, and it was a real blocker: `@dcl/sdk-commands` v7.27.0 calls
+   `fs.globSync`, a **Node 22+** API, despite the docs saying "Node 20 or later". Every build failed
+   with an opaque `TypeError`. Node 22.23.2 is now pinned in `package.json` via Volta.
 
-## Timeline reality
+## Still to verify (needs a human at the keyboard)
 
-The plan's Phase 0–8 build order assumes a longer runway than remains. Today is Aug 31; the extended
-deadline is Sep 11 and the World must be live from Sep 5. Practical read: aim to have a *submittable*
-World deployed well before Sep 5, then improve it in place during the judging window. The stated cut order
-(Jump Bar → persistence → daily challenge → Tip Toe → ghost times) is likely to be exercised, not held
-in reserve. Phase 2 shrinking to ~half a day buys back some of that runway.
+- **Nothing has been seen running in an actual explorer.** All code compiles and the pure logic has
+  24 passing tests, but no round has been played. `npm run start` is the next step and the first
+  place real bugs will appear — tile heights, fall thresholds, wall speeds, and whether the sweeper
+  gap is actually wide enough to run through.
+- Wave speeds, memory durations and the Hex-Drop decay window are first guesses. They need a
+  playtest to tune.
+- Mobile safe-area layout is written to the documented rules but not yet checked on a real phone.
 
-## Design decisions still open
+## Timeline
 
-- Solo mode: three lives per round, or continuous score attack? BRIEF.md says both in different places.
-- Crown persistence: does an anonymous/guest visitor earn crowns, or is a wallet required to appear on
-  the board? (Only decidable once Layer 2's option is picked — guests can't sign a `POST /result`.)
-- Hex-Drop join window: how far into the slot can a player still enter before being forced to spectate?
-  Everything else derives from the seed, so this is the one round with a real mid-round join limit.
+Deploy target Sep 4, judging Sep 5–11. Day-1 plan work (scaffold, scheduler, layouts, all four
+rounds, HUD, lobby) is complete ahead of schedule. The remaining risk is entirely in item 1.
