@@ -73,7 +73,7 @@ Tech: ~180 hexes per layer from one shared mesh, step detection by position-over
 Stretch round (only if day 9 is free) — Jump Bar: a slow rotating beam sweeps a circular pad, jump over it or get dinged. One tweened rotator plus a trigger.
 
 ### The meta loop
-Rounds fire on server wall-clock (:00 A, :02 B, :04 C, :06 D, :08 break, repeat ~8 min cycle). Between rounds everyone lands in a small lobby with the crown board, emote podium for the last winner, and the schedule. Crowns: survive = 1, top-3 = 2, win = 4, first-finisher bonuses. Daily crown leaderboard, all-time board, win streaks, personal bests per round. Daily challenge line on the board ("win Perfect Match without losing a life") for the comeback trigger.
+Rounds fire on UTC wall-clock, computed client-side with no server: 120-second slots, `slot % 5` selects A, B, C, D, lobby-break — a 10-minute cycle. See [ARCHITECTURE.md](ARCHITECTURE.md) §1. Between rounds everyone lands in a small lobby with the crown board, emote podium for the last winner, and the schedule. Crowns: survive = 1, top-3 = 2, win = 4, first-finisher bonuses. Daily crown leaderboard, all-time board, win streaks, personal bests per round. Daily challenge line on the board ("win Perfect Match without losing a life") for the comeback trigger.
 
 ---
 
@@ -87,20 +87,33 @@ Rounds fire on server wall-clock (:00 A, :02 B, :04 C, :06 D, :08 break, repeat 
 - Retention: daily crowns, daily challenge, PBs and ghost times, the schedule itself ("Hex-Drop is in 3 minutes, wait for it").
 - Execution: four rounds sharing one tile system is a small codebase pretending to be a big game. That's the point.
 
-Hostless check: the scheduler runs on server time. The arena cycles for an audience of zero.
+Hostless check: the scheduler is pure UTC math on each client — no server owns it. The arena cycles for an audience of zero, and keeps cycling even if the optional persistence layer is down.
 
 ---
 
-## 4. Architecture (condensed — full networking detail is in the Bloop's Pond plan, §4 and §6; it applies unchanged)
+## 4. Architecture (condensed — **full detail, and the authoritative version, is in [ARCHITECTURE.md](ARCHITECTURE.md)**)
 
-Three layers again. Layer 0 free from the platform (avatars, chat, voice). Layer 1 realtime: `syncEntity` + message bus from `@dcl/sdk/network` for eliminations, hex despawns, and celebration events. Layer 2 authority: the Decentraland Multiplayer Server (docs: networking/authoritative-servers, scene-editor/operate-live/server-data) or a fallback ~200-line Node ws server, owning the round schedule, seeds, crowns, leaderboards, streaks, and daily reset.
+> **Superseded in one place:** this section originally had a server publishing
+> `{roundId, type, seed, startsAt}`. It doesn't. The schedule is derived from UTC on every client,
+> and the backend became optional. ARCHITECTURE.md §1 is the version to build from.
 
-The one idea that keeps net traffic near zero: determinism from seeds. The server publishes `{roundId, type, seed, startsAt}`. Every client derives identical tile layouts, fruit sequences, and wall timings from the seed plus server-synced time. The only per-player traffic is `eliminated`, `finished{time}`, and Hex-Drop's `tileStepped{id}`. Crowns are computed server-side from those reports, with basic sanity checks (finish time >= theoretical minimum, one report per round per address via signed fetch).
+Three layers, dependency direction inverted. **Layer 0** free from the platform (avatars, chat, voice).
+**Layer 1** the deterministic scheduler — pure client math over UTC slots, no server — plus, in-round,
+`syncEntity` + the message bus from `@dcl/sdk/network` for eliminations, hex despawns, and celebration
+events. **Layer 2** optional persistence for crowns, dailies and ghosts: Decentraland's Multiplayer
+Server, a ~200-line Node ws server, or nothing at all (session-only crowns). The game is complete and
+playable with Layer 2 absent.
+
+The one idea that keeps net traffic near zero: determinism from seeds. `seed = hash(slot)`, and every
+client derives identical tile layouts, fruit sequences, and wall timings from it plus elapsed time in
+the slot. The only per-player traffic is `eliminated`, `finished{ms}`, and Hex-Drop's `tile{tileId}`.
+If a persistence layer exists, crowns are validated server-side from those reports (finish time >=
+theoretical par, one report per slot per address via signed fetch).
 
 Client module map:
 
     src/
-      index.ts             // boot, connect, clock sync
+      index.ts             // boot, scene setup
       arena/
         lobby.ts           // podium, boards, schedule sign
         tiles.ts           // shared tile system: grid spawn, collider toggle, sink tween
@@ -109,12 +122,12 @@ Client module map:
           sweeper.ts       // walls, waves, hearts
           tipToe.ts        // uses tiles.ts + persistence within round
           hexDrop.ts       // hex grid + step detection
-        scheduler.ts       // round state machine driven by server clock
+        scheduler.ts       // UTC slot math + seeded PRNG + round state machine
       ui/
         hud.tsx            // countdown, hearts, round banner, jump hint
         boards.tsx         // crowns, ghosts, daily challenge
       net/
-        client.ts          // signed fetch + ws (or Multiplayer Server SDK)
+        client.ts          // OPTIONAL Layer 2: signed fetch + ws (or Multiplayer Server SDK)
         sync.ts            // messageBus + syncEntity wiring
       systems/spectator.ts // ledge teleport, cheer emotes
 
@@ -193,8 +206,8 @@ Done when: you can walk the greybox on your phone in the live World.
 Phase 1 — core tile tech. tiles.ts (grid spawn, collider toggle, sink tween, seeded layouts) plus the scheduler state machine running on local time. Build Perfect Match on top of it.
 Done when: you can win and lose Perfect Match alone in preview.
 
-Phase 2 — networking. Decide Multiplayer Server vs own ws server, add clock sync, serve seeds and the round schedule.
-Done when: two browser windows show the same round at the same moment.
+Phase 2 — networking (now ~half a day). Implement the UTC slot math and seeded PRNG, plus message-bus sync for `eliminated` / `finished` / `tile`. No backend decision needed here — it moved to Phase 5.
+Done when: two browser windows show the same round at the same moment, and a client joining mid-round renders the correct board state.
 
 Phase 3 — elimination and the finale. Hex-Drop (step detection, tileStepped sync), spectator ledge, server-side elimination reports, crowns v1.
 Done when: two clients finish a full Hex-Drop and the winner's crown shows on both.
@@ -202,7 +215,7 @@ Done when: two clients finish a full Hex-Drop and the winner's crown shows on bo
 Phase 4 — remaining rounds. Sweeper Gates and Tip Toe, both thin configs on the systems that already exist.
 Done when: the 4-round cycle runs unattended for an hour without breaking.
 
-Phase 5 — meta layer. Boards (daily crowns, ghosts, streaks, daily challenge), podium moment, solo lives and score-attack mode.
+Phase 5 — meta layer. Decide persistence (Multiplayer Server vs own ws server vs session-only — timebox to half a day), then boards (daily crowns, ghosts, streaks, daily challenge), podium moment, solo lives and score-attack mode.
 Done when: a solo session feels like a complete game.
 
 Phase 6 — mobile pass. Safe area, jump button mapping, text sizes, FPS profiling, all with the build-for-mobile docs open.
@@ -213,4 +226,4 @@ Done when: playtesters replay without being asked to.
 
 Phase 8 — ship. Feature freeze. Final deploy (allow 30–60 min for asset conversion before it's reliably playable), scene.json metadata and thumbnail, README structured around the seven judging criteria, a 2-player phone-captured demo video, CREDITS.md, DoraHacks submission — submit with room to spare, then keep the World live through the whole judging window. Schedule two "crown rush hours" on the DCL events page and post the World in the Friendzone Discord so judges can walk into a live crowd.
 
-Cut order if time runs short: Jump Bar, daily challenge, Tip Toe, ghost times. Never cut: the scheduler, Perfect Match, Hex-Drop, the crowns board, mobile polish.
+Cut order if time runs short: Jump Bar, persistence (fall back to session-only crowns), daily challenge, Tip Toe, ghost times. Never cut: the scheduler, Perfect Match, Hex-Drop, the crowns board, mobile polish.
