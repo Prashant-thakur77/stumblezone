@@ -66,6 +66,59 @@ the domain, and that is the whole handshake.
 storage budget. Stumblezone is a low-poly arena with one texture atlas — 36 MB is not close to a
 problem, but run `SceneOptimizer` over the GLBs before the final deploy anyway.
 
+### Route B2 — Borrow someone else's World (free, instant, no funds at all)
+
+Decentraland has a built-in permission system for exactly this: a World owner can grant another
+wallet the right to deploy to their World. This is a supported feature, not a workaround. The World
+stays theirs; the scene, the repo and the submission stay yours.
+
+**Cost to you: nothing.** Deploying is a signed HTTP upload to the content server, not a blockchain
+transaction — no gas, no MANA. An empty wallet is enough.
+
+**What you do first**
+
+- [ ] **B2.1** Create a MetaMask wallet (Part 1 above). Leave it empty. Takes five minutes.
+- [ ] **B2.2** Copy your wallet address — the `0x...` string. That is the only thing you send them.
+
+**What they do** (send them these five lines verbatim)
+
+> 1. Open Creator Hub → **Manage** tab, and select the World you're lending me.
+> 2. Open **Permissions**.
+> 3. Turn on **Multi-Scene World (Advanced)** — the collaborator list only appears behind this toggle.
+> 4. Under **Collaborators**, paste my address: `0x...`
+> 5. Set the scope to **All Parcels**, and save.
+
+The API equivalent, if they prefer curl (needs signed fetch and World ownership):
+`PUT /world/{world_name}/permissions/deployment/{your_address}` against
+`https://worlds-content-server.decentraland.org`.
+
+**Then you deploy**
+
+- [ ] **B2.3** Put *their* name in `scene.json` — not yours:
+
+```json
+{ "worldConfiguration": { "name": "their-name.dcl.eth" } }
+```
+
+- [ ] **B2.4** Deploy, signing with your own wallet:
+
+```bash
+npm run deploy -- --target-content https://worlds-content-server.decentraland.org
+```
+
+- [ ] **B2.5** Wait 30–60 minutes for conversion, then `/goto their-name.dcl.eth` on your phone.
+
+**Three things to be straight with them about**
+
+1. **Ask for a World they aren't using.** With Multi-Scene enabled, a deploy can overwrite an
+   existing scene at the same coordinates. Stumblezone occupies parcels `0,0`–`3,3`. If they have
+   content there, add `--multi-scene` to the deploy command and agree on coordinates first.
+2. **Your scene uses their storage budget** — their 36 MB if it's an ENS World, or their NAME budget.
+   Stumblezone uses SDK primitives and no downloaded models, so this is a rounding error, but say so.
+3. **They can revoke at any time, and the World must stay up Sep 5–11.** This is the real risk of
+   borrowing: someone else can take your submission offline mid-judging, by accident or otherwise.
+   Be explicit that you need it untouched through Sep 11, and offer to credit them in the README.
+
 ### Route C1 — Buy an ENS domain (cheap, fast, no MANA needed)
 
 - [ ] **C1.1** Go to `https://app.ens.domains`, connect the Part 1 wallet, search a name.
@@ -103,6 +156,7 @@ across all your Worlds. If you later drop below your used budget (by selling MAN
 |---|---|---|---|---|
 | **A. Discord-provided NAME** | free | hours–days, uncertain | 100 MB | none |
 | **B. ENS you own** | free | instant | 36 MB | **none** |
+| **B2. Borrowed World (ACL)** | **free, no funds** | minutes | theirs | none your side |
 | **C1. Buy ENS** | ~1yr fee + ETH gas | ~10 min | 36 MB | none |
 | **C2. Buy DCL NAME** | 100 MANA + gas | ~10 min | 100 MB+ | none |
 

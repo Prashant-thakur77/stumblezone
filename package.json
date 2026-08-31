@@ -11,7 +11,7 @@
     "test": "node --import tsx --test tests/*.test.ts"
   },
   "devDependencies": {
-    "@dcl/js-runtime": "latest",
+    "@dcl/js-runtime": "7.27.0",
     "@dcl/sdk": "latest",
     "tsx": "^4.23.13"
   },
