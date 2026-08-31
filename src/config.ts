@@ -35,3 +35,37 @@ export const HEX_PER_LAYER = 180
 
 /** Sweeper Gates walls are divided into this many columns; one of them is the gap. */
 export const SWEEPER_COLUMNS = 6
+
+// --- Arena placement (scene is 4x4 parcels = 64m x 64m) ---------------------
+
+export const ARENA_CENTER_X = 32
+export const ARENA_CENTER_Z = 36
+
+/** Play surface height. Falling below KILL_Y counts as a fall. */
+export const ARENA_Y = 4
+export const KILL_Y = -1
+
+/** Eliminated players watch from here. High enough to see the whole arena. */
+export const LEDGE = { x: 32, y: 13, z: 8 }
+
+/** Where players stand between rounds. */
+export const LOBBY = { x: 32, y: 1, z: 7 }
+
+// --- Palette ----------------------------------------------------------------
+// Chunky, bright, toy-plastic. Fruit colours are deliberately far apart in hue
+// so they stay distinguishable on a small screen in bright sunlight.
+
+export const FRUIT_COLORS = [
+  { r: 0.95, g: 0.26, b: 0.21 }, // strawberry red
+  { r: 1.0, g: 0.76, b: 0.03 }, // banana yellow
+  { r: 0.3, g: 0.69, b: 0.31 }, // lime green
+  { r: 0.13, g: 0.59, b: 0.95 }, // blueberry blue
+  { r: 0.61, g: 0.15, b: 0.69 } // grape purple
+] as const
+
+export const FRUIT_NAMES = ['RED', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
+
+export const TILE_NEUTRAL = { r: 0.93, g: 0.93, b: 0.9 }
+export const TILE_FAKE_HINT = { r: 0.85, g: 0.85, b: 0.82 }
+export const WALL_COLOR = { r: 0.99, g: 0.42, b: 0.31 }
+export const PLATFORM_COLOR = { r: 0.55, g: 0.76, b: 0.88 }

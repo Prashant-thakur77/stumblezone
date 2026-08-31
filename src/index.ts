@@ -1,15 +1,25 @@
-// We define the empty imports so the auto-complete feature works as expected.
-import {} from '@dcl/sdk/math'
-import { engine } from '@dcl/sdk/ecs'
+// Stumblezone - a four-round party gauntlet that runs on UTC and needs no server.
+//
+// Boot order matters: rounds build their entity pools once, the scheduler takes over the clock,
+// and everything after that is driven by the time of day.
 
-import { changeColorSystem, circularSystem } from './systems'
-import { setupUi } from './ui'
+import { buildLobby } from './arena/lobby'
+import { perfectMatch } from './arena/rounds/perfectMatch'
+import { sweeper } from './arena/rounds/sweeper'
+import { tipToe } from './arena/rounds/tipToe'
+import { hexDrop } from './arena/rounds/hexDrop'
+import { setupScheduler } from './systems/scheduler'
+import { initSpectator } from './systems/spectator'
+import { setupCrownSync } from './net/crowns'
+import { setupHud } from './ui/hud'
 
 export function main() {
-  // Defining behavior. See `src/systems.ts` file.
-  engine.addSystem(circularSystem)
-  engine.addSystem(changeColorSystem)
+  buildLobby()
+  initSpectator()
+  setupHud()
 
-  // draw UI. Here is the logic to spawn cubes.
-  setupUi()
+  // Order must match ROUND_NAMES in config.ts - the scheduler indexes both by slot % 4.
+  setupScheduler([perfectMatch, sweeper, tipToe, hexDrop])
+
+  setupCrownSync()
 }
