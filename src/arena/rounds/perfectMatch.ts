@@ -15,14 +15,16 @@ import {
   TILE_SIZE,
   FRUIT_COLORS,
   FRUIT_NAMES,
-  TILE_NEUTRAL
+  TILE_NEUTRAL,
+  PLAY_SECONDS
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 
 const WAVES = 3
-const WAVE_SECONDS = 25
+/** Derived, so retuning the slot split never silently leaves a wave hanging off the end. */
+const WAVE_SECONDS = PLAY_SECONDS / WAVES
 const BLANK_SECONDS = 1
 // Long enough to cross the 15m grid at walking pace after the colour is called. At 3s this round
 // was unwinnable for anyone standing on the far side of the board.

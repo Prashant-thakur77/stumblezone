@@ -79,9 +79,6 @@ export function loseLife(): boolean {
 export function spectateOnly(): void {
   out = true
   void sendTo(LEDGE)
-  InputModifier.createOrReplace(engine.PlayerEntity, {
-    mode: InputModifier.Mode.Standard({ disableAll: true })
-  })
 }
 
 export function eliminate(): void {
@@ -90,11 +87,9 @@ export function eliminate(): void {
   play('eliminated')
   emitEliminated()
   void sendTo(LEDGE)
-  // Eliminated players are spectators, not participants: freeze locomotion so they can't wander
-  // back into a round they are out of.
-  InputModifier.createOrReplace(engine.PlayerEntity, {
-    mode: InputModifier.Mode.Standard({ disableAll: true })
-  })
+  // Deliberately NOT frozen. Being locked in place for the rest of a round is the least social
+  // thing this game could do, and spectating is meant to be its heart. The ledge is 9m above the
+  // arena and 10m clear of it, so a spectator can wander and cheer but cannot rejoin the round.
 }
 
 export function releaseInput(): void {
@@ -120,9 +115,15 @@ export function initSpectator(): void {
   onCheer(() => {})
 
   engine.addSystem(function fallWatcher() {
-    if (relocating || out) return
+    if (relocating) return
     const t = Transform.getOrNull(engine.PlayerEntity)
     if (!t || t.position.y > KILL_Y) return
+
+    // Spectators can walk off the ledge. Put them back rather than letting them fall forever.
+    if (out) {
+      void sendTo(LEDGE)
+      return
+    }
     if (fallHandler) {
       fallHandler()
     } else {
@@ -134,6 +135,8 @@ export function initSpectator(): void {
   // 1/2/3/4 buttons which hide behind a secondary menu.
   engine.addSystem(function cheerInput() {
     if (!out) return
+    // Spectators only - a player still in the round needs IA_PRIMARY for nothing, but binding it
+    // for everyone would fire emotes mid-run.
     if (inputSystem.isTriggered(InputAction.IA_PRIMARY, PointerEventType.PET_DOWN)) cheer()
   })
 }

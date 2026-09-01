@@ -8,8 +8,8 @@ export const SLOT_SECONDS = 120
 export const ROUND_COUNT = 4
 
 /** Phase split inside a slot. Must sum to SLOT_SECONDS — guarded by a unit test. */
-export const INTRO_SECONDS = 30
-export const PLAY_SECONDS = 75
+export const INTRO_SECONDS = 20
+export const PLAY_SECONDS = 85
 export const RESULTS_SECONDS = 15
 
 /** Locomotion is frozen for this long at the start of play, absorbing cross-client clock skew. */

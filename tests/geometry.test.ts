@@ -16,6 +16,7 @@ import {
   SWEEPER_COLUMNS,
   PLAY_SECONDS,
   INTRO_SECONDS,
+  RESULTS_SECONDS,
   GET_READY_SECONDS
 } from '../src/config.ts'
 
@@ -96,10 +97,23 @@ test('Perfect Match gives enough time to cross the board after a colour is calle
   )
 })
 
-test('the three Perfect Match waves fit inside the play phase', () => {
+test('a round leaves more of the cycle playable than waiting', () => {
+  // 38% of every cycle used to be intro plus results. A judge who walks in wants to play, not read.
+  const dead = INTRO_SECONDS + RESULTS_SECONDS
+  const cycle = INTRO_SECONDS + PLAY_SECONDS + RESULTS_SECONDS
+  assert.ok(dead / cycle < 0.32, `${((dead / cycle) * 100).toFixed(0)}% of the cycle is dead time`)
+})
+
+test('each Perfect Match wave has room for its full reveal-blank-call-judge sequence', () => {
   const WAVES = 3
-  const WAVE_SECONDS = 25
-  assert.equal(WAVES * WAVE_SECONDS, PLAY_SECONDS, 'wave schedule does not fill the play phase exactly')
+  const LONGEST_MEMORY = 6
+  const BLANK = 1
+  const CALL = 6
+  const waveSeconds = PLAY_SECONDS / WAVES
+  assert.ok(
+    waveSeconds > LONGEST_MEMORY + BLANK + CALL,
+    `a ${waveSeconds.toFixed(1)}s wave cannot fit a ${LONGEST_MEMORY + BLANK + CALL}s sequence`
+  )
 })
 
 test('the get-ready freeze fits inside the play phase', () => {
