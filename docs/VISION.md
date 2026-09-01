@@ -44,8 +44,10 @@ Every design decision below exists to protect this loop.
 
 ## 3. The four rounds — how each should look and play
 
-The shared shape: **20s intro** (hint + countdown in the lobby) → **85s play** (5s frozen get-ready,
-then the game) → **15s results**. A full cycle of all four rounds is 8 minutes. Nothing waits for
+The shared shape: **20s intro** (three-word hint + countdown) → **85s play** (5s frozen get-ready,
+6s harmless warm-up, then the game) → **15s results**. **The four rounds are one 8-minute SHOW**
+with a champion: crowns accumulate across it, the HUD shows your place in it, and the finale's
+crowns count double. Nothing waits for
 players; everything derives from the UTC clock and the slot seed. ✅
 
 ### Round 1 — Perfect Match (memory)
