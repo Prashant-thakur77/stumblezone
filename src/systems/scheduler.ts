@@ -64,6 +64,7 @@ import { refreshCosmetics } from './cosmetics'
 import { fieldLine, rivalry } from '../lib/field'
 import { dailyFor, dailyDone, dayIndex, DAILY_CROWNS } from '../lib/daily'
 import { bonusesFor } from '../lib/bonus'
+import { Session } from '../lib/session'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -94,6 +95,8 @@ const streaks = new Streaks()
 let outMs = new Map<string, number>()
 /** The UTC day whose challenge is already paid for, so it pays once and only once. */
 let dailyPaidDay = -1
+/** What this visit adds up to, shown on the card at the end of every show. */
+const session = new Session()
 /** True if the crowd hit the top of the hype meter at any point this round. */
 let crowdWentWild = false
 /** Whether the previous round knocked us out, for the comeback bonus. */
@@ -366,7 +369,10 @@ function schedulerSystem(dt: number): void {
       award(myAddress(), bonus.crowns)
       toast(bonus.label + '  +' + bonus.crowns)
     }
-    if (!spectatingOnly) wasOutLastRound = !survived
+    if (!spectatingOnly) {
+      wasOutLastRound = !survived
+      session.round(survived)
+    }
 
     // The daily. Paid once per UTC day, on the first round that clears it.
     if (!spectatingOnly && dailyPaidDay !== dayIndex(now)) {
@@ -444,6 +450,8 @@ function schedulerSystem(dt: number): void {
     // rank comes from the shared crown tally, so every client agrees who stands where and everyone
     // sees the same three avatars arrive on the steps.
     const cycleEnd = isFinale(slot)
+    // The end of a show is where a visit gets summed up, win or lose.
+    if (cycleEnd && !spectatingOnly) hud.resultDetail += '  ·  ' + session.summary()
     const rank = cycleEnd ? showStandings(3).findIndex((s) => s.address === myAddress()) : -1
     if (rank >= 0) {
       const spot = PODIUM_SPOTS[rank]
