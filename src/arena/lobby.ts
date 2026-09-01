@@ -23,7 +23,7 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
-import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
+import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS, SHARE_URL } from '../config'
 import { standings, showStandings, displayName } from '../net/crowns'
 import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInflatable } from './models'
 import { upcoming } from '../systems/scheduler'
@@ -86,6 +86,10 @@ export function buildLobby(): void {
 
   crownBoard = sign('CROWNS', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y + 4, SIGN_Z), 2)
   scheduleBoard = sign('NEXT UP', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y + 4, SIGN_Z), 2)
+
+  // A party game is only as good as the number of people in it, so the way to bring someone is
+  // written on the wall rather than left in a README nobody in-world will read.
+  sign('BRING A FRIEND\n' + SHARE_URL, Vector3.create(ARENA_CENTER_X, LOBBY.y + 2.2, SIGN_Z), 1.1)
 
   // Toys (docs/FALLGUYS-PRESENTATION.md, Part 4). A spinning star crowns the title, two smiling
   // lollipops flank it, and a pair of inflatables sit in the back corners: things with faces and

@@ -26,7 +26,8 @@ import {
   SLOT_SECONDS,
   WARMUP_SECONDS,
   PODIUM_SPOTS,
-  ARENA_Y
+  ARENA_Y,
+  SHARE_URL
 } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
@@ -409,6 +410,8 @@ function schedulerSystem(dt: number): void {
       setConfetti(true)
       play('crown')
       say('congratulations')
+      // The one moment somebody is most likely to tell a friend about this is the moment they win.
+      if (rank === 0) hud.resultDetail = 'SHOW CHAMPION  ·  Bring a friend: ' + SHARE_URL
     } else {
       spectator.sendToLobby()
     }

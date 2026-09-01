@@ -43,6 +43,9 @@ export const ROUND_DIFFICULTY = [1, 4, 5, 6, 2, 3] as const
 
 export const LIVES_PER_ROUND = 3
 
+/** Where to send someone who wants to bring a friend. Printed in the lobby and on a win card. */
+export const SHARE_URL = 'decentraland.org/jump/?realm=justchatting.dcl.eth'
+
 // --- Arena geometry ---------------------------------------------------------
 
 export const TILE_SIZE = 3
