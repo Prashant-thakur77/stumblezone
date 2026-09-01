@@ -15,7 +15,7 @@ import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y } from '../config'
 
 export type Clip = 'tick' | 'go' | 'crack' | 'eliminated' | 'survive' | 'crown'
 
-export type Track = 'music-lobby' | 'music-round'
+export type Track = 'music-lobby' | 'music-round' | 'music-tense'
 
 /** Announcer lines - CC0 recordings from Kenney's Voiceover Pack, one consistent male voice. */
 export type Voice =
@@ -73,7 +73,7 @@ export function initAudio(): void {
     sources.set(clip, e)
   }
 
-  for (const track of ['music-lobby', 'music-round'] as Track[]) {
+  for (const track of ['music-lobby', 'music-round', 'music-tense'] as Track[]) {
     const e = engine.addEntity()
     Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z) })
     AudioSource.create(e, {

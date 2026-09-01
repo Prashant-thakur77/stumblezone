@@ -15,6 +15,9 @@ export const RESULTS_SECONDS = 15
 /** Locomotion is frozen for this long at the start of play, absorbing cross-client clock skew. */
 export const GET_READY_SECONDS = 5
 
+/** After the freeze, this many seconds where nothing can kill you. Time to read the space. */
+export const WARMUP_SECONDS = 6
+
 export const ROUND_NAMES = ['Perfect Match', 'Sweeper Gates', 'Tip Toe', 'Hex-Drop'] as const
 
 // --- Gameplay ---------------------------------------------------------------

@@ -33,7 +33,9 @@ import { emitTile, onTile } from '../../net/sync'
 
 
 /** Grace between a step and the tile giving way. Long enough to run across, short enough to fear. */
-const DECAY_MS = 500
+/** Top deck is forgiving; each deck below is twitchier. Falling costs you thinking time as well. */
+const DECAY_MS_TOP = 600
+const DECAY_MS_PER_DECK = 90
 
 type Pending = { layer: number; index: number; at: number }
 
@@ -49,7 +51,7 @@ function markStepped(layer: number, index: number): void {
   if (layer < 0 || layer >= layers.length) return
   if (layers[layer].isSunk(index)) return
   if (pending.some((p) => p.layer === layer && p.index === index)) return
-  pending.push({ layer, index, at: clock + DECAY_MS })
+  pending.push({ layer, index, at: clock + Math.max(220, DECAY_MS_TOP - layer * DECAY_MS_PER_DECK) })
   layers[layer].warn(index, TILE_WARNING)
 }
 

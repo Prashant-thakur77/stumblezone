@@ -52,6 +52,8 @@ type Wall = {
 }
 
 let platform: Entity
+/** All three slabs: the two ends and the narrow causeway between them. */
+let platformParts: Entity[] = []
 /** The rotating beam at the centre, and the pivot it hangs off. */
 let spinner: Entity
 let spinnerPivot: Entity
@@ -70,6 +72,18 @@ let clock = 0
 let running = false
 /** The final-20s speed-up fires once per round. */
 let accelerated = false
+
+function slab(position: Vector3, scale: Vector3): Entity {
+  const e = engine.addEntity()
+  Transform.create(e, { position, scale })
+  MeshRenderer.setBox(e)
+  MeshCollider.setBox(e)
+  Material.setPbrMaterial(e, {
+    albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
+    roughness: 0.9
+  })
+  return e
+}
 
 function buildSlab(): Entity {
   const e = engine.addEntity()
@@ -158,20 +172,27 @@ function buildSpinner(): void {
   })
 }
 
-/** Soft bumpers around the rim, so being shoved outward bounces rather than simply dropping you. */
+/**
+ * Soft bumpers lining the causeway's two open edges.
+ *
+ * They used to ring the old 30m platform at radius 14 - which, now that the middle third is a 10m
+ * causeway, would leave most of them floating in mid-air. Lining the drop is better placement
+ * anyway: they sit exactly where a knockback threatens to shove you off.
+ */
 function buildBumpers(): void {
-  const COUNT = 10
-  const radius = PLATFORM_SIZE / 2 - 1
-  for (let i = 0; i < COUNT; i++) {
-    const angle = (i / COUNT) * Math.PI * 2
+  const CAUSEWAY_HALF = 5
+  const spots: [number, number][] = []
+  for (let i = 0; i < 5; i++) {
+    const z = ARENA_CENTER_Z - 4 + i * 2
+    spots.push([ARENA_CENTER_X - CAUSEWAY_HALF + 0.6, z])
+    spots.push([ARENA_CENTER_X + CAUSEWAY_HALF - 0.6, z])
+  }
+  for (let i = 0; i < spots.length; i++) {
+    const [bx, bz] = spots[i]
     const e = engine.addEntity()
     Transform.create(e, {
-      position: Vector3.create(
-        ARENA_CENTER_X + Math.cos(angle) * radius,
-        ARENA_Y + 0.8,
-        ARENA_CENTER_Z + Math.sin(angle) * radius
-      ),
-      scale: Vector3.create(2.2, 2.2, 2.2)
+      position: Vector3.create(bx, ARENA_Y + 0.7, bz),
+      scale: Vector3.create(1.6, 1.6, 1.6)
     })
     MeshRenderer.setSphere(e)
     MeshCollider.setSphere(e)
@@ -195,17 +216,31 @@ export const sweeper: Round = {
   },
 
   build() {
-    platform = engine.addEntity()
-    Transform.create(platform, {
-      position: Vector3.create(ARENA_CENTER_X, ARENA_Y - 0.25, ARENA_CENTER_Z),
-      scale: Vector3.create(PLATFORM_SIZE, 0.5, PLATFORM_SIZE)
-    })
-    MeshRenderer.setBox(platform)
-    MeshCollider.setBox(platform)
-    Material.setPbrMaterial(platform, {
-      albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
-      roughness: 0.9
-    })
+    // The platform is built as three slabs, not one, so the middle third is a narrow causeway with
+    // open air either side.
+    //
+    // This is the choke point. Fall Guys bottlenecks players deliberately - it stops the good ones
+    // solo-speedrunning and forces everyone into the same space at the same moment, which is where
+    // the comedy and the clips come from. A 30m-wide platform lets a field spread out and play in
+    // parallel; a 10m causeway makes them play together.
+    const CAUSEWAY_WIDTH = 10
+    const endDepth = (PLATFORM_SIZE - CAUSEWAY_WIDTH) / 2
+
+    platform = slab(
+      Vector3.create(ARENA_CENTER_X, ARENA_Y - 0.25, ARENA_CENTER_Z - PLATFORM_SIZE / 2 + endDepth / 2),
+      Vector3.create(PLATFORM_SIZE, 0.5, endDepth)
+    )
+    platformParts = [
+      platform,
+      slab(
+        Vector3.create(ARENA_CENTER_X, ARENA_Y - 0.25, ARENA_CENTER_Z + PLATFORM_SIZE / 2 - endDepth / 2),
+        Vector3.create(PLATFORM_SIZE, 0.5, endDepth)
+      ),
+      slab(
+        Vector3.create(ARENA_CENTER_X, ARENA_Y - 0.25, ARENA_CENTER_Z),
+        Vector3.create(CAUSEWAY_WIDTH, 0.5, CAUSEWAY_WIDTH)
+      )
+    ]
 
     for (let i = 0; i < WALL_COUNT; i++) {
       walls.push({ left: buildSlab(), right: buildSlab() })
@@ -221,8 +256,10 @@ export const sweeper: Round = {
     lastHitAt = 0
     running = true
     accelerated = false
-    VisibilityComponent.createOrReplace(platform, { visible: true })
-    MeshCollider.setBox(platform)
+    for (const part of platformParts) {
+      VisibilityComponent.createOrReplace(part, { visible: true })
+      if (!MeshCollider.has(part)) MeshCollider.setBox(part)
+    }
     setPropsVisible(true)
     // The beam speeds up with the waves, so the round escalates on two axes at once.
     Tween.createOrReplace(spinnerPivot, {
@@ -296,8 +333,10 @@ export const sweeper: Round = {
 
   stop() {
     running = false
-    VisibilityComponent.createOrReplace(platform, { visible: false })
-    MeshCollider.deleteFrom(platform)
+    for (const part of platformParts) {
+      VisibilityComponent.createOrReplace(part, { visible: false })
+      MeshCollider.deleteFrom(part)
+    }
     setPropsVisible(false)
     if (Tween.has(spinnerPivot)) Tween.deleteFrom(spinnerPivot)
     for (const w of walls) {

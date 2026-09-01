@@ -196,8 +196,29 @@ function roundMusic() {
   return bed(8, events)
 }
 
+/**
+ * The tension bed: same progression, 1.5x tempo feel, sixteenth-note arpeggio and a double kick.
+ * Fall Guys moves Hex-A-Gone's score to a more intense section once a round passes two minutes;
+ * this is the same trick, fired for the last 20 seconds of every round.
+ */
+function tenseMusic() {
+  const events = []
+  for (let bar = 0; bar < 8; bar++) {
+    const root = NOTE(C4, PROGRESSION[bar % 4])
+    const shape = [1, 1.5, 2, 1.5, 2, 2.5, 2, 1.5]
+    for (let step = 0; step < 16; step++) {
+      const f = root * shape[step % shape.length]
+      events.push([bar * BAR + step * (BEAT / 4), pluck(f, BEAT * 0.22, 0.1)])
+    }
+    for (let b = 0; b < 8; b++) events.push([bar * BAR + b * (BEAT / 2), kick(0.12, 0.45)])
+    events.push([bar * BAR, pluck(root / 2, BEAT * 2, 0.14)])
+  }
+  return bed(8, events)
+}
+
 clips['music-lobby.wav'] = lobbyMusic()
 clips['music-round.wav'] = roundMusic()
+clips['music-tense.wav'] = tenseMusic()
 
 let total = 0
 for (const [name, samples] of Object.entries(clips)) {
@@ -209,7 +230,7 @@ for (const [name, samples] of Object.entries(clips)) {
 // Music goes out as MP3: it is the format the SDK recommends for music, and it is a third the
 // size of the equivalent WAV. Short cues stay WAV, where the decode overhead of MP3 would show up
 // as latency on a retrigger.
-for (const name of ['music-lobby', 'music-round']) {
+for (const name of ['music-lobby', 'music-round', 'music-tense']) {
   const wav = `${OUT}/${name}.wav`
   const mp3 = `${OUT}/${name}.mp3`
   try {

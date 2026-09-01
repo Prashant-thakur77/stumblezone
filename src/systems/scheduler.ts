@@ -14,6 +14,7 @@ import {
   ROUND_COUNT,
   ROUND_NAMES,
   SLOT_SECONDS,
+  WARMUP_SECONDS,
   PODIUM_SPOTS
 } from '../config'
 import { Round } from '../arena/rounds/types'
@@ -144,7 +145,11 @@ function schedulerSystem(dt: number): void {
 
   // Seconds left in the round itself, for the always-visible HUD timer.
   hud.roundClock = phase === 'play' ? Math.max(0, Math.ceil(INTRO_SECONDS + PLAY_SECONDS - elapsed)) : 0
-  setMusic(phase === 'play' ? 'music-round' : 'music-lobby')
+
+  // The score follows the drama: lobby bed between rounds, the driving bed while playing, and a
+  // faster, busier one for the last 20 seconds - landing with HURRY UP and the spinner speed-up so
+  // every tension signal fires at once.
+  setMusic(phase !== 'play' ? 'music-lobby' : hud.roundClock <= 20 ? 'music-tense' : 'music-round')
 
   if (phase === 'intro') {
     const next = Math.ceil(INTRO_SECONDS - elapsed)
@@ -206,7 +211,16 @@ function schedulerSystem(dt: number): void {
       if (!spectator.isOut()) say('hurry_up')
     }
 
-    active.tick(dt, playElapsed, true)
+    // The warm-up beat: the first seconds of play are harmless, so a first-timer gets to look
+    // around and understand the space before anything can kill them. Fall Guys teaches through
+    // level design rather than text, and its levels open with a survivable stretch for exactly
+    // this reason. Rounds receive `playing: false` and hold their hazards.
+    const warm = playElapsed < GET_READY_SECONDS + WARMUP_SECONDS
+    active.tick(dt, playElapsed, !warm)
+    if (warm) {
+      hud.banner = ''
+      hud.subtitle = active.hint
+    }
 
     // Rounds write whatever suits their own state machine; this has the final word, so no round
     // can tell an eliminated player they are still doing well.
