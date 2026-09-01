@@ -33,13 +33,15 @@ import {
   CROWN_WIN,
   CROWN_FIRST_FINISHER,
   FINALE_MULTIPLIER,
-  setName
+  setName,
+  displayName
 } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds } from './records'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
+import { feed, toast } from './feed'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -60,6 +62,8 @@ let saidSet = false
 let saidHurry = false
 /** True when we arrived after this round had already started, so nothing here counts. */
 let spectatingOnly = false
+/** How many players have crossed this round's finish line, for the feed's placings. */
+let finishers = 0
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -67,13 +71,17 @@ export function setupScheduler(roundList: Round[]): void {
 
   bindSlotSource(() => slotIndex(Date.now()))
 
-  onEliminated((p) => {
+  onEliminated((p, isSelf) => {
     seen.add(p.address)
     eliminated.add(p.address)
+    // Your own elimination already has a stinger, a splash and an emote. Other people's do not.
+    if (!isSelf) toast(displayName(p.address) + ' is OUT')
   })
-  onFinished((p) => {
+  onFinished((p, isSelf) => {
     seen.add(p.address)
     if (!firstFinisher) firstFinisher = p.address
+    finishers += 1
+    toast((isSelf ? 'You' : displayName(p.address)) + ' finished ' + ordinal(finishers))
   })
 
   const me = getPlayer()
@@ -102,6 +110,7 @@ function beginSlot(slot: number): void {
   lastTick = -1
   saidSet = false
   saidHurry = false
+  finishers = 0
 
   syncShow(showIndex(slot))
 
@@ -131,6 +140,7 @@ function schedulerSystem(dt: number): void {
   if (slot !== activeSlot) beginSlot(slot)
   if (!active) return
 
+  hud.toasts = feed.visible(now)
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
   hud.finale = isFinale(slot)
   hud.roundTag = roundTag(roundIndex(slot), hud.finale)

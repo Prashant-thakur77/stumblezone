@@ -26,6 +26,8 @@ export type HudState = {
   roundClock: number
   /** Your standing in the current show, e.g. "SHOW 3rd of 7". Empty before you score. */
   showLine: string
+  /** The corner feed: who fell, who finished, who is cheering. Newest first, at most three. */
+  toasts: string[]
 }
 
 export const hud: HudState = {
@@ -41,7 +43,8 @@ export const hud: HudState = {
   alive: 1,
   resultDetail: '',
   roundClock: 0,
-  showLine: ''
+  showLine: '',
+  toasts: []
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

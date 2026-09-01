@@ -116,6 +116,8 @@ export function ChunkyText(props: ChunkyProps) {
 }
 
 type PillProps = {
+  /** Set when pills are rendered from a list, so react-ecs can keep entities stable. */
+  key?: number | string
   text: string
   width: number
   position?: Position

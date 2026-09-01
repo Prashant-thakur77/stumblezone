@@ -100,6 +100,26 @@ function Splash() {
   )
 }
 
+/** The corner feed. Newest on top, each line gone four seconds after it arrives. */
+function Toasts() {
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { bottom: 24, left: 16 },
+        width: 420,
+        height: 150,
+        flexDirection: 'column',
+        justifyContent: 'flex-end'
+      }}
+    >
+      {hud.toasts.map((t, i) => (
+        <Pill key={i} text={t} width={400} height={40} fontSize={20} color={C.plate} />
+      ))}
+    </UiEntity>
+  )
+}
+
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
@@ -140,6 +160,7 @@ function Hud() {
       <Countdown />
       <PlayBanner />
       <Splash />
+      <Toasts />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}

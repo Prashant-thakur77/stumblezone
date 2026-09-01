@@ -13,6 +13,8 @@ import { movePlayerTo, triggerEmote } from '~system/RestrictedActions'
 import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND, ARENA_Y } from '../config'
 import { emitCheer, emitEliminated, onCheer } from '../net/sync'
 import { play, say } from './audio'
+import { toast } from './feed'
+import { displayName } from '../net/crowns'
 
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
 
@@ -130,7 +132,9 @@ export function cheer(): void {
 export function initSpectator(): void {
   // Other players' cheers already animate their own avatars over the network; this just keeps the
   // channel wired so the HUD can react to a crowd reacting.
-  onCheer(() => {})
+  onCheer((p, isSelf) => {
+    if (!isSelf) toast(displayName(p.address) + ' cheers!')
+  })
 
   engine.addSystem(function fallWatcher() {
     if (relocating) return
