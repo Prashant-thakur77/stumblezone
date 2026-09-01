@@ -34,7 +34,8 @@ import {
   CROWN_FIRST_FINISHER,
   FINALE_MULTIPLIER,
   setName,
-  displayName
+  displayName,
+  leader
 } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
@@ -43,6 +44,8 @@ import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
 import { hype } from './hype'
+import { Streaks } from '../lib/streak'
+import { refreshCosmetics } from './cosmetics'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -67,6 +70,8 @@ let spectatingOnly = false
 let finishers = 0
 /** While this is in the future the confetti is up because the crowd went wild, not because you won. */
 let wildUntil = 0
+/** Consecutive qualifications, for the star over a hot player's name tag. */
+const streaks = new Streaks()
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -285,6 +290,15 @@ function schedulerSystem(dt: number): void {
       if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN * stakes)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
+
+    // Streaks and worn cosmetics. Everyone we saw this round either went down or came through,
+    // and the same computation runs on every client from the same messages.
+    for (const address of seen) {
+      if (address === myAddress() && spectatingOnly) continue
+      if (eliminated.has(address)) streaks.eliminated(address)
+      else streaks.qualified(address)
+    }
+    refreshCosmetics(leader(), streaks.hot())
     // The stinger and the crowd's verdict, before any announcer line.
     if (spectatingOnly) {
       // Watched, did not play: no fanfare and no groan for you.
@@ -344,6 +358,11 @@ function schedulerSystem(dt: number): void {
   // A mid-round joiner watched, so they were neither. The card tells them what happens next.
   hud.banner = spectatingOnly ? 'NEXT ROUND' : spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
+}
+
+/** Your own qualifying streak, for the title under your standing. */
+export function myStreak(): number {
+  return streaks.streak(myAddress())
 }
 
 function ordinal(n: number): string {

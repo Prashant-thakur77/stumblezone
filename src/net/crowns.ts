@@ -63,6 +63,12 @@ export function displayName(address: string): string {
   return address.slice(0, 6) + '...' + address.slice(-4)
 }
 
+/** Whoever is top of the current show, or '' before anyone has scored. Drives the worn crown. */
+export function leader(): string {
+  const top = showStandings(1)
+  return top.length > 0 && top[0].crowns > 0 ? top[0].address : ''
+}
+
 export function crownsFor(address: string): number {
   return crowns.get(address) ?? 0
 }
