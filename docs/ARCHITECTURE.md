@@ -25,17 +25,30 @@ Round scheduling is a function of UTC time, computed identically on every client
 
 ```ts
 SLOT_SECONDS = 120
-slot      = floor(Date.now()/1000 / SLOT_SECONDS)
-roundType = slot % 5          // A, B, C, D, lobby-break
-seed      = hash(slot)        // e.g. splitmix/xxhash of the slot number
-phase     = elapsed within slot → countdown / play / results
+ROUND_COUNT  = 4                              // acts per show
+slot   = floor(Date.now()/1000 / SLOT_SECONDS)
+act    = slot mod 4                           // which act of the show this is
+show   = floor(slot / 4)
+round  = act < 3 ? showRounds(show)[act]      // three of five, drawn by the show's seed
+                 : FINALE_ROUND               // always Hex-Drop
+seed   = hash(slot)                           // splitmix32 of the slot number
+phase  = elapsed within slot → intro / play / results
+golden = show mod 4 === 3                     // double crowns
 ```
 
-Five slots of 120s = a 10-minute cycle.
+Four slots of 120s = one eight-minute show, ending on a podium.
+
+`showRounds(show)` shuffles the pool of five with a PRNG seeded from the show number, takes three,
+and sorts them by a fixed difficulty table so a show always escalates. Every client draws the same
+card without exchanging a message, and two shows in a row are two different cards — which is what
+stops a judge's second visit from being a repeat of their first.
 
 Everything random in a round derives from that seed through a seeded PRNG (mulberry32 is 4 lines):
 
+- **The show's card:** which three of the five pool rounds run, and in what order
 - **Perfect Match:** fruit assignment per tile, target sequence, wave timings
+- **Spotlight:** each light's Lissajous frequencies and phases (position = `f(seed, index, elapsed)`)
+- **Jump Bar:** each beam's starting angle
 - **Tip Toe:** which tiles are fake
 - **Sweeper Gates:** wave speeds and gap offsets (motion position = `f(seed, elapsed)`, so a
   late-joining client renders walls in the correct mid-flight position)
@@ -46,12 +59,23 @@ Everything random in a round derives from that seed through a seeded PRNG (mulbe
 sub-second cross-client agreement. If paranoia strikes later, one fetch to any HTTP `Date` header at
 scene load gives an offset correction — but ship without it first.
 
+### Layer 1c — things every client computes rather than syncs
+
+Some visible state looks like it needs a server and does not. Each of these is a pure function of
+messages every client already receives, so every client reaches the same answer independently:
+
+- **The worn crown** — whoever leads the show's crown tally wears it, via a local `AvatarAttach`.
+- **Streak stars** — two consecutive qualifications, computed from `eliminated` messages.
+- **The hype meter** — cheers inside a sliding ten-second window; at the top, the crowd goes wild
+  for everyone at once.
+- **The daily challenge** — a pure function of the UTC day.
+
 ### Layer 1b — in-round sync between present players
 
 `@dcl/sdk/network` message bus (plus `syncEntity` where a visual should be identical for everyone):
 
 ```ts
-eliminated { slot, address }
+eliminated { slot, address, ms }   // ms = how long they lasted, for rivalry lines
 finished   { slot, address, ms }
 tile       { slot, tileId }        // Hex-Drop step decay only
 cheer      { emoteId }
