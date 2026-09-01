@@ -37,6 +37,13 @@ export type TileGridOptions = {
   /** Offset alternate rows by half a tile, for the Hex-Drop honeycomb look. */
   stagger?: boolean
   thickness?: number
+  /**
+   * Round tiles instead of square ones.
+   *
+   * The party-game look is soft and fat - nothing in it is a hard-edged box. Discs also read their
+   * own edges far better when the floor is falling away around you.
+   */
+  shape?: 'box' | 'disc'
 }
 
 export type TileGrid = {
@@ -72,6 +79,7 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
   const gap = opts.gap ?? 0.15
   const thickness = opts.thickness ?? 0.5
   const stagger = opts.stagger ?? false
+  const shape = opts.shape ?? 'box'
   const pitch = tileSize + gap
 
   const entities: Entity[] = []
@@ -88,8 +96,13 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
 
       const e = engine.addEntity()
       Transform.create(e, { position: home, scale: Vector3.create(tileSize, thickness, tileSize) })
-      MeshRenderer.setBox(e)
-      MeshCollider.setBox(e)
+      if (shape === 'disc') {
+        MeshRenderer.setCylinder(e, 1, 1)
+        MeshCollider.setCylinder(e, 1, 1)
+      } else {
+        MeshRenderer.setBox(e)
+        MeshCollider.setBox(e)
+      }
       Material.setPbrMaterial(e, {
         albedoColor: Color4.create(TILE_NEUTRAL.r, TILE_NEUTRAL.g, TILE_NEUTRAL.b, 1),
         roughness: 0.8,
@@ -99,6 +112,14 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
       entities.push(e)
       homes.push(home)
       sunk.push(false)
+    }
+  }
+
+  function restoreCollider(e: Entity): void {
+    if (shape === 'disc') {
+      MeshCollider.setCylinder(e, 1, 1)
+    } else {
+      MeshCollider.setBox(e)
     }
   }
 
@@ -181,7 +202,7 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
         if (TweenSequence.has(e)) TweenSequence.deleteFrom(e)
         const t = Transform.getMutable(e)
         t.position = homes[i]
-        if (!MeshCollider.has(e)) MeshCollider.setBox(e)
+        if (!MeshCollider.has(e)) restoreCollider(e)
         sunk[i] = false
       }
     },
@@ -190,7 +211,7 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
       for (const e of entities) {
         VisibilityComponent.createOrReplace(e, { visible })
         if (visible) {
-          if (!MeshCollider.has(e)) MeshCollider.setBox(e)
+          if (!MeshCollider.has(e)) restoreCollider(e)
         } else {
           MeshCollider.deleteFrom(e)
         }

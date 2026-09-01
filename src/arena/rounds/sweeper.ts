@@ -17,9 +17,11 @@ import {
   VisibilityComponent,
   TriggerArea,
   triggerAreaEventsSystem,
-  Physics
+  Physics,
+  Tween,
+  EasingFunction
 } from '@dcl/sdk/ecs'
-import { Vector3, Color4 } from '@dcl/sdk/math'
+import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { sweeperWaves, SweeperWave } from '../../lib/layouts'
 import {
   ARENA_CENTER_X,
@@ -27,7 +29,8 @@ import {
   ARENA_Y,
   SWEEPER_COLUMNS,
   WALL_COLOR,
-  PLATFORM_COLOR
+  PLATFORM_COLOR,
+  PARTY_COLORS
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -48,6 +51,10 @@ type Wall = {
 }
 
 let platform: Entity
+/** The rotating beam at the centre, and the pivot it hangs off. */
+let spinner: Entity
+let spinnerPivot: Entity
+let bumpers: Entity[] = []
 let walls: Wall[] = []
 let waves: SweeperWave[] = []
 let lastHitAt = 0
@@ -85,9 +92,100 @@ function buildSlab(): Entity {
   return e
 }
 
+/**
+ * A long beam sweeping a circle at the centre of the platform.
+ *
+ * Every good party-game stage has one big rotating thing. It converts the round from "watch one
+ * axis" into "watch the walls AND the middle", which is the difference between a puzzle you solve
+ * once and a stage you have to keep reading.
+ */
+function buildSpinner(): void {
+  spinnerPivot = engine.addEntity()
+  Transform.create(spinnerPivot, {
+    position: Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.0, ARENA_CENTER_Z)
+  })
+
+  spinner = engine.addEntity()
+  // Parented to the pivot, so rotating the pivot sweeps the beam around the platform.
+  Transform.create(spinner, {
+    parent: spinnerPivot,
+    position: Vector3.create(0, 0, 0),
+    scale: Vector3.create(PLATFORM_SIZE * 0.75, 1.4, 1.4)
+  })
+  MeshRenderer.setBox(spinner)
+  MeshCollider.setBox(spinner)
+  Material.setPbrMaterial(spinner, {
+    albedoColor: Color4.create(1.0, 0.72, 0.15, 1),
+    roughness: 0.55,
+    emissiveColor: Color3.create(1.0, 0.72, 0.15),
+    emissiveIntensity: 0.7
+  })
+
+  // Rounded caps on the beam ends. Nothing in this style is a hard-edged box.
+  for (const side of [-1, 1]) {
+    const cap = engine.addEntity()
+    Transform.create(cap, {
+      parent: spinnerPivot,
+      position: Vector3.create((side * PLATFORM_SIZE * 0.75) / 2, 0, 0),
+      scale: Vector3.create(2.2, 2.2, 2.2)
+    })
+    MeshRenderer.setSphere(cap)
+    MeshCollider.setSphere(cap)
+    Material.setPbrMaterial(cap, {
+      albedoColor: Color4.create(1.0, 0.45, 0.3, 1),
+      roughness: 0.5,
+      emissiveColor: Color3.create(1.0, 0.45, 0.3),
+      emissiveIntensity: 0.6
+    })
+  }
+
+  TriggerArea.setBox(spinner)
+  triggerAreaEventsSystem.onTriggerEnter(spinner, (result) => {
+    if (!running) return
+    if (result.trigger?.entity !== engine.PlayerEntity) return
+    if (isOut() || clock - lastHitAt < HIT_COOLDOWN_MS) return
+    lastHitAt = clock
+    if (!loseLife()) {
+      Physics.applyKnockbackToPlayer(
+        Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z),
+        16,
+        PLATFORM_SIZE
+      )
+    }
+  })
+}
+
+/** Soft bumpers around the rim, so being shoved outward bounces rather than simply dropping you. */
+function buildBumpers(): void {
+  const COUNT = 10
+  const radius = PLATFORM_SIZE / 2 - 1
+  for (let i = 0; i < COUNT; i++) {
+    const angle = (i / COUNT) * Math.PI * 2
+    const e = engine.addEntity()
+    Transform.create(e, {
+      position: Vector3.create(
+        ARENA_CENTER_X + Math.cos(angle) * radius,
+        ARENA_Y + 0.8,
+        ARENA_CENTER_Z + Math.sin(angle) * radius
+      ),
+      scale: Vector3.create(2.2, 2.2, 2.2)
+    })
+    MeshRenderer.setSphere(e)
+    MeshCollider.setSphere(e)
+    const c = PARTY_COLORS[i % PARTY_COLORS.length]
+    Material.setPbrMaterial(e, {
+      albedoColor: Color4.create(c.r, c.g, c.b, 1),
+      roughness: 0.45,
+      emissiveColor: Color3.create(c.r, c.g, c.b),
+      emissiveIntensity: 0.5
+    })
+    bumpers.push(e)
+  }
+}
+
 export const sweeper: Round = {
   name: 'Sweeper Gates',
-  hint: 'Walls sweep across. Get through the gap, keep your hearts.',
+  hint: 'Walls sweep both ways and a beam spins the middle. Mind the gap.',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z - PLATFORM_SIZE / 2 + 3)
@@ -109,6 +207,8 @@ export const sweeper: Round = {
     for (let i = 0; i < WALL_COUNT; i++) {
       walls.push({ left: buildSlab(), right: buildSlab() })
     }
+    buildSpinner()
+    buildBumpers()
     this.stop()
   },
 
@@ -119,6 +219,16 @@ export const sweeper: Round = {
     running = true
     VisibilityComponent.createOrReplace(platform, { visible: true })
     MeshCollider.setBox(platform)
+    setPropsVisible(true)
+    // The beam speeds up with the waves, so the round escalates on two axes at once.
+    Tween.createOrReplace(spinnerPivot, {
+      mode: Tween.Mode.RotateContinuous({
+        direction: Quaternion.fromEulerDegrees(0, 1, 0),
+        speed: 26
+      }),
+      duration: 0,
+      easingFunction: EasingFunction.EF_LINEAR
+    })
     for (const w of walls) {
       for (const slab of [w.left, w.right]) {
         VisibilityComponent.createOrReplace(slab, { visible: true })
@@ -170,11 +280,41 @@ export const sweeper: Round = {
     running = false
     VisibilityComponent.createOrReplace(platform, { visible: false })
     MeshCollider.deleteFrom(platform)
+    setPropsVisible(false)
+    if (Tween.has(spinnerPivot)) Tween.deleteFrom(spinnerPivot)
     for (const w of walls) {
       for (const slab of [w.left, w.right]) {
         VisibilityComponent.createOrReplace(slab, { visible: false })
         // Must actually remove the collider - an invisible wall is still a solid wall.
         MeshCollider.deleteFrom(slab)
+      }
+    }
+  }
+}
+
+
+/** Show or hide the spinner and bumpers, removing colliders so they never block another round. */
+function setPropsVisible(visible: boolean): void {
+  const props = [spinner, ...bumpers]
+  for (const e of props) {
+    VisibilityComponent.createOrReplace(e, { visible })
+    if (visible) {
+      if (!MeshCollider.has(e)) {
+        if (e === spinner) MeshCollider.setBox(e)
+        else MeshCollider.setSphere(e)
+      }
+    } else {
+      MeshCollider.deleteFrom(e)
+    }
+  }
+  for (const child of engine.getEntitiesWith(Transform)) {
+    // The beam's two end caps are parented to the pivot and share its fate.
+    if (child[1].parent === spinnerPivot && child[0] !== spinner) {
+      VisibilityComponent.createOrReplace(child[0], { visible })
+      if (visible) {
+        if (!MeshCollider.has(child[0])) MeshCollider.setSphere(child[0])
+      } else {
+        MeshCollider.deleteFrom(child[0])
       }
     }
   }

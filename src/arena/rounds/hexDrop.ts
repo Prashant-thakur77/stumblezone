@@ -68,7 +68,8 @@ export const hexDrop: Round = {
         tileSize: HEX_SIZE,
         gap: 0.2,
         stagger: true,
-        thickness: 0.4
+        thickness: 0.4,
+        shape: 'disc'
       })
     )
     for (const l of layers) l.setVisible(false)

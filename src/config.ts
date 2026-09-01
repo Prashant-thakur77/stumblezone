@@ -63,23 +63,23 @@ export const LOBBY = { x: 32, y: 1, z: 7 }
 // so they stay distinguishable on a small screen in bright sunlight.
 
 export const FRUIT_COLORS = [
-  { r: 0.95, g: 0.26, b: 0.21 }, // strawberry red
-  { r: 1.0, g: 0.76, b: 0.03 }, // banana yellow
-  { r: 0.3, g: 0.69, b: 0.31 }, // lime green
-  { r: 0.13, g: 0.59, b: 0.95 }, // blueberry blue
-  { r: 0.61, g: 0.15, b: 0.69 } // grape purple
+  { r: 1.0, g: 0.29, b: 0.36 }, // watermelon
+  { r: 1.0, g: 0.82, b: 0.15 }, // banana
+  { r: 0.29, g: 0.85, b: 0.51 }, // lime
+  { r: 0.2, g: 0.68, b: 1.0 }, // blueberry
+  { r: 0.78, g: 0.38, b: 1.0 } // grape
 ] as const
 
 export const FRUIT_NAMES = ['RED', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
 
-export const TILE_NEUTRAL = { r: 0.93, g: 0.93, b: 0.9 }
+export const TILE_NEUTRAL = { r: 1.0, g: 0.97, b: 0.92 }
 /** A tile that has been stepped on and is about to give way. Reads as danger at a glance. */
-export const TILE_WARNING = { r: 0.98, g: 0.55, b: 0.15 }
-export const TILE_SHADE = { r: 0.82, g: 0.84, b: 0.88 }
+export const TILE_WARNING = { r: 1.0, g: 0.48, b: 0.1 }
+export const TILE_SHADE = { r: 0.99, g: 0.85, b: 0.89 }
 /** Hex-Drop's lower deck, darker so you know you are on your last chance. */
-export const DECK_TWO = { r: 0.62, g: 0.66, b: 0.76 }
-export const WALL_COLOR = { r: 0.99, g: 0.42, b: 0.31 }
-export const PLATFORM_COLOR = { r: 0.55, g: 0.76, b: 0.88 }
+export const DECK_TWO = { r: 0.72, g: 0.78, b: 0.95 }
+export const WALL_COLOR = { r: 1.0, g: 0.36, b: 0.42 }
+export const PLATFORM_COLOR = { r: 0.42, g: 0.78, b: 0.95 }
 
 // --- Scenery -----------------------------------------------------------------
 

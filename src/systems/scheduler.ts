@@ -192,7 +192,9 @@ function schedulerSystem(dt: number): void {
   }
 
   active.tick(dt, SLOT_SECONDS, false)
-  hud.banner = spectator.isOut() ? 'ELIMINATED' : 'SURVIVED'
+  // "QUALIFIED" is the party-game word, and it lands harder than "survived" - it says you are
+  // through to something, not merely that you are not dead.
+  hud.banner = spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
 }
 
