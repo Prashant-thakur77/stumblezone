@@ -23,6 +23,7 @@ import {
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { play } from '../../systems/audio'
+import { buildFinishFlag, setVisible } from '../models'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 import { emitTile, onTile, emitFinished } from '../../net/sync'
 
@@ -32,6 +33,7 @@ let grid: TileGrid
 /** Solid ground at both ends. Without these the bridge floats in mid-air with no way on or off. */
 let startPad: Entity
 let finishPad: Entity
+let finishFlag: Entity
 let fakes: boolean[] = []
 let pending: { index: number; at: number }[] = []
 let clock = 0
@@ -93,6 +95,11 @@ export const tipToe: Round = {
     })
     startPad = pad(grid.homes[0].z - PAD_DEPTH / 2 - TILE_SIZE / 2)
     finishPad = pad(grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
+    // Players could not see where the bridge ended. A finish line is the single clearest way to
+    // say "get here" without a word of instruction.
+    finishFlag = buildFinishFlag(
+      Vector3.create(ARENA_CENTER_X, ARENA_Y, grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
+    )
     grid.setVisible(false)
     setPadsVisible(false)
     onTile((p, isSelf) => {
@@ -152,6 +159,11 @@ export const tipToe: Round = {
   },
 
   stop() {
+    // Players could not see where the bridge ended. A finish line is the single clearest way to
+    // say "get here" without a word of instruction.
+    finishFlag = buildFinishFlag(
+      Vector3.create(ARENA_CENTER_X, ARENA_Y, grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
+    )
     grid.setVisible(false)
     setPadsVisible(false)
     pending = []
@@ -159,6 +171,7 @@ export const tipToe: Round = {
 }
 
 function setPadsVisible(visible: boolean): void {
+  setVisible(finishFlag, visible)
   for (const e of [startPad, finishPad]) {
     VisibilityComponent.createOrReplace(e, { visible })
     if (visible) {

@@ -25,6 +25,7 @@ import {
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
 import { standings, displayName } from '../net/crowns'
+import { buildCrown, buildBalloons } from './models'
 import { upcoming } from '../systems/scheduler'
 
 let crownBoard: Entity
@@ -106,6 +107,14 @@ export function buildLobby(): void {
       emissiveIntensity: 0.5
     })
   }
+  // A real spinning crown on the tallest step. The podium is the one place in the scene a player
+  // stands still and looks at something, so it is worth a model rather than a box.
+  buildCrown(Vector3.create(podiumX, LOBBY.y + 1.2, podiumZ))
+
+  // Balloon clusters framing the lobby. Scaled to 0.22 - the model renders 44m across natively.
+  buildBalloons(Vector3.create(ARENA_CENTER_X - 12, LOBBY.y + 5, LOBBY.z + 1))
+  buildBalloons(Vector3.create(ARENA_CENTER_X + 12, LOBBY.y + 5, LOBBY.z + 1))
+
   podiumSign = sign('', Vector3.create(podiumX, LOBBY.y + 3.2, podiumZ), 2.4)
 
   buildJumpPads()

@@ -21,6 +21,7 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
+import { buildConfetti, setVisible } from './models'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -62,6 +63,7 @@ function cylinder(position: Vector3, scale: Vector3, color: { r: number; g: numb
 
 /** The big billboarded countdown over the arena, readable from the lobby and the ledge alike. */
 let jumbotron: Entity
+let confetti: Entity
 
 export function buildScenery(): void {
   // A floor for the sky. Far below the kill plane, so it is scenery and never a surface.
@@ -105,6 +107,8 @@ export function buildScenery(): void {
 
   // Round banner above the arena. The HUD covers the player looking forward; this covers the
   // player looking up, across the arena, or down from the ledge.
+  confetti = buildConfetti(Vector3.create(ARENA_CENTER_X, ARENA_Y + 8, ARENA_CENTER_Z))
+
   jumbotron = engine.addEntity()
   Transform.create(jumbotron, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y + 13, ARENA_CENTER_Z) })
   Billboard.create(jumbotron, { billboardMode: BillboardMode.BM_Y })
@@ -116,6 +120,11 @@ export function buildScenery(): void {
     outlineWidth: 0.2,
     outlineColor: Color3.Black()
   })
+}
+
+/** Burst of confetti over the arena. Shown for the results phase when the local player qualified. */
+export function setConfetti(on: boolean): void {
+  if (confetti) setVisible(confetti, on)
 }
 
 export function setJumbotron(text: string): void {

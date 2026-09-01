@@ -16,7 +16,7 @@ import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
 import { play, setMusic } from './audio'
-import { setJumbotron } from '../arena/scenery'
+import { setJumbotron, setConfetti } from '../arena/scenery'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -68,6 +68,7 @@ function beginSlot(slot: number): void {
   eliminated = new Set<string>()
   firstFinisher = ''
 
+  setConfetti(false)
   spectator.resetForSlot()
   spectator.releaseInput()
   outAt = 0
@@ -175,6 +176,7 @@ function schedulerSystem(dt: number): void {
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
     if (survived) play('crown')
+    setConfetti(survived)
 
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
     // A round you watched is not a round you played - it must not set a personal best.
