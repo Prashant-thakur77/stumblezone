@@ -173,6 +173,13 @@ export function setConfetti(on: boolean): void {
   if (confetti) setVisible(confetti, on)
 }
 
+/** Tint the jumbotron text. Perfect Match uses this to SHOW the called colour, not just name it. */
+export function setJumbotronColor(color: { r: number; g: number; b: number } | null): void {
+  if (!jumbotron) return
+  const t = TextShape.getMutable(jumbotron)
+  t.textColor = color ? Color4.create(color.r, color.g, color.b, 1) : Color4.White()
+}
+
 export function setJumbotron(text: string): void {
   if (!jumbotron) return
   const t = TextShape.getMutable(jumbotron)

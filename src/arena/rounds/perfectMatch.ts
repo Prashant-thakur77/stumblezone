@@ -36,6 +36,7 @@ import {
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
+import { setJumbotronColor } from '../scenery'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 
 let grid: TileGrid
@@ -135,6 +136,7 @@ export const perfectMatch: Round = {
       // The tiles are blank by now, so the called colour has to be named here or the round is
       // pure luck. Memory is tested by the blank board, not by hiding the instruction.
       setBanner('STAND ON ' + FRUIT_NAMES[wave.target], Math.ceil(judgeAt - t) + '...')
+      setJumbotronColor(FRUIT_COLORS[wave.target])
       // In the last second every doomed tile starts shuddering. It gives a player who guessed
       // wrong one final beat to jump, and turns a static countdown into a visible threat.
       if (judgeAt - t < 1 && warned !== index) {
@@ -156,6 +158,7 @@ export const perfectMatch: Round = {
       setBanner('', 'It was ' + FRUIT_NAMES[wave.target])
     } else if (judged < index) {
       judged = index
+      setJumbotronColor(null)
       for (let i = 0; i < wave.fruits.length; i++) {
         if (wave.fruits[i] !== wave.target) grid.sink(i)
       }
@@ -164,6 +167,7 @@ export const perfectMatch: Round = {
   },
 
   stop() {
+    setJumbotronColor(null)
     grid.setVisible(false)
   }
 }

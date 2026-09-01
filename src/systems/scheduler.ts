@@ -17,7 +17,7 @@ import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
 import { play, setMusic, say } from './audio'
-import { setJumbotron, setConfetti } from '../arena/scenery'
+import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -72,6 +72,7 @@ function beginSlot(slot: number): void {
   firstFinisher = ''
 
   setConfetti(false)
+  setJumbotronColor(null)
   spectator.setRoundLive(false)
   spectator.resetForSlot()
   spectator.releaseInput()
