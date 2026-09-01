@@ -7,20 +7,23 @@ import { mulberry32, shuffle } from './prng'
 import { PM_GRID, TIPTOE_WIDTH, TIPTOE_LENGTH, SWEEPER_COLUMNS } from '../config'
 
 /** Distinct colours per wave. More kinds means a harder board to memorise. */
-const FRUIT_KINDS = [3, 3, 4, 4, 5, 5]
+// Perfect Match is deliberately the EASY opening act. Fall Guys varies difficulty between rounds
+// on purpose, so that a hard round lands as a shock; a show where every act is equally hard has no
+// dynamics. Four gentle waves here, and Tip Toe carries the spike.
+const FRUIT_KINDS = [3, 3, 4, 4]
 
 /** How long the colours stay visible before the board blanks, per wave. */
-const MEMORY_MS = [6000, 4500, 3500, 3000, 2500, 2000]
+const MEMORY_MS = [8000, 7000, 6000, 5000]
 
 /** How many waves a full round runs. */
 export const PM_WAVE_COUNT = FRUIT_KINDS.length
 
 /** Seconds each wave spends on: blank board, colour called, then settling after the drop. */
 export const PM_BLANK_SECONDS = 1
-export const PM_CALL_SECONDS = 6
+export const PM_CALL_SECONDS = 7
 /** The beat where every tile shows its colour again, before the wrong ones drop. */
 export const PM_REVEAL_SECONDS = 1.2
-export const PM_SETTLE_SECONDS = 1.8
+export const PM_SETTLE_SECONDS = 4
 
 /** Wall-clock length of one wave, which shortens as the memory phase does. */
 export function perfectMatchWaveSeconds(wave: number): number {
@@ -84,7 +87,8 @@ export function tipToeFakes(seed: number): boolean[] {
 
   // Add decoy real tiles so the carved route can't be spotted by elimination.
   for (let i = 0; i < fakes.length; i++) {
-    if (fakes[i] && rng() < 0.35) fakes[i] = false
+    // Fewer freebies than before: Tip Toe is the show's difficulty spike.
+    if (fakes[i] && rng() < 0.22) fakes[i] = false
   }
   return fakes
 }

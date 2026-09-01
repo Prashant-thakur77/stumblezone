@@ -188,7 +188,7 @@ function buildBumpers(): void {
 
 export const sweeper: Round = {
   name: 'Sweeper Gates',
-  hint: 'Walls sweep both ways and a beam spins the middle. Mind the gap.',
+  hint: 'Dodge the walls.',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z - PLATFORM_SIZE / 2 + 3)

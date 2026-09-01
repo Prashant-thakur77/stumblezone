@@ -66,7 +66,7 @@ function currentDeck(): number {
 
 export const hexDrop: Round = {
   name: 'Hex-Drop',
-  hint: 'Every tile you touch falls away. Four levels down before you are out.',
+  hint: 'Do not stop moving.',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)

@@ -64,7 +64,7 @@ function locate(elapsed: number): { index: number; t: number } {
 
 export const perfectMatch: Round = {
   name: 'Perfect Match',
-  hint: 'Memorise the colours. When one is called, stand on it.',
+  hint: 'Match the colour.',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)

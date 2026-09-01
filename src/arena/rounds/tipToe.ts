@@ -18,7 +18,8 @@ import {
   TILE_NEUTRAL,
   TILE_SHADE,
   PLATFORM_COLOR,
-  TILE_WARNING
+  TILE_WARNING,
+  PLAY_SECONDS
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -27,7 +28,9 @@ import { buildFinishFlag, setVisible } from '../models'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 import { emitTile, onTile, emitFinished } from '../../net/sync'
 
-const DECAY_MS = 400
+/** Pioneers get a beat to react; late crossers get less. The bridge speeds up as the round runs. */
+const DECAY_MS_START = 450
+const DECAY_MS_END = 250
 
 let grid: TileGrid
 /** Solid ground at both ends. Without these the bridge floats in mid-air with no way on or off. */
@@ -43,6 +46,8 @@ let finishFlag: Entity
  */
 let scars: Entity[] = []
 let nextScar = 0
+/** Current decay window, recomputed each frame from how far the round has run. */
+let decayMs = DECAY_MS_START
 let fakes: boolean[] = []
 let pending: { index: number; at: number }[] = []
 let clock = 0
@@ -83,13 +88,13 @@ function step(index: number): void {
   if (index < 0 || grid.isSunk(index)) return
   if (!fakes[index]) return
   if (pending.some((p) => p.index === index)) return
-  pending.push({ index, at: clock + DECAY_MS })
+  pending.push({ index, at: clock + decayMs })
   grid.warn(index, TILE_WARNING)
 }
 
 export const tipToe: Round = {
   name: 'Tip Toe',
-  hint: 'Half the tiles are fake. Whoever leads finds them the hard way.',
+  hint: 'Find the path.',
 
   spawn() {
     return startSpot()
@@ -155,6 +160,10 @@ export const tipToe: Round = {
     if (startAt === 0) startAt = elapsed
 
     clock += dt * 1000
+    // Ramp within the round: the floor gets twitchier the longer the crossing takes.
+    const progress = Math.min(1, (elapsed - startAt) / PLAY_SECONDS)
+    decayMs = DECAY_MS_START + (DECAY_MS_END - DECAY_MS_START) * progress
+
     for (let i = pending.length - 1; i >= 0; i--) {
       if (clock >= pending[i].at) {
         const h = grid.homes[pending[i].index]
