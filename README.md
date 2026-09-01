@@ -79,6 +79,12 @@ The genre gives you rounds. These are the things layered on top that make it a *
 - **The Golden Show**: every fourth show pays double crowns, with a gold card, a gold jumbotron and
   a countdown in the lobby.
 - **A curtain call** — a six-second crane shot of the podium for everyone after the finale.
+- **WATCH ARENA** — one tap points a spectator's camera at the round they were knocked out of,
+  instead of asking them to wrestle a third-person camera round on a touchscreen.
+- **Bonuses with names**: CLUTCH (survived on your last heart), COMEBACK (qualified straight after
+  being knocked out), CROWD BONUS (paid to every survivor when the spectators drove the meter to
+  the top).
+- **A session summary** on the end-of-show card: rounds played, qualified, best streak.
 
 ### 2. Social value
 The buildathon rules exclude single-player experiences, and the mobile client **has no proximity
