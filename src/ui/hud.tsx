@@ -54,6 +54,12 @@ function Chip(props: ChipProps) {
   )
 }
 
+function formatClock(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m + ':' + (s < 10 ? '0' : '') + s
+}
+
 function Hud() {
   const showBanner = hud.banner !== '' || hud.subtitle !== ''
   return (
@@ -66,6 +72,15 @@ function Hud() {
         show={!hud.out}
       />
       <Chip text={hud.alive + ' alive'} width={150} position={{ top: 16, right: 16 }} />
+
+      {/* Round clock. Always on during play - knowing how long you have left is most of the
+          tension, and without it a round just ends. */}
+      <Chip
+        text={formatClock(hud.roundClock)}
+        width={140}
+        position={{ top: 72, left: '50%' }}
+        show={hud.roundClock > 0}
+      />
 
       {/* The big centre line. Above true centre so it never fights the on-screen controls. */}
       <UiEntity

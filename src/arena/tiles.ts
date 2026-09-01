@@ -14,6 +14,7 @@ import {
   VisibilityComponent,
   Tween,
   TweenSequence,
+  TweenLoop,
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
@@ -48,6 +49,14 @@ export type TileGrid = {
   setAllColors(color: Rgb): void
   /** Two-tone the grid so individual tiles stay distinguishable when they are all blank. */
   setCheckerboard(light: Rgb, dark: Rgb): void
+  /**
+   * Mark a tile as doomed: recolour it and start it wobbling.
+   *
+   * The wobble is the whole point. A tile that vanishes with no warning reads as the game cheating;
+   * the same tile that shudders for half a second first reads as a fair fight you lost.
+   */
+  warn(index: number, color: Rgb): void
+
   /** Drop the collider now, then tween the tile out of sight. Idempotent. */
   sink(index: number): void
   isSunk(index: number): boolean
@@ -124,6 +133,22 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
       }
     },
 
+    warn(index: number, color: Rgb) {
+      if (index < 0 || index >= entities.length || sunk[index]) return
+      setColor(index, color, 1.2)
+      const e = entities[index]
+      const home = homes[index]
+      Tween.createOrReplace(e, {
+        mode: Tween.Mode.Move({
+          start: home,
+          end: Vector3.create(home.x, home.y - 0.18, home.z)
+        }),
+        duration: 110,
+        easingFunction: EasingFunction.EF_LINEAR
+      })
+      TweenSequence.createOrReplace(e, { sequence: [], loop: TweenLoop.TL_YOYO })
+    },
+
     sink(index: number) {
       if (index < 0 || index >= entities.length || sunk[index]) return
       sunk[index] = true
@@ -131,6 +156,8 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
       // Removing the collider is what actually drops the player. The tween is only the visual,
       // so nothing may wait on it before the tile stops being solid.
       MeshCollider.deleteFrom(e)
+      // Stop the warning wobble, or its yoyo loop fights the drop.
+      if (TweenSequence.has(e)) TweenSequence.deleteFrom(e)
       const from = homes[index]
       Tween.createOrReplace(e, {
         mode: Tween.Mode.Move({

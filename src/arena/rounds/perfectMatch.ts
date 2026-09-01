@@ -30,7 +30,8 @@ import {
   FRUIT_COLORS,
   FRUIT_NAMES,
   TILE_NEUTRAL,
-  TILE_SHADE
+  TILE_SHADE,
+  TILE_WARNING
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -42,6 +43,7 @@ let starts: number[] = []
 /** Highest wave already judged, so each wave drops its tiles exactly once. */
 let judged = -1
 let shown = -1
+let warned = -1
 
 function safeSpot(wave: PerfectMatchWave): Vector3 {
   const i = wave.fruits.indexOf(wave.target)
@@ -81,6 +83,7 @@ export const perfectMatch: Round = {
     starts = perfectMatchSchedule()
     judged = -1
     shown = -1
+    warned = -1
     grid.setVisible(true)
     grid.resetAll()
     grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
@@ -127,6 +130,14 @@ export const perfectMatch: Round = {
       // The tiles are blank by now, so the called colour has to be named here or the round is
       // pure luck. Memory is tested by the blank board, not by hiding the instruction.
       setBanner('STAND ON ' + FRUIT_NAMES[wave.target], Math.ceil(judgeAt - t) + '...')
+      // In the last second every doomed tile starts shuddering. It gives a player who guessed
+      // wrong one final beat to jump, and turns a static countdown into a visible threat.
+      if (judgeAt - t < 1 && warned !== index) {
+        warned = index
+        for (let i = 0; i < wave.fruits.length; i++) {
+          if (wave.fruits[i] !== wave.target) grid.warn(i, TILE_WARNING)
+        }
+      }
     } else if (judged < index) {
       judged = index
       for (let i = 0; i < wave.fruits.length; i++) {

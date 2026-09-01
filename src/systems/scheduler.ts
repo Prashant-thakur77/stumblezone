@@ -15,7 +15,7 @@ import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync
 import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
-import { play } from './audio'
+import { play, setMusic } from './audio'
 import { setJumbotron } from '../arena/scenery'
 
 let rounds: Round[] = []
@@ -106,6 +106,10 @@ function schedulerSystem(dt: number): void {
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
   setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
+
+  // Seconds left in the round itself, for the always-visible HUD timer.
+  hud.roundClock = phase === 'play' ? Math.max(0, Math.ceil(INTRO_SECONDS + PLAY_SECONDS - elapsed)) : 0
+  setMusic(phase === 'play' ? 'music-round' : 'music-lobby')
 
   if (phase === 'intro') {
     const next = Math.ceil(INTRO_SECONDS - elapsed)

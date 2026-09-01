@@ -48,7 +48,7 @@ function markStepped(layer: number, index: number): void {
   if (layers[layer].isSunk(index)) return
   if (pending.some((p) => p.layer === layer && p.index === index)) return
   pending.push({ layer, index, at: clock + DECAY_MS })
-  layers[layer].setColor(index, TILE_WARNING)
+  layers[layer].warn(index, TILE_WARNING)
 }
 
 export const hexDrop: Round = {

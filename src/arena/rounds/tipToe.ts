@@ -73,7 +73,7 @@ function step(index: number): void {
   if (!fakes[index]) return
   if (pending.some((p) => p.index === index)) return
   pending.push({ index, at: clock + DECAY_MS })
-  grid.setColor(index, TILE_WARNING)
+  grid.warn(index, TILE_WARNING)
 }
 
 export const tipToe: Round = {

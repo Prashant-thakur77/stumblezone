@@ -16,7 +16,8 @@ import {
   Material,
   VisibilityComponent,
   TriggerArea,
-  triggerAreaEventsSystem
+  triggerAreaEventsSystem,
+  Physics
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4 } from '@dcl/sdk/math'
 import { sweeperWaves, SweeperWave } from '../../lib/layouts'
@@ -30,7 +31,7 @@ import {
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
-import { loseLife, isOut, sendTo } from '../../systems/spectator'
+import { loseLife, isOut } from '../../systems/spectator'
 
 const PLATFORM_SIZE = 30
 const WALL_COUNT = 4
@@ -75,7 +76,10 @@ function buildSlab(): Entity {
     if (isOut() || clock - lastHitAt < HIT_COOLDOWN_MS) return
     lastHitAt = clock
     if (!loseLife()) {
-      void sendTo({ x: ARENA_CENTER_X, y: ARENA_Y + 1.5, z: ARENA_CENTER_Z - PLATFORM_SIZE / 2 + 2 })
+      // A shove, not a teleport. Being flicked backwards by a wall you can see reads as the wall
+      // hitting you; blinking to a spawn point reads as the game glitching.
+      const hit = Transform.get(e).position
+      Physics.applyKnockbackToPlayer(hit, 12, 6)
     }
   })
   return e

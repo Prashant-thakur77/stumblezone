@@ -13,10 +13,17 @@ import {
   TextShape,
   Font,
   Billboard,
-  BillboardMode
+  BillboardMode,
+  TriggerArea,
+  triggerAreaEventsSystem,
+  Physics,
+  Tween,
+  TweenSequence,
+  TweenLoop,
+  EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
-import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR } from '../config'
+import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
 import { standings, displayName } from '../net/crowns'
 import { upcoming } from '../systems/scheduler'
 
@@ -101,6 +108,8 @@ export function buildLobby(): void {
   }
   podiumSign = sign('', Vector3.create(podiumX, LOBBY.y + 3.2, podiumZ), 2.4)
 
+  buildJumpPads()
+
   // Boards only need refreshing a couple of times a second, not every frame.
   let since = 0
   engine.addSystem((dt: number) => {
@@ -109,6 +118,65 @@ export function buildLobby(): void {
     since = 0
     refreshBoards()
   })
+}
+
+/**
+ * Bouncy pads in the lobby.
+ *
+ * Roughly a third of every cycle is intro and results, and an empty lobby for 35 seconds is the
+ * single most boring thing in the game. These cost four entities and give people something to
+ * play with - and messing about on them is exactly the kind of thing a crowd does together.
+ *
+ * Deliberately physics, not a teleport: mutating the player's Transform does nothing, the engine
+ * owns it. Physics.applyImpulseToPlayer is the supported way to move a player.
+ */
+function buildJumpPads(): void {
+  const spots: [number, number][] = [
+    [-8, 3],
+    [8, 3],
+    [-4, -2],
+    [4, -2]
+  ]
+  for (const [dx, dz] of spots) {
+    const x = ARENA_CENTER_X + dx
+    const z = LOBBY.z + dz
+
+    const padColor = PARTY_COLORS[(Math.abs(dx) + Math.abs(dz)) % PARTY_COLORS.length]
+    const e = engine.addEntity()
+    Transform.create(e, {
+      position: Vector3.create(x, LOBBY.y + 0.1, z),
+      scale: Vector3.create(3, 0.4, 3)
+    })
+    MeshRenderer.setBox(e)
+    MeshCollider.setBox(e)
+    Material.setPbrMaterial(e, {
+      albedoColor: Color4.create(padColor.r, padColor.g, padColor.b, 1),
+      roughness: 0.5,
+      emissiveColor: Color3.create(padColor.r, padColor.g, padColor.b),
+      emissiveIntensity: 0.9
+    })
+    // A slow bob, so the pads read as springy before anyone steps on one.
+    Tween.createOrReplace(e, {
+      mode: Tween.Mode.Move({
+        start: Vector3.create(x, LOBBY.y + 0.05, z),
+        end: Vector3.create(x, LOBBY.y + 0.3, z)
+      }),
+      duration: 900,
+      easingFunction: EasingFunction.EF_EASESINE
+    })
+    TweenSequence.createOrReplace(e, { sequence: [], loop: TweenLoop.TL_YOYO })
+
+    const trigger = engine.addEntity()
+    Transform.create(trigger, {
+      position: Vector3.create(x, LOBBY.y + 1, z),
+      scale: Vector3.create(3, 2, 3)
+    })
+    TriggerArea.setBox(trigger)
+    triggerAreaEventsSystem.onTriggerEnter(trigger, (result) => {
+      if (result.trigger?.entity !== engine.PlayerEntity) return
+      Physics.applyImpulseToPlayer(Vector3.create(0, 1, 0), 14)
+    })
+  }
 }
 
 function refreshBoards(): void {

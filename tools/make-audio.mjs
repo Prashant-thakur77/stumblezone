@@ -111,6 +111,93 @@ const clips = {
   )
 }
 
+// --- Music -------------------------------------------------------------------
+// Two looping beds, synthesised the same way as the cues. 120bpm, eight bars each.
+//
+// The loop points matter: the last sample must lead cleanly back into the first, so both tracks
+// are written as a whole number of bars with no trailing decay.
+
+const BPM = 120
+const BEAT = 60 / BPM
+const BAR = BEAT * 4
+
+/** Semitone offsets from a root, as scale degrees. */
+const NOTE = (root, semis) => root * Math.pow(2, semis / 12)
+const C4 = 261.63
+
+function pluck(freq, seconds, gain = 0.22) {
+  const total = n(seconds)
+  const out = new Float32Array(total)
+  let phase = 0
+  for (let i = 0; i < total; i++) {
+    phase += (2 * Math.PI * freq) / RATE
+    // A soft triangle-ish tone: fundamental plus a quiet fifth, decaying quickly.
+    const v = Math.sin(phase) + 0.25 * Math.sin(phase * 3)
+    out[i] = v * Math.exp((-4.5 * i) / total) * gain
+  }
+  return out
+}
+
+function kick(seconds = 0.16, gain = 0.5) {
+  const total = n(seconds)
+  const out = new Float32Array(total)
+  let phase = 0
+  for (let i = 0; i < total; i++) {
+    const t = i / total
+    const freq = 110 * Math.exp(-4 * t) + 45
+    phase += (2 * Math.PI * freq) / RATE
+    out[i] = Math.sin(phase) * Math.exp(-5 * t) * gain
+  }
+  return out
+}
+
+function bed(bars, events, gain = 1) {
+  const total = n(bars * BAR)
+  const out = new Float32Array(total)
+  for (const [at, track] of events) {
+    const start = n(at)
+    for (let i = 0; i < track.length; i++) {
+      // Wrap rather than clip, so a note started near the end tails into the loop point.
+      out[(start + i) % total] += track[i] * gain
+    }
+  }
+  return out
+}
+
+/** I - vi - IV - V, the friendliest progression there is. */
+const PROGRESSION = [0, -3, 5, 7]
+
+function lobbyMusic() {
+  const events = []
+  for (let bar = 0; bar < 8; bar++) {
+    const root = NOTE(C4, PROGRESSION[bar % 4])
+    // Slow arpeggio, two notes a bar - calm enough to talk over.
+    events.push([bar * BAR, pluck(root, BEAT * 1.8, 0.16)])
+    events.push([bar * BAR + BEAT * 2, pluck(root * 1.5, BEAT * 1.8, 0.13)])
+    events.push([bar * BAR + BEAT, pluck(root / 2, BEAT * 2.5, 0.1)])
+  }
+  return bed(8, events)
+}
+
+function roundMusic() {
+  const events = []
+  for (let bar = 0; bar < 8; bar++) {
+    const root = NOTE(C4, PROGRESSION[bar % 4])
+    // Eighth-note arpeggio over a four-on-the-floor kick: busier, pushes you to move.
+    const shape = [1, 1.25, 1.5, 2, 1.5, 1.25]
+    for (let step = 0; step < 8; step++) {
+      const f = root * shape[step % shape.length]
+      events.push([bar * BAR + step * (BEAT / 2), pluck(f, BEAT * 0.45, 0.11)])
+    }
+    for (let b = 0; b < 4; b++) events.push([bar * BAR + b * BEAT, kick()])
+    events.push([bar * BAR, pluck(root / 2, BEAT * 3, 0.12)])
+  }
+  return bed(8, events)
+}
+
+clips['music-lobby.wav'] = lobbyMusic()
+clips['music-round.wav'] = roundMusic()
+
 let total = 0
 for (const [name, samples] of Object.entries(clips)) {
   const buf = wav(samples)

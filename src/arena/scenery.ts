@@ -7,7 +7,19 @@
 // Nothing here has a collider except the ground, which sits far below the kill plane and exists
 // only so the sky has a floor.
 
-import { engine, Entity, Transform, MeshRenderer, Material, TextShape, Font, Billboard, BillboardMode } from '@dcl/sdk/ecs'
+import {
+  engine,
+  Entity,
+  Transform,
+  MeshRenderer,
+  Material,
+  TextShape,
+  Font,
+  Billboard,
+  BillboardMode,
+  Tween,
+  EasingFunction
+} from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import {
   ARENA_CENTER_X,
@@ -73,12 +85,22 @@ export function buildScenery(): void {
       { r: 0.97, g: 0.97, b: 0.95 }
     )
     // A glowing cap, so the ring still reads at dusk and from the spectator ledge.
-    box(
+    const cap = box(
       Vector3.create(x, ARENA_Y - 4 + PILLAR_HEIGHT + 0.6, z),
       Vector3.create(2.4, 1.2, 2.4),
       color,
       1.4
     )
+    // Slow continuous spin, each cap a little different. Ambient motion is what stops a static
+    // arena reading as a screenshot - and it costs nothing, the engine drives the tween.
+    Tween.createOrReplace(cap, {
+      mode: Tween.Mode.RotateContinuous({
+        direction: Quaternion.fromEulerDegrees(0, i % 2 === 0 ? 1 : -1, 0),
+        speed: 12
+      }),
+      duration: 0,
+      easingFunction: EasingFunction.EF_LINEAR
+    })
   }
 
   // Round banner above the arena. The HUD covers the player looking forward; this covers the

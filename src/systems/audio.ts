@@ -15,6 +15,8 @@ import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y } from '../config'
 
 export type Clip = 'tick' | 'go' | 'crack' | 'eliminated' | 'survive' | 'crown'
 
+export type Track = 'music-lobby' | 'music-round'
+
 const VOLUMES: Record<Clip, number> = {
   tick: 0.35,
   go: 0.6,
@@ -25,6 +27,8 @@ const VOLUMES: Record<Clip, number> = {
 }
 
 const sources = new Map<Clip, Entity>()
+const music = new Map<Track, Entity>()
+let currentTrack: Track | null = null
 
 export function initAudio(): void {
   for (const clip of Object.keys(VOLUMES) as Clip[]) {
@@ -40,6 +44,35 @@ export function initAudio(): void {
       global: true
     })
     sources.set(clip, e)
+  }
+
+  for (const track of ['music-lobby', 'music-round'] as Track[]) {
+    const e = engine.addEntity()
+    Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z) })
+    AudioSource.create(e, {
+      audioClipUrl: 'assets/Audio/' + track + '.wav',
+      playing: false,
+      loop: true,
+      // Well under the cues, so music never competes with a countdown tick.
+      volume: 0.22,
+      global: true
+    })
+    music.set(track, e)
+  }
+}
+
+/**
+ * Cross to a music bed, or silence with `null`.
+ *
+ * Both beds are eight bars at 120bpm and loop seamlessly. The lobby track is calm enough to talk
+ * over; the round track adds a kick and an eighth-note arpeggio to push you to move.
+ */
+export function setMusic(track: Track | null): void {
+  if (track === currentTrack) return
+  currentTrack = track
+  for (const [name, entity] of music) {
+    const src = AudioSource.getMutable(entity)
+    src.playing = name === track
   }
 }
 
