@@ -16,6 +16,8 @@ export type HudState = {
   resultDetail: string
   /** Seconds left in the round. Zero outside the play phase, when it is hidden. */
   roundClock: number
+  /** Your standing in the current show, e.g. "SHOW 3rd of 7". Empty before you score. */
+  showLine: string
 }
 
 export const hud: HudState = {
@@ -27,7 +29,8 @@ export const hud: HudState = {
   out: false,
   alive: 1,
   resultDetail: '',
-  roundClock: 0
+  roundClock: 0,
+  showLine: ''
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

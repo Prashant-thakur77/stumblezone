@@ -73,6 +73,9 @@ function Hud() {
       />
       <Chip text={hud.alive + ' alive'} width={150} position={{ top: 16, right: 16 }} />
 
+      {/* Your standing in the eight-minute show. */}
+      <Chip text={hud.showLine} width={190} position={{ top: 72, right: 16 }} show={hud.showLine !== ''} />
+
       {/* Round clock. Always on during play - knowing how long you have left is most of the
           tension, and without it a round just ends. */}
       <Chip

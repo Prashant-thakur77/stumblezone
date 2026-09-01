@@ -33,6 +33,25 @@ export function phaseAt(elapsed: number): { phase: Phase; remaining: number } {
   return { phase: 'results', remaining: SLOT_SECONDS - elapsed }
 }
 
+/**
+ * Which show a slot belongs to. Four rounds make one show, and a show has a champion.
+ *
+ * This is what turns a playlist of minigames into an evening's entertainment: Fall Guys' tension
+ * comes from the arc across its rounds, not from any single round in isolation.
+ */
+export function showIndex(slot: number): number {
+  return Math.floor(slot / ROUND_COUNT)
+}
+
+/** Which act of the show this slot is, 0-based. The last act is the finale. */
+export function actIndex(slot: number): number {
+  return roundIndex(slot)
+}
+
+export function isFinale(slot: number): boolean {
+  return roundIndex(slot) === ROUND_COUNT - 1
+}
+
 export function seedForSlot(slot: number): number {
   return hashSlot(slot)
 }

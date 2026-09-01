@@ -6,7 +6,7 @@
 // exactly the same state as everyone already there.
 
 import { engine } from '@dcl/sdk/ecs'
-import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../lib/schedule'
+import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot, showIndex, isFinale } from '../lib/schedule'
 import {
   INTRO_SECONDS,
   GET_READY_SECONDS,
@@ -21,7 +21,18 @@ import { hud } from '../ui/state'
 import { resolveBanner } from '../lib/banner'
 import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
-import { award, standings, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
+import {
+  award,
+  standings,
+  showStandings,
+  showRank,
+  syncShow,
+  CROWN_SURVIVE,
+  CROWN_WIN,
+  CROWN_FIRST_FINISHER,
+  FINALE_MULTIPLIER,
+  setName
+} from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds } from './records'
@@ -90,9 +101,11 @@ function beginSlot(slot: number): void {
   saidSet = false
   saidHurry = false
 
+  syncShow(showIndex(slot))
+
   active = rounds[roundIndex(slot)]
   active.start(seedForSlot(slot))
-  if (roundIndex(slot) === ROUND_COUNT - 1) say('final_round')
+  if (isFinale(slot)) say('final_round')
 
   // Joining after the round has already begun means spectating it. Dropping a latecomer onto a
   // half-decayed board is worse than a clear "you're up next" - and it stops the alive count from
@@ -121,6 +134,10 @@ function schedulerSystem(dt: number): void {
   hud.out = spectator.isOut()
   hud.alive = Math.max(1, seen.size - eliminated.size)
 
+  // Your place in the current show. This is the line that makes four rounds feel like one evening.
+  const rank = showRank(myAddress())
+  hud.showLine = rank.of > 0 && showStandings(1).length > 0 ? 'SHOW ' + ordinal(rank.place) + ' of ' + rank.of : ''
+
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
   setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
@@ -143,7 +160,7 @@ function schedulerSystem(dt: number): void {
       }
     } else {
       hud.banner = active.name
-      hud.subtitle = active.hint
+      hud.subtitle = isFinale(slot) ? 'FINAL ROUND - the show champion is decided here' : active.hint
     }
     return
   }
@@ -209,11 +226,12 @@ function schedulerSystem(dt: number): void {
     scored = true
     spectator.setRoundLive(false)
     const survived = !spectator.isOut()
+    const stakes = isFinale(slot) ? FINALE_MULTIPLIER : 1
     if (survived && !spectatingOnly) {
-      award(myAddress(), CROWN_SURVIVE)
+      award(myAddress(), CROWN_SURVIVE * stakes)
       // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is
       // worth a crown, but it is not a win.
-      if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN)
+      if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN * stakes)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
     if (survived) play('crown')
@@ -225,7 +243,7 @@ function schedulerSystem(dt: number): void {
 
     // One announcer line per result, most specific wins: a sole-survivor win beats a new best,
     // which beats plain qualification. The eliminated heard "you lose" when they fell.
-    const onPodium = roundIndex(slot) === ROUND_COUNT - 1 && standings(3).some((s) => s.address === myAddress())
+    const onPodium = isFinale(slot) && showStandings(3).some((s) => s.address === myAddress())
     if (!spectatingOnly && !onPodium) {
       const wonOutright = survived && seen.size > 1 && eliminated.size === seen.size - 1
       if (wonOutright) say('congratulations')
@@ -246,8 +264,8 @@ function schedulerSystem(dt: number): void {
     // The cycle's celebration peak: after the finale, the podium. Each client moves only itself -
     // rank comes from the shared crown tally, so every client agrees who stands where and everyone
     // sees the same three avatars arrive on the steps.
-    const cycleEnd = roundIndex(slot) === ROUND_COUNT - 1
-    const rank = cycleEnd ? standings(3).findIndex((s) => s.address === myAddress()) : -1
+    const cycleEnd = isFinale(slot)
+    const rank = cycleEnd ? showStandings(3).findIndex((s) => s.address === myAddress()) : -1
     if (rank >= 0) {
       const spot = PODIUM_SPOTS[rank]
       void spectator.sendTo({ x: spot.x, y: spot.y, z: spot.z })
@@ -264,6 +282,11 @@ function schedulerSystem(dt: number): void {
   // through to something, not merely that you are not dead.
   hud.banner = spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
+}
+
+function ordinal(n: number): string {
+  const suffix = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'
+  return n + suffix
 }
 
 /** What is coming up, for the lobby schedule sign. */

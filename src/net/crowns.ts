@@ -11,13 +11,45 @@ export const CROWN_SURVIVE = 1
 export const CROWN_TOP3 = 2
 export const CROWN_WIN = 4
 export const CROWN_FIRST_FINISHER = 1
+/** The finale decides the show, so its crowns count double. */
+export const FINALE_MULTIPLIER = 2
 
 const crowns = new Map<string, number>()
+/**
+ * Crowns earned in the CURRENT show only, cleared when a new show starts.
+ *
+ * The all-time tally rewards playing a lot; this one creates the eight-minute story that makes
+ * people say "one more show" instead of "one more round".
+ */
+const showCrowns = new Map<string, number>()
+let currentShow = -1
 /** Display names, so the board shows something friendlier than an address. */
 const names = new Map<string, string>()
 
 export function award(address: string, amount: number): void {
   crowns.set(address, (crowns.get(address) ?? 0) + amount)
+  showCrowns.set(address, (showCrowns.get(address) ?? 0) + amount)
+}
+
+/** Start a new show if the slot belongs to one we have not seen. Idempotent per show. */
+export function syncShow(show: number): void {
+  if (show === currentShow) return
+  currentShow = show
+  showCrowns.clear()
+}
+
+export function showStandings(limit = 10): { address: string; crowns: number }[] {
+  return Array.from(showCrowns.entries())
+    .map(([address, c]) => ({ address, crowns: c }))
+    .sort((a, b) => b.crowns - a.crowns || a.address.localeCompare(b.address))
+    .slice(0, limit)
+}
+
+/** Your place in the current show, 1-based, and how many players are in it. */
+export function showRank(address: string): { place: number; of: number } {
+  const table = showStandings(100)
+  const i = table.findIndex((e) => e.address === address)
+  return { place: i < 0 ? table.length + 1 : i + 1, of: Math.max(1, table.length) }
 }
 
 export function setName(address: string, name: string): void {

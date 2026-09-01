@@ -24,7 +24,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
-import { standings, displayName } from '../net/crowns'
+import { standings, showStandings, displayName } from '../net/crowns'
 import { buildCrown, buildBalloons, buildTree } from './models'
 import { upcoming } from '../systems/scheduler'
 
@@ -239,10 +239,13 @@ function refreshBoards(): void {
     : 'No crowns yet.\nWin a round to get on the board.'
   TextShape.getMutable(crownBoard).text = 'CROWNS\n\n' + crownLines
 
-  const leader = top.length ? top[0] : null
+  // The show leader is the live story; the all-time board is on the wall behind.
+  const show = showStandings(1)
+  const leader = show.length ? show[0] : top.length ? top[0] : null
+  const label = show.length ? 'SHOW LEADER' : 'CROWN LEADER'
   TextShape.getMutable(podiumSign).text = leader
-    ? 'CROWN LEADER\n' + displayName(leader.address) + '\n' + leader.crowns + ' crowns'
-    : 'CROWN LEADER\n\nUp for grabs'
+    ? label + '\n' + displayName(leader.address) + '\n' + leader.crowns + ' crowns'
+    : 'SHOW LEADER\n\nUp for grabs'
 
   const nextLines = upcoming(3)
     .map((u) => {
