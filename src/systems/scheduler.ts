@@ -42,6 +42,7 @@ import { record, best, formatSeconds } from './records'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
+import { hype } from './hype'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -64,6 +65,8 @@ let saidHurry = false
 let spectatingOnly = false
 /** How many players have crossed this round's finish line, for the feed's placings. */
 let finishers = 0
+/** While this is in the future the confetti is up because the crowd went wild, not because you won. */
+let wildUntil = 0
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -111,6 +114,7 @@ function beginSlot(slot: number): void {
   saidSet = false
   saidHurry = false
   finishers = 0
+  wildUntil = 0
 
   syncShow(showIndex(slot))
 
@@ -141,6 +145,19 @@ function schedulerSystem(dt: number): void {
   if (!active) return
 
   hud.toasts = feed.visible(now)
+  hud.hype = hype.level(now)
+  // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
+  // over the arena and the board saying so, for four seconds.
+  if (hype.consumeWild(now)) {
+    play('crowd-cheer')
+    toast('THE CROWD IS GOING WILD')
+    wildUntil = now + 4000
+    setConfetti(true)
+  }
+  if (wildUntil !== 0 && now >= wildUntil) {
+    wildUntil = 0
+    if (phase === 'play') setConfetti(false)
+  }
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
   hud.finale = isFinale(slot)
   hud.roundTag = roundTag(roundIndex(slot), hud.finale)

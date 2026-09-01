@@ -28,6 +28,8 @@ export type HudState = {
   showLine: string
   /** The corner feed: who fell, who finished, who is cheering. Newest first, at most three. */
   toasts: string[]
+  /** How hot the crowd is, 0 to 1. Spectators drive it by cheering. */
+  hype: number
 }
 
 export const hud: HudState = {
@@ -44,7 +46,8 @@ export const hud: HudState = {
   resultDetail: '',
   roundClock: 0,
   showLine: '',
-  toasts: []
+  toasts: [],
+  hype: 0
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

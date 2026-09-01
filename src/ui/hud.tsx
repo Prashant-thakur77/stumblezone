@@ -152,6 +152,16 @@ function Hud() {
       <Dots count={Math.max(0, hud.lives)} max={LIVES_PER_ROUND} position={{ top: 16, left: 16 }} show={!hud.out} />
       <Pill text="SPECTATING" width={170} position={{ top: 16, left: 16 }} color={C.slate} fontSize={20} show={hud.out} />
 
+      {/* The crowd meter. Bars, not a gauge - a gauge needs a texture per state, bars need none. */}
+      <Pill
+        text={'HYPE ' + '|'.repeat(Math.max(1, Math.round(hud.hype * 5)))}
+        width={170}
+        position={{ top: 72, left: 16 }}
+        color={hud.hype >= 1 ? C.pink : C.plate}
+        fontSize={20}
+        show={hud.hype > 0}
+      />
+
       {/* Top right: the field, and your standing in the show. */}
       <Pill text={hud.alive + ' IN'} width={130} position={{ top: 16, right: 16 }} color={C.cyan} textColor={C.navy} />
       <Pill text={hud.showLine} width={200} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />

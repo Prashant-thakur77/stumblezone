@@ -14,6 +14,7 @@ import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND, ARENA_Y } from '../config'
 import { emitCheer, emitEliminated, onCheer } from '../net/sync'
 import { play, say } from './audio'
 import { toast } from './feed'
+import { hype } from './hype'
 import { displayName } from '../net/crowns'
 
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
@@ -133,6 +134,8 @@ export function initSpectator(): void {
   // Other players' cheers already animate their own avatars over the network; this just keeps the
   // channel wired so the HUD can react to a crowd reacting.
   onCheer((p, isSelf) => {
+    // Every cheer, mine included, feeds the meter: the crowd is the sum of the room.
+    hype.cheer(Date.now())
     if (!isSelf) toast(displayName(p.address) + ' cheers!')
   })
 
