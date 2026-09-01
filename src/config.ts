@@ -121,6 +121,14 @@ export const GROUND_Y = 0
 export const ARENA_RADIUS = 26
 
 /**
+ * The radius of the round stage that Spotlight and Jump Bar share.
+ *
+ * Small enough that a sweeping beam or a roaming light is always a threat somewhere near you, and
+ * comfortably inside ARENA_RADIUS so the stadium dressing still frames it.
+ */
+export const DISC_RADIUS = 13
+
+/**
  * Stadium dressing (docs/FALLGUYS-PRESENTATION.md, Part 4). Crowd clusters sit between the
  * pillars, a little above the arena floor so the faces show over the tile edge. Radius 22 rather
  * than the pillar ring's 26 because a 26m ring at z=36 would poke past the z=64 parcel edge.
