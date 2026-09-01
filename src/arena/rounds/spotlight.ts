@@ -56,7 +56,13 @@ function buildSpot(): Spot {
     rotation: Quaternion.fromEulerDegrees(-90, 0, 0),
     scale: Vector3.create(0.62, 0.62, 0.25)
   })
-  GltfContainer.create(rig, { src: 'assets/Models/searchlight.glb' })
+  // Collision masks off: the emitter hangs 20m up where nobody can reach it, and an untouchable
+  // collider is pure cost on a phone.
+  GltfContainer.create(rig, {
+    src: 'assets/Models/searchlight.glb',
+    visibleMeshesCollisionMask: 0,
+    invisibleMeshesCollisionMask: 0
+  })
 
   const pool = engine.addEntity()
   Transform.create(pool, {

@@ -93,6 +93,9 @@ const streaks = new Streaks()
 let outMs = new Map<string, number>()
 /** The UTC day whose challenge is already paid for, so it pays once and only once. */
 let dailyPaidDay = -1
+/** What the daily pill currently says, so the string is rebuilt only when it changes. */
+let dailyShownDay = -1
+let dailyShownDone = false
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -173,10 +176,21 @@ function schedulerSystem(dt: number): void {
   if (slot !== activeSlot) beginSlot(slot)
   if (!active) return
 
-  hud.toasts = feed.visible(now)
+  // The feed changes a few times a round, not every frame; rebuilding the array is cheap but
+  // handing the UI a new one every frame makes it re-render the whole corner.
+  const visible = feed.visible(now)
+  if (visible.length !== hud.toasts.length || visible.some((t, i) => t !== hud.toasts[i])) {
+    hud.toasts = visible
+  }
   hud.hype = hype.level(now)
-  const today = dailyFor(dayIndex(now))
-  hud.daily = dailyPaidDay === dayIndex(now) ? 'DAILY: DONE' : 'DAILY: ' + today.text.toUpperCase()
+  // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
+  // than thirty times a second.
+  const today = dayIndex(now)
+  if (today !== dailyShownDay || dailyPaidDay === today !== dailyShownDone) {
+    dailyShownDay = today
+    dailyShownDone = dailyPaidDay === today
+    hud.daily = dailyShownDone ? 'DAILY: DONE' : 'DAILY: ' + dailyFor(today).text.toUpperCase()
+  }
   // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
   // over the arena and the board saying so, for four seconds.
   if (hype.consumeWild(now)) {
@@ -215,7 +229,7 @@ function schedulerSystem(dt: number): void {
   setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
   // The board goes gold for a Golden Show, so the stakes are visible from anywhere in the arena
   // and not only to whoever is reading the HUD.
-  if (goldenShow) setJumbotronColor({ r: 1.0, g: 0.83, b: 0.25 })
+  if (goldenShow && phase === 'intro') setJumbotronColor({ r: 1.0, g: 0.83, b: 0.25 })
 
   // Seconds left in the round itself, for the always-visible HUD timer.
   hud.roundClock = phase === 'play' ? Math.max(0, Math.ceil(INTRO_SECONDS + PLAY_SECONDS - elapsed)) : 0
