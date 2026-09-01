@@ -9,6 +9,17 @@ const bestSurvival = new Map<string, number>()
 const played = new Map<string, number>()
 
 /** Record a completed round. Returns true if this run beat the previous best. */
+/** Finale wins this session. One is enough to be a CHAMPION for the rest of the night. */
+let finaleWins = 0
+
+export function recordFinaleWin(): void {
+  finaleWins += 1
+}
+
+export function finaleWinCount(): number {
+  return finaleWins
+}
+
 export function record(roundName: string, survivedMs: number): boolean {
   played.set(roundName, (played.get(roundName) ?? 0) + 1)
   const prev = bestSurvival.get(roundName) ?? 0

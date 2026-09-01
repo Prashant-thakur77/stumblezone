@@ -39,6 +39,7 @@ import {
   showStandings,
   showRank,
   syncShow,
+  crownsFor,
   CROWN_SURVIVE,
   CROWN_WIN,
   CROWN_FIRST_FINISHER,
@@ -50,7 +51,8 @@ import {
 } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
-import { record, best, formatSeconds } from './records'
+import { record, best, formatSeconds, recordFinaleWin, finaleWinCount } from './records'
+import { titleFor } from '../lib/titles'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
@@ -201,7 +203,9 @@ function schedulerSystem(dt: number): void {
 
   // Your place in the current show. This is the line that makes four rounds feel like one evening.
   const rank = showRank(myAddress())
-  hud.showLine = rank.of > 0 && showStandings(1).length > 0 ? 'SHOW ' + ordinal(rank.place) + ' of ' + rank.of : ''
+  const title = titleFor({ crowns: crownsFor(myAddress()), streak: streaks.streak(myAddress()), finaleWins: finaleWinCount() })
+  hud.showLine =
+    rank.of > 0 && showStandings(1).length > 0 ? 'SHOW ' + ordinal(rank.place) + ' of ' + rank.of + '  ·  ' + title : title
 
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
@@ -401,6 +405,7 @@ function schedulerSystem(dt: number): void {
       const spot = PODIUM_SPOTS[rank]
       void spectator.sendTo({ x: spot.x, y: spot.y, z: spot.z })
       void triggerEmote({ predefinedEmote: rank === 0 ? 'raiseHand' : 'clap' })
+      if (rank === 0) recordFinaleWin()
       setConfetti(true)
       play('crown')
       say('congratulations')
