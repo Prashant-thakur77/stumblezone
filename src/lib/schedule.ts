@@ -4,8 +4,16 @@
 // seed drives its content. Two clients whose clocks agree to within a second agree on everything
 // except at the instant of a slot boundary, which the get-ready freeze absorbs.
 
-import { SLOT_SECONDS, ROUND_COUNT, INTRO_SECONDS, PLAY_SECONDS } from '../config'
-import { hashSlot } from './prng'
+import {
+  SLOT_SECONDS,
+  ROUND_COUNT,
+  INTRO_SECONDS,
+  PLAY_SECONDS,
+  ROUND_POOL,
+  ROUND_DIFFICULTY,
+  FINALE_ROUND
+} from '../config'
+import { hashSlot, mulberry32, shuffle } from './prng'
 
 export type Phase = 'intro' | 'play' | 'results'
 
@@ -18,9 +26,24 @@ export function slotElapsed(nowMs: number): number {
   return nowMs / 1000 - slotIndex(nowMs) * SLOT_SECONDS
 }
 
-/** Which round a slot runs. The double-modulo keeps pre-epoch slot numbers in range. */
+/**
+ * The three pool rounds this show runs, in order, easiest first.
+ *
+ * Two people who show up an hour apart should not see the same four rounds in the same order, and
+ * a judge who plays two shows back to back should see a different card the second time. The draw
+ * is seeded by the show number, so every client agrees without a word passing between them.
+ */
+export function showRounds(show: number): number[] {
+  const rng = mulberry32(hashSlot(show * 7919 + 31))
+  return shuffle(rng, ROUND_POOL as readonly number[])
+    .slice(0, ROUND_COUNT - 1)
+    .sort((a, b) => ROUND_DIFFICULTY[a] - ROUND_DIFFICULTY[b])
+}
+
+/** Which round (an index into ROUND_NAMES) a slot runs. The finale is always the same round. */
 export function roundIndex(slot: number): number {
-  return ((slot % ROUND_COUNT) + ROUND_COUNT) % ROUND_COUNT
+  const act = actIndex(slot)
+  return act === ROUND_COUNT - 1 ? FINALE_ROUND : showRounds(showIndex(slot))[act]
 }
 
 export function phaseAt(elapsed: number): { phase: Phase; remaining: number } {
@@ -45,11 +68,11 @@ export function showIndex(slot: number): number {
 
 /** Which act of the show this slot is, 0-based. The last act is the finale. */
 export function actIndex(slot: number): number {
-  return roundIndex(slot)
+  return ((slot % ROUND_COUNT) + ROUND_COUNT) % ROUND_COUNT
 }
 
 export function isFinale(slot: number): boolean {
-  return roundIndex(slot) === ROUND_COUNT - 1
+  return actIndex(slot) === ROUND_COUNT - 1
 }
 
 export function seedForSlot(slot: number): number {

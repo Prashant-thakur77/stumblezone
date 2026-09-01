@@ -6,7 +6,16 @@
 // exactly the same state as everyone already there.
 
 import { engine } from '@dcl/sdk/ecs'
-import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot, showIndex, isFinale } from '../lib/schedule'
+import {
+  slotIndex,
+  slotElapsed,
+  roundIndex,
+  actIndex,
+  phaseAt,
+  seedForSlot,
+  showIndex,
+  isFinale
+} from '../lib/schedule'
 import {
   INTRO_SECONDS,
   GET_READY_SECONDS,
@@ -170,7 +179,8 @@ function schedulerSystem(dt: number): void {
   }
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
   hud.finale = isFinale(slot)
-  hud.roundTag = roundTag(roundIndex(slot), hud.finale)
+  // The tag counts acts ("ROUND 2 of 4"), not round ids - which round is playing is the name.
+  hud.roundTag = roundTag(actIndex(slot), hud.finale)
   hud.countdown = Math.ceil(remaining)
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()

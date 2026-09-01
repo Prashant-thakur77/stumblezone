@@ -4,6 +4,8 @@ import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../src
 import {
   SLOT_SECONDS,
   ROUND_COUNT,
+  ROUND_NAMES,
+  FINALE_ROUND,
   INTRO_SECONDS,
   PLAY_SECONDS,
   RESULTS_SECONDS,
@@ -36,15 +38,17 @@ test('slotIndex and slotElapsed reconstruct the clock', () => {
   assert.ok(Math.abs(slotIndex(t) * SLOT_SECONDS + slotElapsed(t) - t / 1000) < 1e-6)
 })
 
-test('roundIndex cycles through every round and is never negative', () => {
+test('roundIndex names a real round for every slot, and every round is reachable', () => {
   const seen = new Set<number>()
-  for (let s = 0; s < ROUND_COUNT * 3; s++) {
+  for (let s = 0; s < ROUND_COUNT * 40; s++) {
     const r = roundIndex(s)
-    assert.ok(r >= 0 && r < ROUND_COUNT, `round ${r} out of range for slot ${s}`)
+    assert.ok(r >= 0 && r < ROUND_NAMES.length, `round ${r} out of range for slot ${s}`)
     seen.add(r)
   }
-  assert.equal(seen.size, ROUND_COUNT, 'not every round is reachable')
-  assert.equal(roundIndex(-1), ROUND_COUNT - 1, 'negative slots must not produce a negative index')
+  assert.equal(seen.size, ROUND_NAMES.length, 'not every round is reachable across shows')
+  const back = roundIndex(-1)
+  assert.ok(back >= 0 && back < ROUND_NAMES.length, 'negative slots must not produce a negative index')
+  assert.equal(back, FINALE_ROUND, 'slot -1 is the last act of the show before the epoch')
 })
 
 test('phaseAt covers the whole slot with no gap and no overlap', () => {

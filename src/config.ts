@@ -18,7 +18,26 @@ export const GET_READY_SECONDS = 5
 /** After the freeze, this many seconds where nothing can kill you. Time to read the space. */
 export const WARMUP_SECONDS = 6
 
-export const ROUND_NAMES = ['Perfect Match', 'Sweeper Gates', 'Tip Toe', 'Hex-Drop'] as const
+/**
+ * Every round in the game, indexed by round id. The scheduler picks ids; a show runs three of them
+ * plus the finale, so this list is longer than a show.
+ */
+export const ROUND_NAMES = ['Perfect Match', 'Sweeper Gates', 'Tip Toe', 'Hex-Drop', 'Spotlight', 'Jump Bar'] as const
+
+/** The rounds a show may draw its first three acts from. */
+export const ROUND_POOL = [0, 1, 2, 4, 5] as const
+
+/**
+ * The finale, always. Hex-Drop is the only round whose floor genuinely runs out, so it is the only
+ * one that reliably ends with a single player standing - which is what a show needs to crown one.
+ */
+export const FINALE_ROUND = 3
+
+/**
+ * How hard each round is, by round id. Acts are sorted by this so a show always escalates: an
+ * easy round to learn the controls, then something that bites, then something that hurts.
+ */
+export const ROUND_DIFFICULTY = [1, 4, 5, 6, 2, 3] as const
 
 // --- Gameplay ---------------------------------------------------------------
 
