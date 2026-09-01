@@ -17,13 +17,14 @@
 //
 // The look is a game show's (docs/FALLGUYS-PRESENTATION.md): rounded bordered pills for readouts, a
 // category-tagged intro card, a countdown that flips colour each second, and a full splash for
-// QUALIFIED / ELIMINATED. Every plate is drawn from layout props - no textures, no fonts to load.
+// QUALIFIED / ELIMINATED. Every plate is a tinted PNG (see parts.tsx): the mobile client does not
+// render `borderRadius`, and this HUD has to look right on a phone first.
 
 import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
 import { cheer } from '../systems/spectator'
 import { C, countdownColor } from './theme'
-import { Pill, Card, ChunkyText, Dots } from './parts'
+import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
 import { LIVES_PER_ROUND } from '../config'
 
 function formatClock(seconds: number): string {
@@ -159,8 +160,8 @@ function Hud() {
           fontSize={28}
           color={C.navy}
           onMouseDown={cheer}
-          uiTransform={{ width: '100%', height: 64, borderRadius: 32, borderWidth: 3, borderColor: C.shadow }}
-          uiBackground={{ color: C.yellow }}
+          uiTransform={{ width: '100%', height: 64 }}
+          uiBackground={shape(UI_TEX.pill, C.yellow)}
         />
         <Label
           value="Watching from the ledge"

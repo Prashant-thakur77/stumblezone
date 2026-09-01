@@ -1,9 +1,9 @@
-// The HUD's palette and radii, in one place.
+// The HUD's palette, in one place.
 //
 // Fall Guys' HUD is chunky white uppercase on saturated rounded plates: magenta for "you", yellow
 // for gold and stakes, cyan for calm information, a purple-navy for plates. The SDK cannot load
-// Titan One or draw an outline, so the "chunky" comes from a 3px border on every plate and a
-// shadow copy under every big label (see parts.tsx).
+// Titan One or draw an outline, so the "chunky" comes from a dark shadow copy under every plate
+// and every big label (see parts.tsx).
 
 import { Color4 } from '@dcl/sdk/math'
 
@@ -23,10 +23,6 @@ export const C = {
   dim: Color4.create(1, 1, 1, 0.25)
 }
 
-export const R = {
-  pill: 22,
-  card: 30
-}
 
 /** The colour a countdown numeral wears: it flips each second so the tick is seen as well as heard. */
 export function countdownColor(n: number): Color4 {
