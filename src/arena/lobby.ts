@@ -29,6 +29,7 @@ import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInfla
 import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
 import { dailyFor, dayIndex } from '../lib/daily'
+import { slotIndex, slotsUntilGolden } from '../lib/schedule'
 
 let crownBoard: Entity
 let scheduleBoard: Entity
@@ -273,5 +274,10 @@ function refreshBoards(): void {
   // The daily hangs off the schedule board: it is the answer to "why come back tomorrow", and the
   // schedule is the one board people read while waiting for the next round to start.
   const daily = dailyFor(dayIndex(Date.now()))
-  TextShape.getMutable(scheduleBoard).text = 'NEXT UP\n\n' + nextLines + '\n\nTODAY: ' + daily.text
+  // And the countdown to the next Golden Show, which is the reason to stay for another twenty.
+  const untilGolden = slotsUntilGolden(slotIndex(Date.now()))
+  const goldenLine =
+    untilGolden === 0 ? 'GOLDEN SHOW NOW - DOUBLE CROWNS' : 'GOLDEN SHOW in ' + untilGolden + ' rounds'
+  TextShape.getMutable(scheduleBoard).text =
+    'NEXT UP\n\n' + nextLines + '\n\nTODAY: ' + daily.text + '\n' + goldenLine
 }

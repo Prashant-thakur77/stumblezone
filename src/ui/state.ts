@@ -34,6 +34,8 @@ export type HudState = {
   fieldLine: string
   /** Today's challenge, or "DAILY: DONE" once it is cleared. */
   daily: string
+  /** True during a Golden Show: every crown counts double and the card goes gold. */
+  golden: boolean
 }
 
 export const hud: HudState = {
@@ -53,7 +55,8 @@ export const hud: HudState = {
   toasts: [],
   hype: 0,
   fieldLine: '',
-  daily: ''
+  daily: '',
+  golden: false
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

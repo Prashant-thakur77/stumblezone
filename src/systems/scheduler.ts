@@ -14,7 +14,8 @@ import {
   phaseAt,
   seedForSlot,
   showIndex,
-  isFinale
+  isFinale,
+  isGolden
 } from '../lib/schedule'
 import {
   INTRO_SECONDS,
@@ -42,6 +43,7 @@ import {
   CROWN_WIN,
   CROWN_FIRST_FINISHER,
   FINALE_MULTIPLIER,
+  GOLDEN_MULTIPLIER,
   setName,
   displayName,
   leader
@@ -185,7 +187,10 @@ function schedulerSystem(dt: number): void {
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
   hud.finale = isFinale(slot)
   // The tag counts acts ("ROUND 2 of 4"), not round ids - which round is playing is the name.
-  hud.roundTag = roundTag(actIndex(slot), hud.finale)
+  const goldenShow = isGolden(showIndex(slot))
+  hud.roundTag = (goldenShow ? 'GOLDEN SHOW  ·  ' : '') + roundTag(actIndex(slot), hud.finale)
+  // A golden card, not just a golden word: the whole intro should look like the stakes changed.
+  hud.golden = goldenShow
   hud.countdown = Math.ceil(remaining)
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()
@@ -201,6 +206,9 @@ function schedulerSystem(dt: number): void {
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
   setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
+  // The board goes gold for a Golden Show, so the stakes are visible from anywhere in the arena
+  // and not only to whoever is reading the HUD.
+  if (goldenShow) setJumbotronColor({ r: 1.0, g: 0.83, b: 0.25 })
 
   // Seconds left in the round itself, for the always-visible HUD timer.
   hud.roundClock = phase === 'play' ? Math.max(0, Math.ceil(INTRO_SECONDS + PLAY_SECONDS - elapsed)) : 0
@@ -305,7 +313,8 @@ function schedulerSystem(dt: number): void {
     scored = true
     spectator.setRoundLive(false)
     const survived = !spectator.isOut()
-    const stakes = isFinale(slot) ? FINALE_MULTIPLIER : 1
+    const golden = isGolden(showIndex(slot))
+    const stakes = (isFinale(slot) ? FINALE_MULTIPLIER : 1) * (golden ? GOLDEN_MULTIPLIER : 1)
     if (survived && !spectatingOnly) {
       award(myAddress(), CROWN_SURVIVE * stakes)
       // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is

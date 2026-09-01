@@ -37,10 +37,10 @@ function formatClock(seconds: number): string {
 /** The intro card: tag, name, three-word hint. Gold when it is the final. */
 function IntroCard() {
   return (
-    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale ? C.yellow : C.plate} show={hud.phase === 'card'}>
-      <ChunkyText text={hud.roundTag} fontSize={28} width="100%" height={40} color={hud.finale ? C.navy : C.cyan} />
+    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={hud.phase === 'card'}>
+      <ChunkyText text={hud.roundTag} fontSize={24} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.cyan} />
       <ChunkyText text={hud.roundName.toUpperCase()} fontSize={86} width="100%" height={110} />
-      <ChunkyText text={hud.subtitle} fontSize={32} width="100%" height={50} color={hud.finale ? C.navy : C.yellow} />
+      <ChunkyText text={hud.subtitle} fontSize={32} width="100%" height={50} color={hud.finale || hud.golden ? C.navy : C.yellow} />
     </Card>
   )
 }
@@ -175,7 +175,15 @@ function Hud() {
           alignItems: 'center'
         }}
       >
-        <Pill text={hud.roundTag} width={300} height={36} fontSize={18} color={hud.finale ? C.yellow : C.plate} textColor={hud.finale ? C.navy : C.white} show={hud.roundTag !== ''} />
+        <Pill
+          text={hud.roundTag}
+          width={420}
+          height={36}
+          fontSize={18}
+          color={hud.finale || hud.golden ? C.yellow : C.plate}
+          textColor={hud.finale || hud.golden ? C.navy : C.white}
+          show={hud.roundTag !== ''}
+        />
         <Pill text={hud.roundName.toUpperCase()} width={360} color={C.pink} fontSize={24} />
         <Pill
           text={formatClock(hud.roundClock)}

@@ -75,6 +75,28 @@ export function isFinale(slot: number): boolean {
   return actIndex(slot) === ROUND_COUNT - 1
 }
 
+/** How often the stakes double. Every fourth show is a Golden Show. */
+export const GOLDEN_EVERY = 4
+
+/**
+ * A Golden Show pays double crowns for everything.
+ *
+ * It gives the schedule a shape beyond "the next round starts in 40 seconds": there is a reason to
+ * still be here in twenty minutes, and a reason for the lobby to fill up before it starts.
+ */
+export function isGolden(show: number): boolean {
+  return ((show % GOLDEN_EVERY) + GOLDEN_EVERY) % GOLDEN_EVERY === GOLDEN_EVERY - 1
+}
+
+/** Slots until the next Golden Show, or 0 during one. */
+export function slotsUntilGolden(slot: number): number {
+  const show = showIndex(slot)
+  if (isGolden(show)) return 0
+  const into = ((show % GOLDEN_EVERY) + GOLDEN_EVERY) % GOLDEN_EVERY
+  const nextGoldenShow = show + (GOLDEN_EVERY - 1 - into)
+  return nextGoldenShow * ROUND_COUNT - slot
+}
+
 export function seedForSlot(slot: number): number {
   return hashSlot(slot)
 }

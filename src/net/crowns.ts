@@ -14,6 +14,9 @@ export const CROWN_FIRST_FINISHER = 1
 /** The finale decides the show, so its crowns count double. */
 export const FINALE_MULTIPLIER = 2
 
+/** A Golden Show pays double on top of everything else, finale included. */
+export const GOLDEN_MULTIPLIER = 2
+
 const crowns = new Map<string, number>()
 /**
  * Crowns earned in the CURRENT show only, cleared when a new show starts.
