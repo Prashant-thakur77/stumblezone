@@ -63,6 +63,7 @@ import { Streaks } from '../lib/streak'
 import { refreshCosmetics } from './cosmetics'
 import { fieldLine, rivalry } from '../lib/field'
 import { dailyFor, dailyDone, dayIndex, DAILY_CROWNS } from '../lib/daily'
+import { bonusesFor } from '../lib/bonus'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -93,6 +94,10 @@ const streaks = new Streaks()
 let outMs = new Map<string, number>()
 /** The UTC day whose challenge is already paid for, so it pays once and only once. */
 let dailyPaidDay = -1
+/** True if the crowd hit the top of the hype meter at any point this round. */
+let crowdWentWild = false
+/** Whether the previous round knocked us out, for the comeback bonus. */
+let wasOutLastRound = false
 /** What the daily pill currently says, so the string is rebuilt only when it changes. */
 let dailyShownDay = -1
 let dailyShownDone = false
@@ -147,6 +152,7 @@ function beginSlot(slot: number): void {
   saidHurry = false
   finishers = 0
   wildUntil = 0
+  crowdWentWild = false
 
   syncShow(showIndex(slot))
 
@@ -194,6 +200,7 @@ function schedulerSystem(dt: number): void {
   // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
   // over the arena and the board saying so, for four seconds.
   if (hype.consumeWild(now)) {
+    crowdWentWild = true
     play('crowd-cheer')
     toast('THE CROWD IS GOING WILD')
     wildUntil = now + 4000
@@ -344,6 +351,23 @@ function schedulerSystem(dt: number): void {
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
 
+    // Bonuses. Each is announced by name, because a crown that arrives without a reason is just a
+    // number going up.
+    const bonuses = spectatingOnly
+      ? []
+      : bonusesFor({
+          survived,
+          livesLeft: spectator.livesLeft(),
+          wasOutLastRound,
+          crowdWentWild,
+          stakes
+        })
+    for (const bonus of bonuses) {
+      award(myAddress(), bonus.crowns)
+      toast(bonus.label + '  +' + bonus.crowns)
+    }
+    if (!spectatingOnly) wasOutLastRound = !survived
+
     // The daily. Paid once per UTC day, on the first round that clears it.
     if (!spectatingOnly && dailyPaidDay !== dayIndex(now)) {
       const cleared = dailyDone(dailyFor(dayIndex(now)), {
@@ -400,6 +424,9 @@ function schedulerSystem(dt: number): void {
       : beatIt
         ? 'New best! ' + formatSeconds(survivedMs)
         : formatSeconds(survivedMs) + '  ·  best ' + formatSeconds(best(hud.roundName))
+
+    // Bonuses go on the splash as well as in the feed - the splash is what a player screenshots.
+    if (bonuses.length > 0) hud.resultDetail += '  ·  ' + bonuses.map((b) => b.label).join(' + ')
 
     // One named comparison beats any number of seconds. Whoever finished nearest you on the clock
     // is the person you will talk to about this round.
