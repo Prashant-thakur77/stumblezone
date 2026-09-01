@@ -50,11 +50,11 @@ export function initAudio(): void {
     const e = engine.addEntity()
     Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z) })
     AudioSource.create(e, {
-      audioClipUrl: 'assets/Audio/' + track + '.wav',
+      audioClipUrl: 'assets/Audio/' + track + '.mp3',
       playing: false,
       loop: true,
-      // Well under the cues, so music never competes with a countdown tick.
-      volume: 0.22,
+      // Audible under the cues without competing with a countdown tick.
+      volume: 0.6,
       global: true
     })
     music.set(track, e)

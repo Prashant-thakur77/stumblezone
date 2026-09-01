@@ -31,7 +31,9 @@ export const PM_GRID = 5
 export const TIPTOE_WIDTH = 4
 export const TIPTOE_LENGTH = 12
 
-export const HEX_PER_LAYER = 180
+export const HEX_COLS = 11
+export const HEX_ROWS = 9
+export const HEX_TILE_SIZE = 2.6
 
 /** Sweeper Gates walls are divided into this many columns; one of them is the gap. */
 export const SWEEPER_COLUMNS = 6
@@ -50,7 +52,9 @@ export const ARENA_Y = 4
  * the lower deck was a coin flip between playing on and being eliminated.
  */
 export const HEX_LAYER_GAP = 4
-export const KILL_Y = -6
+/** Hex-Drop decks. Four levels means three real second chances before you are out. */
+export const HEX_LAYERS = 4
+export const KILL_Y = -16
 
 /** Eliminated players watch from here. High enough to see the whole arena. */
 export const LEDGE = { x: 32, y: 13, z: 8 }
@@ -94,5 +98,5 @@ export const PARTY_COLORS = [
 ] as const
 
 /** Decorative ground, far below the kill plane so nobody ever lands on it. */
-export const GROUND_Y = -18
+export const GROUND_Y = -30
 export const ARENA_RADIUS = 26

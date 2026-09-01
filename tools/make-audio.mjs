@@ -3,7 +3,8 @@
 // Everything here is synthesised from maths - no downloaded samples, no licensing to track, and
 // the whole set weighs well under 100 KB. Re-run with `node tools/make-audio.mjs` after editing.
 
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { writeFileSync, mkdirSync, unlinkSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 
 const RATE = 22050
 const OUT = 'assets/Audio'
@@ -205,4 +206,19 @@ for (const [name, samples] of Object.entries(clips)) {
   total += buf.length
   console.log(`${name.padEnd(16)} ${(buf.length / 1024).toFixed(1)} KB`)
 }
-console.log(`\ntotal ${(total / 1024).toFixed(1)} KB`)
+// Music goes out as MP3: it is the format the SDK recommends for music, and it is a third the
+// size of the equivalent WAV. Short cues stay WAV, where the decode overhead of MP3 would show up
+// as latency on a retrigger.
+for (const name of ['music-lobby', 'music-round']) {
+  const wav = `${OUT}/${name}.wav`
+  const mp3 = `${OUT}/${name}.mp3`
+  try {
+    execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', wav, '-codec:a', 'libmp3lame', '-b:a', '96k', mp3])
+    unlinkSync(wav)
+    console.log(`${name}.mp3`.padEnd(16) + ' (converted from wav)')
+  } catch {
+    console.log(`${name}: ffmpeg unavailable, keeping wav`)
+  }
+}
+
+console.log(`\ntotal ${(total / 1024).toFixed(1)} KB before mp3 conversion`)

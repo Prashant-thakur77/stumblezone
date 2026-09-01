@@ -16,6 +16,10 @@ import {
   ARENA_CENTER_Z,
   ARENA_Y,
   HEX_LAYER_GAP,
+  HEX_LAYERS,
+  HEX_COLS,
+  HEX_ROWS,
+  HEX_TILE_SIZE,
   TILE_NEUTRAL,
   TILE_SHADE,
   DECK_TWO,
@@ -27,9 +31,7 @@ import { play } from '../../systems/audio'
 import { eliminate, isOut, onFall } from '../../systems/spectator'
 import { emitTile, onTile } from '../../net/sync'
 
-const COLS = 15
-const ROWS = 12
-const HEX_SIZE = 2
+
 /** Grace between a step and the tile giving way. Long enough to run across, short enough to fear. */
 const DECAY_MS = 500
 
@@ -51,22 +53,33 @@ function markStepped(layer: number, index: number): void {
   layers[layer].warn(index, TILE_WARNING)
 }
 
+/** Which deck the local player is standing on, or -1 if they are between or off the stack. */
+function currentDeck(): number {
+  const t = Transform.getOrNull(engine.PlayerEntity)
+  if (!t) return -1
+  for (let l = 0; l < layers.length; l++) {
+    const surfaceY = ARENA_Y - l * HEX_LAYER_GAP
+    if (t.position.y >= surfaceY - 0.3 && t.position.y <= surfaceY + 3) return l
+  }
+  return -1
+}
+
 export const hexDrop: Round = {
   name: 'Hex-Drop',
-  hint: 'Every tile you touch falls away. Keep moving.',
+  hint: 'Every tile you touch falls away. Four levels down before you are out.',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)
   },
 
   build() {
-    layers = [0, 1].map((l) =>
+    layers = Array.from({ length: HEX_LAYERS }, (_, l) => l).map((l) =>
       createTileGrid({
-        cols: COLS,
-        rows: ROWS,
+        cols: HEX_COLS,
+        rows: HEX_ROWS,
         center: Vector3.create(ARENA_CENTER_X, ARENA_Y - l * HEX_LAYER_GAP, ARENA_CENTER_Z),
-        tileSize: HEX_SIZE,
-        gap: 0.2,
+        tileSize: HEX_TILE_SIZE,
+        gap: 0.35,
         stagger: true,
         thickness: 0.4,
         shape: 'disc'
@@ -89,11 +102,21 @@ export const hexDrop: Round = {
       layer.resetAll()
       // The lower deck is visibly darker, so a player who drops through knows instantly that they
       // are on their last chance rather than wondering which layer they are on.
-      if (i === 0) {
-        layer.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
-      } else {
-        layer.setCheckerboard(TILE_SHADE, DECK_TWO)
+      // Each deck down is darker than the one above, so how far you have fallen - and how many
+      // chances are left - reads instantly without a word of UI.
+      const t = i / Math.max(1, HEX_LAYERS - 1)
+      const mix = (a: number, b: number) => a + (b - a) * t
+      const light = {
+        r: mix(TILE_NEUTRAL.r, DECK_TWO.r),
+        g: mix(TILE_NEUTRAL.g, DECK_TWO.g),
+        b: mix(TILE_NEUTRAL.b, DECK_TWO.b)
       }
+      const dark = {
+        r: mix(TILE_SHADE.r, DECK_TWO.r * 0.8),
+        g: mix(TILE_SHADE.g, DECK_TWO.g * 0.8),
+        b: mix(TILE_SHADE.b, DECK_TWO.b * 0.8)
+      }
+      layer.setCheckerboard(light, dark)
     }
     onFall(() => {
       // Through both layers is out. There is no second chance in the finale.
@@ -106,7 +129,8 @@ export const hexDrop: Round = {
       setBanner('Hex-Drop', 'Keep moving. Every tile you touch falls away.')
       return
     }
-    setBanner('', 'Last one standing wins')
+    const deck = currentDeck()
+    setBanner('', deck < 0 ? 'Last one standing wins' : 'Level ' + (deck + 1) + ' of ' + HEX_LAYERS)
 
     clock += dt * 1000
 

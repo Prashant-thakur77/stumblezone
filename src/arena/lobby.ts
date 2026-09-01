@@ -25,7 +25,7 @@ import {
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
 import { standings, displayName } from '../net/crowns'
-import { buildCrown, buildBalloons } from './models'
+import { buildCrown, buildBalloons, buildTree } from './models'
 import { upcoming } from '../systems/scheduler'
 
 let crownBoard: Entity
@@ -118,6 +118,17 @@ export function buildLobby(): void {
   podiumSign = sign('', Vector3.create(podiumX, LOBBY.y + 3.2, podiumZ), 2.4)
 
   buildJumpPads()
+  buildPerch()
+
+  // Trees at the lobby corners. Soft, rounded, and they stop the spawn reading as a bare slab.
+  for (const [tx, tz] of [
+    [-14, -2],
+    [14, -2],
+    [-14, 10],
+    [14, 10]
+  ] as [number, number][]) {
+    buildTree(Vector3.create(ARENA_CENTER_X + tx, LOBBY.y - 0.5, LOBBY.z + tz), 1.2)
+  }
 
   // Boards only need refreshing a couple of times a second, not every frame.
   let since = 0
@@ -184,6 +195,38 @@ function buildJumpPads(): void {
     triggerAreaEventsSystem.onTriggerEnter(trigger, (result) => {
       if (result.trigger?.entity !== engine.PlayerEntity) return
       Physics.applyImpulseToPlayer(Vector3.create(0, 1, 0), 14)
+    })
+  }
+}
+
+/**
+ * A little stepped perch beside the spawn.
+ *
+ * Three platforms a normal jump apart, so it is reliably climbable without depending on how far a
+ * physics impulse actually throws you. Somewhere to go, something to stand on top of, and a spot
+ * to watch the arena from while the countdown runs.
+ */
+function buildPerch(): void {
+  const steps: [number, number, number][] = [
+    [-6, 1.6, 9],
+    [-2, 3.0, 11],
+    [3, 4.4, 10]
+  ]
+  for (let i = 0; i < steps.length; i++) {
+    const [dx, y, dz] = steps[i]
+    const c = PARTY_COLORS[(i + 2) % PARTY_COLORS.length]
+    const e = engine.addEntity()
+    Transform.create(e, {
+      position: Vector3.create(ARENA_CENTER_X + dx, y, LOBBY.z + dz - 6),
+      scale: Vector3.create(4, 0.5, 4)
+    })
+    MeshRenderer.setCylinder(e, 1, 1)
+    MeshCollider.setCylinder(e, 1, 1)
+    Material.setPbrMaterial(e, {
+      albedoColor: Color4.create(c.r, c.g, c.b, 1),
+      roughness: 0.7,
+      emissiveColor: Color3.create(c.r, c.g, c.b),
+      emissiveIntensity: 0.35
     })
   }
 }

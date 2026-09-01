@@ -11,6 +11,10 @@ import {
   ARENA_CENTER_Z,
   ARENA_Y,
   HEX_LAYER_GAP,
+  HEX_LAYERS,
+  HEX_COLS,
+  HEX_ROWS,
+  HEX_TILE_SIZE,
   KILL_Y,
   LOBBY,
   LEDGE,
@@ -44,7 +48,7 @@ function assertInBounds(name: string, [lo, hi]: [number, number]): void {
 test('the kill plane sits clear of every standable surface', () => {
   // Regression: KILL_Y was -1 and Hex-Drop's lower deck was also at -1, so simply standing on the
   // second layer was a coin flip between playing on and being eliminated.
-  const lowestSurface = ARENA_Y - HEX_LAYER_GAP
+  const lowestSurface = ARENA_Y - (HEX_LAYERS - 1) * HEX_LAYER_GAP
   assert.ok(
     lowestSurface - KILL_Y >= 3,
     `only ${lowestSurface - KILL_Y}m between the lowest standable surface (${lowestSurface}) and KILL_Y (${KILL_Y})`
@@ -62,8 +66,11 @@ test('every round fits inside the scene bounds', () => {
   const [tz0, tz1] = gridExtent(TIPTOE_LENGTH, TILE_SIZE, ARENA_CENTER_Z)
   assertInBounds('Tip Toe z including pads', [tz0 - 6, tz1 + 6])
 
-  assertInBounds('Hex-Drop x', gridExtent(15, 2, ARENA_CENTER_X))
-  assertInBounds('Hex-Drop z', gridExtent(12, 2, ARENA_CENTER_Z))
+  // Staggered rows push odd rows half a pitch further in x.
+  const hexPitch = HEX_TILE_SIZE + 0.35
+  const [hx0, hx1] = gridExtent(HEX_COLS, HEX_TILE_SIZE, ARENA_CENTER_X)
+  assertInBounds('Hex-Drop x including stagger', [hx0, hx1 + hexPitch / 2])
+  assertInBounds('Hex-Drop z', gridExtent(HEX_ROWS, HEX_TILE_SIZE, ARENA_CENTER_Z))
   assertInBounds('Sweeper platform z', [ARENA_CENTER_Z - 15, ARENA_CENTER_Z + 15])
   assertInBounds('Lobby z', [LOBBY.z - 6, LOBBY.z + 6])
 })

@@ -64,6 +64,21 @@ export function buildConfetti(position: Vector3): Entity {
   return e
 }
 
+/**
+ * A drifting cloud puff. Measures 0.7m natively - the catalog says 1.5 - so it is scaled up hard.
+ * Ships an idle animation clip, which is why the sky is never completely still.
+ */
+export function buildCloud(position: Vector3, size = 6): Entity {
+  const e = decorModel('assets/Models/cloud-puff.glb', position, Vector3.create(size, size, size))
+  Animator.create(e, { states: [{ clip: 'Animation', playing: true, loop: true }] })
+  return e
+}
+
+/** Native 4.1 x 5.3 x 4.4m with its base near the origin, so it is placed at ground level 1:1. */
+export function buildTree(position: Vector3, scale = 1): Entity {
+  return decorModel('assets/Models/tree.glb', position, Vector3.create(scale, scale, scale))
+}
+
 export function setVisible(e: Entity, visible: boolean): void {
   VisibilityComponent.createOrReplace(e, { visible })
 }

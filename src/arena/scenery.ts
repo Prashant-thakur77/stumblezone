@@ -21,7 +21,7 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
-import { buildConfetti, setVisible } from './models'
+import { buildConfetti, buildCloud, setVisible } from './models'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -107,6 +107,22 @@ export function buildScenery(): void {
 
   // Round banner above the arena. The HUD covers the player looking forward; this covers the
   // player looking up, across the arena, or down from the ledge.
+  // Cloud puffs ringing the arena at varying heights. They animate on their own, so the sky is
+  // never completely still, and they give the sheer drop below the arena a sense of altitude.
+  const CLOUDS = 14
+  for (let i = 0; i < CLOUDS; i++) {
+    const angle = (i / CLOUDS) * Math.PI * 2 + 0.3
+    const radius = ARENA_RADIUS + 4 + (i % 3) * 2.5
+    buildCloud(
+      Vector3.create(
+        ARENA_CENTER_X + Math.cos(angle) * radius,
+        ARENA_Y + 2 + (i % 5) * 3.5,
+        ARENA_CENTER_Z + Math.sin(angle) * radius
+      ),
+      5 + (i % 3) * 1.5
+    )
+  }
+
   confetti = buildConfetti(Vector3.create(ARENA_CENTER_X, ARENA_Y + 8, ARENA_CENTER_Z))
 
   jumbotron = engine.addEntity()
