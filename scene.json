@@ -3,7 +3,7 @@
   "runtimeVersion": "7",
   "display": {
     "title": "Stumblezone",
-    "description": "A four-round party gauntlet that never stops. Walk in, survive, win crowns.",
+    "description": "A party gauntlet that never stops. A new round every 2 minutes, four acts to a show, a podium at the end. Fall and you cheer from the ledge - the crowd changes the game.",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"
   },
@@ -18,7 +18,10 @@
     "party",
     "multiplayer",
     "mobile",
-    "competition"
+    "competition",
+    "minigames",
+    "obstacle-course",
+    "spectator"
   ],
   "scene": {
     "parcels": [

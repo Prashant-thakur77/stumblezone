@@ -88,7 +88,10 @@ export function buildLobby(): void {
 
   sign('STUMBLEZONE', Vector3.create(ARENA_CENTER_X, LOBBY.y + 6, SIGN_Z), 8)
   sign(
-    'Qualify to win crowns.\nFall and you cheer from the ledge.\nNew round every 2 minutes.\nBounce on the pads while you wait!',
+    'Qualify to win crowns. New round every 2 minutes.\n' +
+      'Fall and you cheer from the ledge - 5 cheers in 10s and the crowd goes wild.\n' +
+      'Four acts make a show. The show champion takes the podium.\n' +
+      'Bounce on the pads while you wait!',
     Vector3.create(ARENA_CENTER_X, LOBBY.y + 3.4, SIGN_Z),
     2.5
   )
