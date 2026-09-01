@@ -210,7 +210,18 @@ function Hud() {
         textColor={C.navy}
         fontSize={20}
       />
-      <Pill text={hud.showLine} width={200} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />
+      <Pill text={hud.showLine} width={300} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />
+
+      {/* Today's challenge. It is the one line on this HUD that is about tomorrow. */}
+      <Pill
+        text={hud.daily}
+        width={340}
+        position={{ top: 128, right: 16 }}
+        color={hud.daily === 'DAILY: DONE' ? C.green : C.plate}
+        textColor={hud.daily === 'DAILY: DONE' ? C.navy : C.white}
+        fontSize={18}
+        show={hud.daily !== '' && hud.phase !== 'play'}
+      />
 
       <IntroCard />
       <Countdown />

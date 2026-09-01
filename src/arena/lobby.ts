@@ -28,6 +28,7 @@ import { standings, showStandings, displayName } from '../net/crowns'
 import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInflatable } from './models'
 import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
+import { dailyFor, dayIndex } from '../lib/daily'
 
 let crownBoard: Entity
 let scheduleBoard: Entity
@@ -269,5 +270,8 @@ function refreshBoards(): void {
       return `${u.name}  ${m}:${String(s).padStart(2, '0')}`
     })
     .join('\n')
-  TextShape.getMutable(scheduleBoard).text = 'NEXT UP\n\n' + nextLines
+  // The daily hangs off the schedule board: it is the answer to "why come back tomorrow", and the
+  // schedule is the one board people read while waiting for the next round to start.
+  const daily = dailyFor(dayIndex(Date.now()))
+  TextShape.getMutable(scheduleBoard).text = 'NEXT UP\n\n' + nextLines + '\n\nTODAY: ' + daily.text
 }

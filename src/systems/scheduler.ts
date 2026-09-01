@@ -56,6 +56,7 @@ import { hype } from './hype'
 import { Streaks } from '../lib/streak'
 import { refreshCosmetics } from './cosmetics'
 import { fieldLine, rivalry } from '../lib/field'
+import { dailyFor, dailyDone, dayIndex, DAILY_CROWNS } from '../lib/daily'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -84,6 +85,8 @@ let wildUntil = 0
 const streaks = new Streaks()
 /** How long each eliminated player lasted this round, for the rivalry line. */
 let outMs = new Map<string, number>()
+/** The UTC day whose challenge is already paid for, so it pays once and only once. */
+let dailyPaidDay = -1
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -165,6 +168,8 @@ function schedulerSystem(dt: number): void {
 
   hud.toasts = feed.visible(now)
   hud.hype = hype.level(now)
+  const today = dailyFor(dayIndex(now))
+  hud.daily = dailyPaidDay === dayIndex(now) ? 'DAILY: DONE' : 'DAILY: ' + today.text.toUpperCase()
   // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
   // over the arena and the board saying so, for four seconds.
   if (hype.consumeWild(now)) {
@@ -308,6 +313,22 @@ function schedulerSystem(dt: number): void {
       if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN * stakes)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
+
+    // The daily. Paid once per UTC day, on the first round that clears it.
+    if (!spectatingOnly && dailyPaidDay !== dayIndex(now)) {
+      const cleared = dailyDone(dailyFor(dayIndex(now)), {
+        roundId: roundIndex(slot),
+        survived: !spectator.isOut(),
+        first: firstFinisher === myAddress(),
+        survivedMs: Math.round((!spectator.isOut() ? PLAY_SECONDS : outAt) * 1000)
+      })
+      if (cleared) {
+        dailyPaidDay = dayIndex(now)
+        award(myAddress(), DAILY_CROWNS)
+        toast('DAILY CHALLENGE DONE  +' + DAILY_CROWNS)
+        play('crown')
+      }
+    }
 
     // Streaks and worn cosmetics. Everyone we saw this round either went down or came through,
     // and the same computation runs on every client from the same messages.

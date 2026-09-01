@@ -32,6 +32,8 @@ export type HudState = {
   hype: number
   /** Who is still standing, by name: "IN: you, Alice, Bob +2". */
   fieldLine: string
+  /** Today's challenge, or "DAILY: DONE" once it is cleared. */
+  daily: string
 }
 
 export const hud: HudState = {
@@ -50,7 +52,8 @@ export const hud: HudState = {
   showLine: '',
   toasts: [],
   hype: 0,
-  fieldLine: ''
+  fieldLine: '',
+  daily: ''
 }
 
 export function setBanner(banner: string, subtitle = ''): void {
