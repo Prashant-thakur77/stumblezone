@@ -30,7 +30,8 @@ import {
   SWEEPER_COLUMNS,
   WALL_COLOR,
   PLATFORM_COLOR,
-  PARTY_COLORS
+  PARTY_COLORS,
+  PLAY_SECONDS
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -67,6 +68,8 @@ let clock = 0
  * and kept dealing damage through Hex-Drop and Tip Toe, invisibly.
  */
 let running = false
+/** The final-20s speed-up fires once per round. */
+let accelerated = false
 
 function buildSlab(): Entity {
   const e = engine.addEntity()
@@ -217,6 +220,7 @@ export const sweeper: Round = {
     clock = 0
     lastHitAt = 0
     running = true
+    accelerated = false
     VisibilityComponent.createOrReplace(platform, { visible: true })
     MeshCollider.setBox(platform)
     setPropsVisible(true)
@@ -244,6 +248,20 @@ export const sweeper: Round = {
     }
     clock += dt * 1000
     setBanner('', 'Mind the gap')
+
+    // The last 20 seconds: the beam nearly doubles its sweep rate. Lands at the same moment as the
+    // announcer's HURRY UP, so the pressure is heard and seen together.
+    if (!accelerated && elapsed > PLAY_SECONDS - 20) {
+      accelerated = true
+      Tween.createOrReplace(spinnerPivot, {
+        mode: Tween.Mode.RotateContinuous({
+          direction: Quaternion.fromEulerDegrees(0, 1, 0),
+          speed: 46
+        }),
+        duration: 0,
+        easingFunction: EasingFunction.EF_LINEAR
+      })
+    }
 
     const half = PLATFORM_SIZE / 2
 

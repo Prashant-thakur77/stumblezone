@@ -34,6 +34,15 @@ let grid: TileGrid
 let startPad: Entity
 let finishPad: Entity
 let finishFlag: Entity
+/**
+ * Scar plates: one is laid where each fake tile fell.
+ *
+ * The fallen tile drops 8m and is hard to read from the back of the bridge; a dark plate at bridge
+ * level turns accumulated damage into a map, which is what makes following someone worthwhile.
+ * Pooled and re-laid per round like every other repeated thing in the scene.
+ */
+let scars: Entity[] = []
+let nextScar = 0
 let fakes: boolean[] = []
 let pending: { index: number; at: number }[] = []
 let clock = 0
@@ -100,6 +109,18 @@ export const tipToe: Round = {
     finishFlag = buildFinishFlag(
       Vector3.create(ARENA_CENTER_X, ARENA_Y, grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
     )
+
+    // 26 covers the worst case: a 48-tile bridge at the tested 25-60% fake ratio.
+    for (let i = 0; i < 26; i++) {
+      const e = engine.addEntity()
+      Transform.create(e, {
+        position: Vector3.create(0, -50, 0),
+        scale: Vector3.create(TILE_SIZE, 0.08, TILE_SIZE)
+      })
+      MeshRenderer.setBox(e)
+      Material.setPbrMaterial(e, { albedoColor: Color4.create(0.18, 0.14, 0.2, 1), roughness: 1 })
+      scars.push(e)
+    }
     grid.setVisible(false)
     setPadsVisible(false)
     onTile((p, isSelf) => {
@@ -112,6 +133,9 @@ export const tipToe: Round = {
     pending = []
     clock = 0
     finished = false
+    // Park every scar out of sight; they have no collider, so parking is all the reset they need.
+    nextScar = 0
+    for (const e of scars) Transform.getMutable(e).position = Vector3.create(0, -50, 0)
     startAt = 0
     grid.setVisible(true)
     setPadsVisible(true)
@@ -133,6 +157,11 @@ export const tipToe: Round = {
     clock += dt * 1000
     for (let i = pending.length - 1; i >= 0; i--) {
       if (clock >= pending[i].at) {
+        const h = grid.homes[pending[i].index]
+        if (nextScar < scars.length) {
+          Transform.getMutable(scars[nextScar]).position = Vector3.create(h.x, h.y - 0.35, h.z)
+          nextScar++
+        }
         grid.sink(pending[i].index)
         pending.splice(i, 1)
       }
@@ -159,11 +188,6 @@ export const tipToe: Round = {
   },
 
   stop() {
-    // Players could not see where the bridge ended. A finish line is the single clearest way to
-    // say "get here" without a word of instruction.
-    finishFlag = buildFinishFlag(
-      Vector3.create(ARENA_CENTER_X, ARENA_Y, grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
-    )
     grid.setVisible(false)
     setPadsVisible(false)
     pending = []
