@@ -75,6 +75,24 @@ export const FRUIT_NAMES = ['RED', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
 export const TILE_NEUTRAL = { r: 0.93, g: 0.93, b: 0.9 }
 /** A tile that has been stepped on and is about to give way. Reads as danger at a glance. */
 export const TILE_WARNING = { r: 0.98, g: 0.55, b: 0.15 }
-export const TILE_FAKE_HINT = { r: 0.85, g: 0.85, b: 0.82 }
+export const TILE_SHADE = { r: 0.82, g: 0.84, b: 0.88 }
+/** Hex-Drop's lower deck, darker so you know you are on your last chance. */
+export const DECK_TWO = { r: 0.62, g: 0.66, b: 0.76 }
 export const WALL_COLOR = { r: 0.99, g: 0.42, b: 0.31 }
 export const PLATFORM_COLOR = { r: 0.55, g: 0.76, b: 0.88 }
+
+// --- Scenery -----------------------------------------------------------------
+
+/** Festival colours for the pillar ring and bunting. Bright, saturated, toy-plastic. */
+export const PARTY_COLORS = [
+  { r: 0.95, g: 0.26, b: 0.21 },
+  { r: 1.0, g: 0.6, b: 0.0 },
+  { r: 1.0, g: 0.84, b: 0.0 },
+  { r: 0.3, g: 0.75, b: 0.35 },
+  { r: 0.13, g: 0.59, b: 0.95 },
+  { r: 0.61, g: 0.25, b: 0.79 }
+] as const
+
+/** Decorative ground, far below the kill plane so nobody ever lands on it. */
+export const GROUND_Y = -18
+export const ARENA_RADIUS = 26

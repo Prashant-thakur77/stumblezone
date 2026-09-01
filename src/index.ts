@@ -4,6 +4,7 @@
 // and everything after that is driven by the time of day.
 
 import { buildLobby } from './arena/lobby'
+import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
 import { tipToe } from './arena/rounds/tipToe'
@@ -16,6 +17,7 @@ import { initAudio } from './systems/audio'
 
 export function main() {
   initAudio()
+  buildScenery()
   buildLobby()
   initSpectator()
   setupHud()

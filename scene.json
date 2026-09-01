@@ -72,5 +72,8 @@
   },
   "policy": {
     "rating": "E"
+  },
+  "skyboxConfig": {
+    "fixedTime": 57600
   }
 }

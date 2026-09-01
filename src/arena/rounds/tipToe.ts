@@ -16,6 +16,7 @@ import {
   TIPTOE_LENGTH,
   TILE_SIZE,
   TILE_NEUTRAL,
+  TILE_SHADE,
   PLATFORM_COLOR,
   TILE_WARNING
 } from '../../config'
@@ -108,7 +109,7 @@ export const tipToe: Round = {
     grid.setVisible(true)
     setPadsVisible(true)
     grid.resetAll()
-    grid.setAllColors(TILE_NEUTRAL)
+    grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
     onFall(() => {
       if (isOut()) return
       if (!loseLife()) void sendTo(startSpot())

@@ -6,11 +6,36 @@
 import { mulberry32, shuffle } from './prng'
 import { PM_GRID, TIPTOE_WIDTH, TIPTOE_LENGTH, SWEEPER_COLUMNS } from '../config'
 
-/** Distinct fruit kinds per wave. More kinds means a harder board to memorise. */
-const FRUIT_KINDS = [3, 4, 5]
+/** Distinct colours per wave. More kinds means a harder board to memorise. */
+const FRUIT_KINDS = [3, 3, 4, 4, 5, 5]
 
-/** How long the fruits stay visible before the board blanks, per wave. */
-const MEMORY_MS = [6000, 4000, 2500]
+/** How long the colours stay visible before the board blanks, per wave. */
+const MEMORY_MS = [6000, 4500, 3500, 3000, 2500, 2000]
+
+/** How many waves a full round runs. */
+export const PM_WAVE_COUNT = FRUIT_KINDS.length
+
+/** Seconds each wave spends on: blank board, colour called, then settling after the drop. */
+export const PM_BLANK_SECONDS = 1
+export const PM_CALL_SECONDS = 6
+export const PM_SETTLE_SECONDS = 3
+
+/** Wall-clock length of one wave, which shortens as the memory phase does. */
+export function perfectMatchWaveSeconds(wave: number): number {
+  const w = Math.min(wave, MEMORY_MS.length - 1)
+  return MEMORY_MS[w] / 1000 + PM_BLANK_SECONDS + PM_CALL_SECONDS + PM_SETTLE_SECONDS
+}
+
+/** Cumulative start time of each wave, so `tick` can locate itself from elapsed seconds alone. */
+export function perfectMatchSchedule(): number[] {
+  const starts: number[] = []
+  let t = 0
+  for (let i = 0; i < PM_WAVE_COUNT; i++) {
+    starts.push(t)
+    t += perfectMatchWaveSeconds(i)
+  }
+  return starts
+}
 
 /** Safe tiles guaranteed on every Perfect Match board, so a crowd always has somewhere to stand. */
 const MIN_SAFE_TILES = 4
@@ -65,6 +90,8 @@ export function tipToeFakes(seed: number): boolean[] {
 export type SweeperWave = {
   speed: number
   gapCol: number
+  /** +1 travels away from the lobby, -1 towards it. Alternating stops the round being a metronome. */
+  direction: 1 | -1
 }
 
 /** Wall speed in metres per second, escalating each wave, with a seeded gap position. */
@@ -76,6 +103,7 @@ export function sweeperWaves(seed: number): SweeperWave[] {
   const STEP = 0.5
   return [0, 1, 2, 3].map((i) => ({
     speed: BASE_SPEED + i * STEP,
-    gapCol: Math.floor(rng() * SWEEPER_COLUMNS)
+    gapCol: Math.floor(rng() * SWEEPER_COLUMNS),
+    direction: (i % 2 === 0 ? 1 : -1) as 1 | -1
   }))
 }

@@ -140,7 +140,13 @@ export const sweeper: Round = {
       const span = PLATFORM_SIZE + 6
       const offset = (i * span) / walls.length
       const travelled = (elapsed * wave.speed + offset) % span
-      const z = ARENA_CENTER_Z - half - 3 + travelled
+      // Half the walls run the other way, so the round cannot be beaten by facing one direction
+      // and walking. Position stays a pure function of elapsed time either way, so a late joiner
+      // still renders every wall exactly where everyone else sees it.
+      const z =
+        wave.direction === 1
+          ? ARENA_CENTER_Z - half - 3 + travelled
+          : ARENA_CENTER_Z + half + 3 - travelled
 
       const gapCentre = ARENA_CENTER_X - half + (wave.gapCol + 0.5) * COLUMN_WIDTH
       const leftWidth = Math.max(0.1, gapCentre - COLUMN_WIDTH / 2 - (ARENA_CENTER_X - half))

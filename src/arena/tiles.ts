@@ -16,7 +16,7 @@ import {
   TweenSequence,
   EasingFunction
 } from '@dcl/sdk/ecs'
-import { Vector3, Color4 } from '@dcl/sdk/math'
+import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { TILE_NEUTRAL } from '../config'
 
 /** How far a doomed tile falls, and how long it takes. */
@@ -44,8 +44,10 @@ export type TileGrid = {
   homes: Vector3[]
   cols: number
   rows: number
-  setColor(index: number, color: Rgb): void
+  setColor(index: number, color: Rgb, glow?: number): void
   setAllColors(color: Rgb): void
+  /** Two-tone the grid so individual tiles stay distinguishable when they are all blank. */
+  setCheckerboard(light: Rgb, dark: Rgb): void
   /** Drop the collider now, then tween the tile out of sight. Idempotent. */
   sink(index: number): void
   isSunk(index: number): boolean
@@ -91,12 +93,15 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
     }
   }
 
-  function setColor(index: number, color: Rgb): void {
+  function setColor(index: number, color: Rgb, glow = 0): void {
     if (index < 0 || index >= entities.length) return
     Material.setPbrMaterial(entities[index], {
       albedoColor: Color4.create(color.r, color.g, color.b, 1),
       roughness: 0.8,
-      metallic: 0
+      metallic: 0,
+      ...(glow > 0
+        ? { emissiveColor: Color3.create(color.r, color.g, color.b), emissiveIntensity: glow }
+        : {})
     })
   }
 
@@ -109,6 +114,14 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
 
     setAllColors(color: Rgb) {
       for (let i = 0; i < entities.length; i++) setColor(i, color)
+    },
+
+    setCheckerboard(light: Rgb, dark: Rgb) {
+      for (let i = 0; i < entities.length; i++) {
+        const row = Math.floor(i / cols)
+        const col = i % cols
+        setColor(i, (row + col) % 2 === 0 ? light : dark)
+      }
     },
 
     sink(index: number) {

@@ -16,6 +16,7 @@ import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
 import { play } from './audio'
+import { setJumbotron } from '../arena/scenery'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -101,6 +102,10 @@ function schedulerSystem(dt: number): void {
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()
   hud.alive = Math.max(1, seen.size - eliminated.size)
+
+  // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
+  // or looking down from the spectator ledge.
+  setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
 
   if (phase === 'intro') {
     const next = Math.ceil(INTRO_SECONDS - elapsed)

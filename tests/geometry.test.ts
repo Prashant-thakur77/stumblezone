@@ -1,6 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { sweeperWaves } from '../src/lib/layouts.ts'
+import {
+  sweeperWaves,
+  perfectMatchSchedule,
+  perfectMatchWaveSeconds,
+  PM_WAVE_COUNT
+} from '../src/lib/layouts.ts'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -104,16 +109,25 @@ test('a round leaves more of the cycle playable than waiting', () => {
   assert.ok(dead / cycle < 0.32, `${((dead / cycle) * 100).toFixed(0)}% of the cycle is dead time`)
 })
 
-test('each Perfect Match wave has room for its full reveal-blank-call-judge sequence', () => {
-  const WAVES = 3
-  const LONGEST_MEMORY = 6
-  const BLANK = 1
-  const CALL = 6
-  const waveSeconds = PLAY_SECONDS / WAVES
+test('the Perfect Match wave schedule fills the play phase without overrunning it', () => {
+  // Regression: three equal 28s slices left 51 of the round's 85 seconds showing a static board.
+  const starts = perfectMatchSchedule()
+  assert.equal(starts.length, PM_WAVE_COUNT)
+
+  const total = starts[starts.length - 1] + perfectMatchWaveSeconds(PM_WAVE_COUNT - 1)
+  assert.ok(total <= PLAY_SECONDS, `waves run ${total.toFixed(1)}s, longer than the ${PLAY_SECONDS}s play phase`)
   assert.ok(
-    waveSeconds > LONGEST_MEMORY + BLANK + CALL,
-    `a ${waveSeconds.toFixed(1)}s wave cannot fit a ${LONGEST_MEMORY + BLANK + CALL}s sequence`
+    total > PLAY_SECONDS * 0.9,
+    `waves only fill ${total.toFixed(1)}s of ${PLAY_SECONDS}s - the rest is dead air`
   )
+
+  // Waves must get shorter, i.e. harder, as the round goes on.
+  for (let i = 1; i < PM_WAVE_COUNT; i++) {
+    assert.ok(
+      perfectMatchWaveSeconds(i) <= perfectMatchWaveSeconds(i - 1),
+      `wave ${i} is not at least as hard as wave ${i - 1}`
+    )
+  }
 })
 
 test('the get-ready freeze fits inside the play phase', () => {

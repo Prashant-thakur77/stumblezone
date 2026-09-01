@@ -1,12 +1,26 @@
 // Round A - Perfect Match.
 //
-// Three waves of a memory game on a 5x5 grid. Fruits show, the board blanks, a target is called,
-// and every tile that isn't the target drops away. Layout comes from the slot seed, so every
-// client renders identical fruit without exchanging a single message.
+// Six escalating waves of a memory game on a 5x5 grid. Colours show, the board blanks, one is
+// called, and every tile that isn't it drops away.
+//
+// Waves are variable length rather than fixed slices of the round: a wave is exactly as long as
+// its own reveal-blank-call-settle sequence, so the board is always doing something. Cut into
+// three equal 28s slices this round spent 51 of its 85 seconds showing a static board.
+//
+// Layout comes from the slot seed, so every client renders identical colours without exchanging a
+// single message.
 
 import { Vector3 } from '@dcl/sdk/math'
 import { createTileGrid, TileGrid } from '../tiles'
-import { perfectMatchWave, PerfectMatchWave } from '../../lib/layouts'
+import {
+  perfectMatchWave,
+  PerfectMatchWave,
+  perfectMatchSchedule,
+  perfectMatchWaveSeconds,
+  PM_WAVE_COUNT,
+  PM_BLANK_SECONDS,
+  PM_CALL_SECONDS
+} from '../../lib/layouts'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -16,30 +30,31 @@ import {
   FRUIT_COLORS,
   FRUIT_NAMES,
   TILE_NEUTRAL,
-  PLAY_SECONDS
+  TILE_SHADE
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 
-const WAVES = 3
-/** Derived, so retuning the slot split never silently leaves a wave hanging off the end. */
-const WAVE_SECONDS = PLAY_SECONDS / WAVES
-const BLANK_SECONDS = 1
-// Long enough to cross the 15m grid at walking pace after the colour is called. At 3s this round
-// was unwinnable for anyone standing on the far side of the board.
-const CALL_SECONDS = 6
-
 let grid: TileGrid
-let seed = 0
 let waves: PerfectMatchWave[] = []
-/** Highest wave index already judged, so each wave only sinks tiles once. */
+let starts: number[] = []
+/** Highest wave already judged, so each wave drops its tiles exactly once. */
 let judged = -1
 let shown = -1
 
 function safeSpot(wave: PerfectMatchWave): Vector3 {
   const i = wave.fruits.indexOf(wave.target)
   return Vector3.create(grid.homes[i].x, grid.homes[i].y + 2, grid.homes[i].z)
+}
+
+/** Which wave `elapsed` falls in, and how far into it we are. */
+function locate(elapsed: number): { index: number; t: number } {
+  let index = 0
+  for (let i = 0; i < starts.length; i++) {
+    if (elapsed >= starts[i]) index = i
+  }
+  return { index, t: elapsed - starts[index] }
 }
 
 export const perfectMatch: Round = {
@@ -60,74 +75,69 @@ export const perfectMatch: Round = {
     grid.setVisible(false)
   },
 
-  start(newSeed: number) {
-    seed = newSeed
-    waves = [0, 1, 2].map((w) => perfectMatchWave(seed, w))
+  start(seed: number) {
+    waves = []
+    for (let w = 0; w < PM_WAVE_COUNT; w++) waves.push(perfectMatchWave(seed, w))
+    starts = perfectMatchSchedule()
     judged = -1
     shown = -1
     grid.setVisible(true)
     grid.resetAll()
-    grid.setAllColors(TILE_NEUTRAL)
+    grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
 
     onFall(() => {
       if (isOut()) return
-      const last = judged >= 0 ? waves[Math.min(judged, WAVES - 1)] : waves[0]
+      const last = waves[Math.max(0, Math.min(judged, PM_WAVE_COUNT - 1))]
       if (!loseLife()) void sendTo(safeSpot(last))
     })
   },
 
   tick(_dt: number, elapsed: number, playing: boolean) {
     if (!playing) {
-      setBanner('Perfect Match', 'Memorise the fruit. Stand on the one they call.')
+      setBanner('Perfect Match', this.hint)
       return
     }
 
-    const waveIndex = Math.min(Math.floor(elapsed / WAVE_SECONDS), WAVES - 1)
-    const t = elapsed - waveIndex * WAVE_SECONDS
-    const wave = waves[waveIndex]
-    const blankAt = wave.memoryMs / 1000
-    const callAt = blankAt + BLANK_SECONDS
-    const judgeAt = callAt + CALL_SECONDS
+    const { index, t } = locate(elapsed)
+    // Past the last wave the round is simply won - hold the board and let the clock run out.
+    if (index >= PM_WAVE_COUNT || elapsed > starts[PM_WAVE_COUNT - 1] + perfectMatchWaveSeconds(PM_WAVE_COUNT - 1)) {
+      setBanner('SURVIVED', 'Hold on until the round ends')
+      return
+    }
 
-    // Restore the board and paint the new wave's fruit exactly once per wave.
-    if (shown !== waveIndex) {
-      shown = waveIndex
+    const wave = waves[index]
+    const blankAt = wave.memoryMs / 1000
+    const callAt = blankAt + PM_BLANK_SECONDS
+    const judgeAt = callAt + PM_CALL_SECONDS
+
+    if (shown !== index) {
+      shown = index
       grid.resetAll()
       for (let i = 0; i < wave.fruits.length; i++) grid.setColor(i, FRUIT_COLORS[wave.fruits[i]])
     }
 
+    const waveLabel = 'Wave ' + (index + 1) + ' of ' + PM_WAVE_COUNT
+
     if (t < blankAt) {
-      setBanner('MEMORISE', 'Wave ' + (waveIndex + 1) + ' of ' + WAVES)
+      setBanner('MEMORISE', waveLabel)
     } else if (t < callAt) {
-      if (judged < waveIndex) grid.setAllColors(TILE_NEUTRAL)
-      setBanner('...', '')
+      if (judged < index) grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
+      setBanner('...', waveLabel)
     } else if (t < judgeAt) {
       // The tiles are blank by now, so the called colour has to be named here or the round is
       // pure luck. Memory is tested by the blank board, not by hiding the instruction.
-      const remaining = Math.ceil(judgeAt - t)
-      setBanner('STAND ON ' + FRUIT_NAMES[wave.target], remaining + '...')
-    } else if (judged < waveIndex) {
-      judged = waveIndex
+      setBanner('STAND ON ' + FRUIT_NAMES[wave.target], Math.ceil(judgeAt - t) + '...')
+    } else if (judged < index) {
+      judged = index
       for (let i = 0; i < wave.fruits.length; i++) {
         if (wave.fruits[i] !== wave.target) grid.sink(i)
-        else grid.setColor(i, FRUIT_COLORS[wave.target])
+        else grid.setColor(i, FRUIT_COLORS[wave.target], 1.6)
       }
-      setBanner('', '')
+      setBanner('', waveLabel + ' survived')
     }
   },
 
   stop() {
     grid.setVisible(false)
   }
-}
-
-/** The colour the current wave is asking for, so the HUD can show it as a swatch. */
-export function currentTargetColor(elapsed: number): { r: number; g: number; b: number } | null {
-  if (waves.length === 0) return null
-  const waveIndex = Math.min(Math.floor(elapsed / WAVE_SECONDS), WAVES - 1)
-  const wave = waves[waveIndex]
-  const t = elapsed - waveIndex * WAVE_SECONDS
-  const callAt = wave.memoryMs / 1000 + BLANK_SECONDS
-  if (t < callAt) return null
-  return FRUIT_COLORS[wave.target]
 }

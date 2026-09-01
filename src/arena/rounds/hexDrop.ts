@@ -17,6 +17,8 @@ import {
   ARENA_Y,
   HEX_LAYER_GAP,
   TILE_NEUTRAL,
+  TILE_SHADE,
+  DECK_TWO,
   TILE_WARNING
 } from '../../config'
 import { Round } from './types'
@@ -80,10 +82,17 @@ export const hexDrop: Round = {
   start() {
     pending = []
     clock = 0
-    for (const l of layers) {
-      l.setVisible(true)
-      l.resetAll()
-      l.setAllColors(TILE_NEUTRAL)
+    for (let i = 0; i < layers.length; i++) {
+      const layer = layers[i]
+      layer.setVisible(true)
+      layer.resetAll()
+      // The lower deck is visibly darker, so a player who drops through knows instantly that they
+      // are on their last chance rather than wondering which layer they are on.
+      if (i === 0) {
+        layer.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
+      } else {
+        layer.setCheckerboard(TILE_SHADE, DECK_TWO)
+      }
     }
     onFall(() => {
       // Through both layers is out. There is no second chance in the finale.

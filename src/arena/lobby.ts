@@ -22,6 +22,7 @@ import { upcoming } from '../systems/scheduler'
 
 let crownBoard: Entity
 let scheduleBoard: Entity
+let podiumSign: Entity
 
 function sign(text: string, position: Vector3, size: number): Entity {
   const e = engine.addEntity()
@@ -74,6 +75,32 @@ export function buildLobby(): void {
   crownBoard = sign('CROWNS', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y + 4, SIGN_Z), 2)
   scheduleBoard = sign('NEXT UP', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y + 4, SIGN_Z), 2)
 
+  // The podium. A physical place the leader's name appears is worth more than another line on a
+  // board - it gives the crowd something to gather round and someone to point at between rounds.
+  const podiumX = ARENA_CENTER_X
+  const podiumZ = LOBBY.z - 3
+  const steps: [number, number][] = [
+    [0, 1.2],
+    [-3, 0.8],
+    [3, 0.5]
+  ]
+  for (const [dx, height] of steps) {
+    const e = engine.addEntity()
+    Transform.create(e, {
+      position: Vector3.create(podiumX + dx, LOBBY.y + height / 2 - 0.5, podiumZ),
+      scale: Vector3.create(2.6, height, 2.6)
+    })
+    MeshRenderer.setBox(e)
+    MeshCollider.setBox(e)
+    Material.setPbrMaterial(e, {
+      albedoColor: Color4.create(1.0, 0.84, 0.0, 1),
+      roughness: 0.6,
+      emissiveColor: Color3.create(1.0, 0.84, 0.0),
+      emissiveIntensity: 0.5
+    })
+  }
+  podiumSign = sign('', Vector3.create(podiumX, LOBBY.y + 3.2, podiumZ), 2.4)
+
   // Boards only need refreshing a couple of times a second, not every frame.
   let since = 0
   engine.addSystem((dt: number) => {
@@ -90,6 +117,11 @@ function refreshBoards(): void {
     ? top.map((s, i) => `${i + 1}. ${displayName(s.address)}  ${s.crowns}`).join('\n')
     : 'No crowns yet.\nWin a round to get on the board.'
   TextShape.getMutable(crownBoard).text = 'CROWNS\n\n' + crownLines
+
+  const leader = top.length ? top[0] : null
+  TextShape.getMutable(podiumSign).text = leader
+    ? 'CROWN LEADER\n' + displayName(leader.address) + '\n' + leader.crowns + ' crowns'
+    : 'CROWN LEADER\n\nUp for grabs'
 
   const nextLines = upcoming(3)
     .map((u) => {
