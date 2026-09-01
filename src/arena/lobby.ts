@@ -23,13 +23,22 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
-import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS, SHARE_URL } from '../config'
+import {
+  ARENA_CENTER_X,
+  LOBBY,
+  LEDGE,
+  PLATFORM_COLOR,
+  PARTY_COLORS,
+  SHARE_URL,
+  ROUND_NAMES,
+  FINALE_ROUND
+} from '../config'
 import { standings, showStandings, displayName } from '../net/crowns'
 import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInflatable } from './models'
 import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
 import { dailyFor, dayIndex } from '../lib/daily'
-import { slotIndex, slotsUntilGolden } from '../lib/schedule'
+import { slotIndex, slotsUntilGolden, showRounds, showIndex } from '../lib/schedule'
 
 let crownBoard: Entity
 let scheduleBoard: Entity
@@ -282,6 +291,20 @@ function refreshBoards(): void {
   const untilGolden = slotsUntilGolden(slotIndex(Date.now()))
   const goldenLine =
     untilGolden === 0 ? 'GOLDEN SHOW NOW - DOUBLE CROWNS' : 'GOLDEN SHOW in ' + untilGolden + ' rounds'
+  // What this show is made of, so the lobby answers "what am I about to play" and not only "when".
+  const slot = slotIndex(Date.now())
+  const card = showRounds(showIndex(slot))
+    .map((id) => ROUND_NAMES[id])
+    .join('  >  ')
   TextShape.getMutable(scheduleBoard).text =
-    'NEXT UP\n\n' + nextLines + '\n\nTODAY: ' + daily.text + '\n' + goldenLine
+    'THIS SHOW\n' +
+    card +
+    '  >  ' +
+    ROUND_NAMES[FINALE_ROUND] +
+    '\n\nNEXT UP\n' +
+    nextLines +
+    '\n\nTODAY: ' +
+    daily.text +
+    '\n' +
+    goldenLine
 }

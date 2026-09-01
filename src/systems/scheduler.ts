@@ -406,6 +406,9 @@ function schedulerSystem(dt: number): void {
     } else if (survived) {
       play('qualified')
       play('crowd-cheer')
+      // A fist pump on the spot. Everyone still standing celebrates at the same instant, which is
+      // what makes a results screen look like a room rather than a scoreboard.
+      void triggerEmote({ predefinedEmote: 'fistpump' })
     } else {
       play('crowd-aww')
     }
