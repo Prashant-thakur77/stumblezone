@@ -26,7 +26,8 @@ import {
   PLAY_SECONDS,
   INTRO_SECONDS,
   RESULTS_SECONDS,
-  GET_READY_SECONDS
+  GET_READY_SECONDS,
+  GROUND_Y
 } from '../src/config.ts'
 
 /** The scene is 4x4 parcels. Anything outside these bounds silently fails to render. */
@@ -44,6 +45,26 @@ function assertInBounds(name: string, [lo, hi]: [number, number]): void {
   assert.ok(lo >= SCENE_MIN, `${name} starts at ${lo.toFixed(1)}, outside the scene (min ${SCENE_MIN})`)
   assert.ok(hi <= SCENE_MAX, `${name} ends at ${hi.toFixed(1)}, outside the scene (max ${SCENE_MAX})`)
 }
+
+test('the fall has somewhere to go: ground below the kill plane, arena high above it', () => {
+  // The drama of falling needs a visible ground you almost reach. GROUND_Y is the solid floor;
+  // the kill plane must sit just above it, and the arena must be far above both.
+  assert.ok(KILL_Y > GROUND_Y, 'kill plane must be above the solid ground, or players land and stand')
+  assert.ok(KILL_Y - GROUND_Y <= 4, 'catch players close to the ground - almost landing is the point')
+  assert.ok(ARENA_Y - KILL_Y >= 15, `only ${ARENA_Y - KILL_Y}m of fall - not enough to feel it`)
+})
+
+test('nothing exceeds the scene height limit', () => {
+  // 16 parcels: log2(17) * 20 = ~81m.
+  const MAX = Math.log2(17) * 20
+  for (const [name, y] of [
+    ['ledge', LEDGE.y],
+    ['jumbotron', ARENA_Y + 13],
+    ['pillar tops', 35]
+  ] as [string, number][]) {
+    assert.ok(y < MAX - 2, `${name} at ${y}m is over the ${MAX.toFixed(0)}m cap`)
+  }
+})
 
 test('the kill plane sits clear of every standable surface', () => {
   // Regression: KILL_Y was -1 and Hex-Drop's lower deck was also at -1, so simply standing on the

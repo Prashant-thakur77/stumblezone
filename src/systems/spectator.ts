@@ -21,6 +21,12 @@ let out = false
 /** Set while a movePlayerTo is in flight, so the fall watcher doesn't fire twice. */
 let relocating = false
 let fallHandler: (() => void) | null = null
+/** True only while a round's play phase is running. Falls outside it are free rides home. */
+let roundLive = false
+
+export function setRoundLive(live: boolean): void {
+  roundLive = live
+}
 
 export function livesLeft(): number {
   return lives
@@ -122,6 +128,12 @@ export function initSpectator(): void {
     // Spectators can walk off the ledge. Put them back rather than letting them fall forever.
     if (out) {
       void sendTo(LEDGE)
+      return
+    }
+    // Now that the lobby itself floats 20m up, walking off its edge between rounds is possible -
+    // and must cost nothing. Only a fall during live play belongs to the round.
+    if (!roundLive) {
+      sendToLobby()
       return
     }
     if (fallHandler) {

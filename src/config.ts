@@ -43,8 +43,12 @@ export const SWEEPER_COLUMNS = 6
 export const ARENA_CENTER_X = 32
 export const ARENA_CENTER_Z = 36
 
-/** Play surface height. Falling below KILL_Y counts as a fall. */
-export const ARENA_Y = 4
+/**
+ * Play surface height. The whole game floats 24m over a visible, solid ground, because a fall
+ * only means something if there is somewhere to fall PAST and somewhere to almost land: ~2 seconds
+ * of clouds, pillars and the ground rushing up, caught a moment before impact.
+ */
+export const ARENA_Y = 24
 
 /**
  * Must sit well below the LOWEST standable surface in any round - which is Hex-Drop's second
@@ -54,13 +58,13 @@ export const ARENA_Y = 4
 export const HEX_LAYER_GAP = 4
 /** Hex-Drop decks. Four levels means three real second chances before you are out. */
 export const HEX_LAYERS = 4
-export const KILL_Y = -16
+export const KILL_Y = 2
 
 /** Eliminated players watch from here. High enough to see the whole arena. */
-export const LEDGE = { x: 32, y: 13, z: 8 }
+export const LEDGE = { x: 32, y: 36, z: 8 }
 
 /** Where players stand between rounds. */
-export const LOBBY = { x: 32, y: 1, z: 7 }
+export const LOBBY = { x: 32, y: 20, z: 7 }
 
 // --- Palette ----------------------------------------------------------------
 // Chunky, bright, toy-plastic. Fruit colours are deliberately far apart in hue
@@ -98,5 +102,5 @@ export const PARTY_COLORS = [
 ] as const
 
 /** Decorative ground, far below the kill plane so nobody ever lands on it. */
-export const GROUND_Y = -30
+export const GROUND_Y = 0
 export const ARENA_RADIUS = 26

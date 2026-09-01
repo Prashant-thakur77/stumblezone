@@ -12,6 +12,7 @@ import {
   Entity,
   Transform,
   MeshRenderer,
+  MeshCollider,
   Material,
   TextShape,
   Font,
@@ -21,7 +22,7 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
-import { buildConfetti, buildCloud, setVisible } from './models'
+import { buildConfetti, buildCloud, buildTree, setVisible } from './models'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -33,7 +34,8 @@ import {
 } from '../config'
 
 const PILLAR_COUNT = 12
-const PILLAR_HEIGHT = 14
+/** Pillars rise from the ground, past the arena - so falling means falling down their length. */
+const PILLAR_HEIGHT = 34
 
 function box(position: Vector3, scale: Vector3, color: { r: number; g: number; b: number }, glow = 0): Entity {
   const e = engine.addEntity()
@@ -66,12 +68,38 @@ let jumbotron: Entity
 let confetti: Entity
 
 export function buildScenery(): void {
-  // A floor for the sky. Far below the kill plane, so it is scenery and never a surface.
-  box(
-    Vector3.create(ARENA_CENTER_X, GROUND_Y, ARENA_CENTER_Z),
+  // The ground. Solid and green, 24m below the arena - the thing a falling player watches rush
+  // up at them. The kill plane sits 2m above it, so nobody quite lands, but everybody almost does.
+  const ground = box(
+    Vector3.create(ARENA_CENTER_X, GROUND_Y - 0.5, ARENA_CENTER_Z),
     Vector3.create(64, 1, 64),
-    { r: 0.36, g: 0.55, b: 0.36 }
+    { r: 0.4, g: 0.62, b: 0.38 }
   )
+  MeshCollider.setBox(ground)
+
+  // A soft pink splash pad directly under the arena: the visual promise of a place to land.
+  const pad = engine.addEntity()
+  Transform.create(pad, {
+    position: Vector3.create(ARENA_CENTER_X, GROUND_Y + 0.06, ARENA_CENTER_Z),
+    scale: Vector3.create(ARENA_RADIUS * 1.6, 0.1, ARENA_RADIUS * 1.6)
+  })
+  MeshRenderer.setCylinder(pad, 1, 1)
+  Material.setPbrMaterial(pad, {
+    albedoColor: Color4.create(0.99, 0.75, 0.83, 1),
+    roughness: 0.9
+  })
+
+  // Trees scattered on the ground below, for scale while you fall.
+  for (const [gx, gz] of [
+    [10, 12],
+    [52, 14],
+    [8, 50],
+    [55, 52],
+    [14, 32],
+    [50, 34]
+  ] as [number, number][]) {
+    buildTree(Vector3.create(gx, GROUND_Y - 0.3, gz), 1.6)
+  }
 
   // A ring of colourful pillars around the play area. These are the scene's main visual anchor:
   // they give the moving sweeper walls something to be measured against.
@@ -82,13 +110,13 @@ export function buildScenery(): void {
     const color = PARTY_COLORS[i % PARTY_COLORS.length]
 
     cylinder(
-      Vector3.create(x, ARENA_Y - 4 + PILLAR_HEIGHT / 2, z),
+      Vector3.create(x, GROUND_Y + PILLAR_HEIGHT / 2, z),
       Vector3.create(1.6, PILLAR_HEIGHT, 1.6),
       { r: 0.97, g: 0.97, b: 0.95 }
     )
     // A glowing cap, so the ring still reads at dusk and from the spectator ledge.
     const cap = box(
-      Vector3.create(x, ARENA_Y - 4 + PILLAR_HEIGHT + 0.6, z),
+      Vector3.create(x, GROUND_Y + PILLAR_HEIGHT + 0.6, z),
       Vector3.create(2.4, 1.2, 2.4),
       color,
       1.4
@@ -116,7 +144,9 @@ export function buildScenery(): void {
     buildCloud(
       Vector3.create(
         ARENA_CENTER_X + Math.cos(angle) * radius,
-        ARENA_Y + 2 + (i % 5) * 3.5,
+        // From just above the ground to just under the arena: the band a falling player drops
+        // through. Falling through a cloud is the whole point of having them.
+        GROUND_Y + 5 + (i % 5) * 4.2,
         ARENA_CENTER_Z + Math.sin(angle) * radius
       ),
       5 + (i % 3) * 1.5

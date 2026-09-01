@@ -70,6 +70,7 @@ function beginSlot(slot: number): void {
   firstFinisher = ''
 
   setConfetti(false)
+  spectator.setRoundLive(false)
   spectator.resetForSlot()
   spectator.releaseInput()
   outAt = 0
@@ -153,6 +154,7 @@ function schedulerSystem(dt: number): void {
     }
     if (!released) {
       released = true
+      spectator.setRoundLive(true)
       if (!spectator.isOut()) {
         spectator.releaseInput()
         play('go')
@@ -179,6 +181,7 @@ function schedulerSystem(dt: number): void {
   // Results.
   if (!scored) {
     scored = true
+    spectator.setRoundLive(false)
     const survived = !spectator.isOut()
     if (survived && !spectatingOnly) {
       award(myAddress(), CROWN_SURVIVE)

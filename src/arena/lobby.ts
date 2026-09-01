@@ -207,17 +207,18 @@ function buildJumpPads(): void {
  * to watch the arena from while the countdown runs.
  */
 function buildPerch(): void {
+  // Offsets from the lobby floor, not absolute heights - the lobby now lives 20m up.
   const steps: [number, number, number][] = [
-    [-6, 1.6, 9],
-    [-2, 3.0, 11],
-    [3, 4.4, 10]
+    [-6, 0.6, 9],
+    [-2, 2.0, 11],
+    [3, 3.4, 10]
   ]
   for (let i = 0; i < steps.length; i++) {
     const [dx, y, dz] = steps[i]
     const c = PARTY_COLORS[(i + 2) % PARTY_COLORS.length]
     const e = engine.addEntity()
     Transform.create(e, {
-      position: Vector3.create(ARENA_CENTER_X + dx, y, LOBBY.z + dz - 6),
+      position: Vector3.create(ARENA_CENTER_X + dx, LOBBY.y + y, LOBBY.z + dz - 6),
       scale: Vector3.create(4, 0.5, 4)
     })
     MeshRenderer.setCylinder(e, 1, 1)
