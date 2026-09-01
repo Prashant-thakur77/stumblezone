@@ -39,8 +39,11 @@ Designed for touch from the first commit, not ported to it.
 ### 2. Social value
 The buildathon rules exclude single-player experiences, and the mobile client **has no proximity
 voice chat** — so every social feature here works over text, emotes and shared spectacle.
-- **The spectator ledge.** Eliminated players are teleported to a raised ledge overlooking the arena
-  with a **cheer button** that fires an emote everyone sees. Losing early keeps you in the round.
+- **The spectator ledge.** Eliminated players are teleported to a raised ledge overlooking the arena,
+  where they can **walk freely** and hit a large on-screen **CHEER** button that fires an emote
+  everyone sees. They are deliberately *not* frozen — being locked in place for the rest of a round
+  is the least social thing this game could do. The ledge is 9m above and 10m clear of the arena, so
+  a spectator can wander and heckle but cannot rejoin the round.
 - **Tip Toe's sacrificial pathfinding** — the leader burns fake tiles for everyone behind them.
 - **A live crown board** in the lobby, and an "N alive" counter that makes the field visible.
 - Shared spectacle: everyone in the World runs the same round at the same instant.
@@ -59,6 +62,8 @@ voice chat** — so every social feature here works over text, emotes and shared
 - SDK primitives and a shared palette — no GLB downloads, near-zero content size against the World
   storage cap.
 - Motion is engine-side `Tween`, not per-frame transform writes.
+- All sound is **synthesised procedurally** by `tools/make-audio.mjs` — six cues, 116 KB total, no
+  downloaded samples and no licensing to track.
 
 ### 5. Creativity and originality
 Other entries are obbies and hangouts. This is an **auto-cycling multi-round gauntlet with a real
@@ -67,6 +72,8 @@ UTC time, so there is no server, no host, and no authority to fail.
 
 ### 6. Retention and discovery value
 - Crowns accumulate across the session; the board is the first thing you see in the lobby.
+- **Personal bests** per round, so a judge walking in alone at 3am still has something to beat.
+- Only 29% of each cycle is intro and results — the rest is playing.
 - The schedule sign shows the next three rounds, which creates the "Hex-Drop is in 3 minutes, wait
   for it" hook.
 - Two-minute rounds mean the worst case wait for *something to do* is 30 seconds.
@@ -124,7 +131,7 @@ src/ui/         mobile HUD
 
 ## Tests
 
-`npm test` runs 24 tests over the parts where a bug is invisible until a live round breaks:
+`npm test` runs 31 tests over the parts where a bug is invisible until a live round breaks:
 
 - **Clock skew** — samples 1,200 points across a slot and asserts two clients one second apart only
   disagree at the boundary. This is the evidence for shipping with no clock synchronisation.
@@ -133,6 +140,11 @@ src/ui/         mobile HUD
   that *every client agrees on* — no crash, no error, just a round nobody can finish.
 - **Perfect Match fairness** — every board, every seed, has at least four safe tiles so a crowd has
   somewhere to stand.
+- **Geometry and pacing invariants** — the kill plane must clear every standable surface, every
+  round must fit inside the scene bounds, wall pacing must stay within touch reaction time, and the
+  call window must be long enough to cross the board. Each of these encodes a bug that was found
+  and fixed: the kill plane once sat exactly on Hex-Drop's lower deck, and the final sweeper wave
+  once closed every 1.6s.
 
 ## Roadmap
 

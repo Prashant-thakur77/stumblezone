@@ -32,6 +32,8 @@ let firstFinisher = ''
 let outAt = 0
 /** Last whole second we played a countdown tick on, so each tick fires exactly once. */
 let lastTick = -1
+/** True when we arrived after this round had already started, so nothing here counts. */
+let spectatingOnly = false
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -77,6 +79,7 @@ function beginSlot(slot: number): void {
   // half-decayed board is worse than a clear "you're up next" - and it stops the alive count from
   // claiming a player who never actually played.
   const joinedLate = slotElapsed(Date.now()) > INTRO_SECONDS + GET_READY_SECONDS
+  spectatingOnly = joinedLate
   if (joinedLate) {
     spectator.spectateOnly()
   } else {
@@ -155,7 +158,7 @@ function schedulerSystem(dt: number): void {
   if (!scored) {
     scored = true
     const survived = !spectator.isOut()
-    if (survived) {
+    if (survived && !spectatingOnly) {
       award(myAddress(), CROWN_SURVIVE)
       // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is
       // worth a crown, but it is not a win.
@@ -165,8 +168,11 @@ function schedulerSystem(dt: number): void {
     if (survived) play('crown')
 
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
-    const beatIt = record(hud.roundName, survivedMs)
-    hud.resultDetail = seen.size > 1
+    // A round you watched is not a round you played - it must not set a personal best.
+    const beatIt = spectatingOnly ? false : record(hud.roundName, survivedMs)
+    hud.resultDetail = spectatingOnly
+      ? 'You watched this one. You are in for the next.'
+      : seen.size > 1
       ? (survived ? '+1 crown' : eliminated.size + ' of ' + seen.size + ' went down')
       : beatIt
         ? 'New best! ' + formatSeconds(survivedMs)

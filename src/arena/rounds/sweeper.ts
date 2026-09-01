@@ -51,6 +51,14 @@ let walls: Wall[] = []
 let waves: SweeperWave[] = []
 let lastHitAt = 0
 let clock = 0
+/**
+ * Whether this round is the active one.
+ *
+ * Hiding a wall does not disarm it: VisibilityComponent only stops it drawing, while its
+ * MeshCollider and TriggerArea keep working. Without this guard the sweeper's walls stayed solid
+ * and kept dealing damage through Hex-Drop and Tip Toe, invisibly.
+ */
+let running = false
 
 function buildSlab(): Entity {
   const e = engine.addEntity()
@@ -62,6 +70,7 @@ function buildSlab(): Entity {
   })
   TriggerArea.setBox(e)
   triggerAreaEventsSystem.onTriggerEnter(e, (result) => {
+    if (!running) return
     if (result.trigger?.entity !== engine.PlayerEntity) return
     if (isOut() || clock - lastHitAt < HIT_COOLDOWN_MS) return
     lastHitAt = clock
@@ -103,11 +112,14 @@ export const sweeper: Round = {
     waves = sweeperWaves(seed)
     clock = 0
     lastHitAt = 0
+    running = true
     VisibilityComponent.createOrReplace(platform, { visible: true })
     MeshCollider.setBox(platform)
     for (const w of walls) {
-      VisibilityComponent.createOrReplace(w.left, { visible: true })
-      VisibilityComponent.createOrReplace(w.right, { visible: true })
+      for (const slab of [w.left, w.right]) {
+        VisibilityComponent.createOrReplace(slab, { visible: true })
+        if (!MeshCollider.has(slab)) MeshCollider.setBox(slab)
+      }
     }
   },
 
@@ -145,11 +157,15 @@ export const sweeper: Round = {
   },
 
   stop() {
+    running = false
     VisibilityComponent.createOrReplace(platform, { visible: false })
     MeshCollider.deleteFrom(platform)
     for (const w of walls) {
-      VisibilityComponent.createOrReplace(w.left, { visible: false })
-      VisibilityComponent.createOrReplace(w.right, { visible: false })
+      for (const slab of [w.left, w.right]) {
+        VisibilityComponent.createOrReplace(slab, { visible: false })
+        // Must actually remove the collider - an invisible wall is still a solid wall.
+        MeshCollider.deleteFrom(slab)
+      }
     }
   }
 }
