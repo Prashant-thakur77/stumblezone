@@ -12,6 +12,7 @@ import { Vector3 } from '@dcl/sdk/math'
 import { movePlayerTo, triggerEmote } from '~system/RestrictedActions'
 import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND } from '../config'
 import { emitCheer, emitEliminated, onCheer } from '../net/sync'
+import { play } from './audio'
 
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
 
@@ -60,7 +61,11 @@ export function sendToLobby(): void {
 export function loseLife(): boolean {
   if (out) return true
   lives -= 1
-  if (lives > 0) return false
+  if (lives > 0) {
+    // Losing a heart but staying in gets a softer cue than being knocked out entirely.
+    play('crack')
+    return false
+  }
   eliminate()
   return true
 }
@@ -82,6 +87,7 @@ export function spectateOnly(): void {
 export function eliminate(): void {
   if (out) return
   out = true
+  play('eliminated')
   emitEliminated()
   void sendTo(LEDGE)
   // Eliminated players are spectators, not participants: freeze locomotion so they can't wander

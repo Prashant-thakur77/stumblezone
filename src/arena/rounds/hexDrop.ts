@@ -21,6 +21,7 @@ import {
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
+import { play } from '../../systems/audio'
 import { eliminate, isOut, onFall } from '../../systems/spectator'
 import { emitTile, onTile } from '../../net/sync'
 
@@ -121,6 +122,7 @@ export const hexDrop: Round = {
       if (pending.some((p) => p.layer === l && p.index === index)) continue
       markStepped(l, index)
       emitTile(tileKey(l, index))
+      play('crack')
       break
     }
   },

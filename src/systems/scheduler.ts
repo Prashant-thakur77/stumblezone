@@ -15,6 +15,7 @@ import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync
 import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
+import { play } from './audio'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -29,6 +30,8 @@ let eliminated = new Set<string>()
 let firstFinisher = ''
 /** When the local player's run in this slot ended, in seconds into the play phase. */
 let outAt = 0
+/** Last whole second we played a countdown tick on, so each tick fires exactly once. */
+let lastTick = -1
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -65,6 +68,7 @@ function beginSlot(slot: number): void {
   spectator.resetForSlot()
   spectator.releaseInput()
   outAt = 0
+  lastTick = -1
 
   active = rounds[roundIndex(slot)]
   active.start(seedForSlot(slot))
@@ -103,6 +107,10 @@ function schedulerSystem(dt: number): void {
     if (next <= 5) {
       hud.banner = String(next)
       hud.subtitle = 'Get ready!'
+      if (next !== lastTick && next > 0) {
+        lastTick = next
+        play('tick')
+      }
     } else {
       hud.banner = active.name
       hud.subtitle = active.hint
@@ -131,7 +139,10 @@ function schedulerSystem(dt: number): void {
     }
     if (!released) {
       released = true
-      if (!spectator.isOut()) spectator.releaseInput()
+      if (!spectator.isOut()) {
+        spectator.releaseInput()
+        play('go')
+      }
     }
 
     if (spectator.isOut() && outAt === 0) outAt = playElapsed
@@ -151,6 +162,7 @@ function schedulerSystem(dt: number): void {
       if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
+    if (survived) play('crown')
 
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
     const beatIt = record(hud.roundName, survivedMs)

@@ -12,8 +12,10 @@ import { setupScheduler } from './systems/scheduler'
 import { initSpectator } from './systems/spectator'
 import { setupCrownSync } from './net/crowns'
 import { setupHud } from './ui/hud'
+import { initAudio } from './systems/audio'
 
 export function main() {
+  initAudio()
   buildLobby()
   initSpectator()
   setupHud()

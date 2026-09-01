@@ -21,6 +21,7 @@ import {
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
+import { play } from '../../systems/audio'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 import { emitTile, onTile, emitFinished } from '../../net/sync'
 
@@ -138,6 +139,7 @@ export const tipToe: Round = {
     if (index >= 0 && !grid.isSunk(index) && fakes[index]) {
       step(index)
       emitTile(index)
+      play('crack')
     }
 
     // Reaching the finish pad ends your run.
