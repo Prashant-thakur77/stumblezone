@@ -54,7 +54,7 @@ import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds, recordFinaleWin, finaleWinCount } from './records'
 import { titleFor } from '../lib/titles'
-import { podiumShot, cameraSystem } from './camera'
+import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
@@ -146,6 +146,8 @@ function beginSlot(slot: number): void {
 
   setConfetti(false)
   setJumbotronColor(null)
+  // A new round means you are playing again, so the arena view goes away with the last one.
+  setSpectatorCam(false)
   spectator.setRoundLive(false)
   spectator.resetForSlot()
   spectator.releaseInput()

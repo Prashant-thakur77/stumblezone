@@ -23,6 +23,7 @@
 import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
 import { cheer, react } from '../systems/spectator'
+import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
 import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
@@ -260,12 +261,17 @@ function Hud() {
           uiTransform={{ width: '100%', height: 64 }}
           uiBackground={shape(UI_TEX.pill, C.yellow)}
         />
-        <Label
-          value="Watching from the ledge"
-          fontSize={18}
-          color={C.white}
-          textAlign="middle-center"
-          uiTransform={{ width: '100%', height: 34 }}
+        {/* One tap to point the camera at the arena. On a phone, dragging a third-person camera
+            round to face the round you were just knocked out of is the friction that makes people
+            close the app instead of staying to watch the finish. */}
+        <Button
+          value={spectatorCamOn() ? 'BACK TO ME' : 'WATCH ARENA'}
+          variant="primary"
+          fontSize={22}
+          color={C.navy}
+          onMouseDown={() => setSpectatorCam(!spectatorCamOn())}
+          uiTransform={{ width: '100%', height: 48, margin: { top: 8 } }}
+          uiBackground={shape(UI_TEX.pill, spectatorCamOn() ? C.green : C.cyan)}
         />
       </UiEntity>
     </UiEntity>
