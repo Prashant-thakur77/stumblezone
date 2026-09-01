@@ -1,5 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { spotCentre } from '../src/lib/spotlight.ts'
 import {
   sweeperWaves,
   perfectMatchSchedule,
@@ -30,8 +32,16 @@ import {
   GROUND_Y,
   CROWD_SPOTS,
   SEARCHLIGHT_SPOTS,
-  SEARCHLIGHT_TARGET
+  SEARCHLIGHT_TARGET,
+  DISC_RADIUS,
+  ROUND_NAMES,
+  ROUND_POOL,
+  ROUND_DIFFICULTY,
+  FINALE_ROUND
 } from '../src/config.ts'
+
+/** 16 parcels allow log2(17) * 20 = ~81m of height. Anything taller is silently clipped. */
+const HEIGHT_CAP = Math.log2(17) * 20
 
 /** The scene is 4x4 parcels. Anything outside these bounds silently fails to render. */
 const SCENE_MIN = 0
@@ -183,4 +193,65 @@ test('the stadium dressing stays inside the parcels', () => {
   }
   assert.equal(CROWD_SPOTS.length, 8)
   assert.equal(SEARCHLIGHT_SPOTS.length, 4)
+})
+
+test('the round stage and its lights fit inside the scene and under the height cap', () => {
+  // The disc plus its lip, and the spotlight rigs 20m above it. A stage that pokes outside the
+  // parcels renders as nothing at all, with no error anywhere.
+  for (const [dx, dz] of [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1]
+  ] as [number, number][]) {
+    const edge = DISC_RADIUS + 0.4
+    const x = ARENA_CENTER_X + dx * edge
+    const z = ARENA_CENTER_Z + dz * edge
+    assertInBounds('disc edge x', [x, x])
+    assertInBounds('disc edge z', [z, z])
+  }
+  // Every point a light can reach, at its extremes on both axes.
+  for (let i = 0; i < 3; i++) {
+    for (let t = 0; t <= 90; t += 0.5) {
+      const p = spotCentre(12345, i, t)
+      assertInBounds('spotlight rig x', [ARENA_CENTER_X + p.x, ARENA_CENTER_X + p.x])
+      assertInBounds('spotlight rig z', [ARENA_CENTER_Z + p.z, ARENA_CENTER_Z + p.z])
+    }
+  }
+})
+
+test('the round stage sits above the kill plane, and its rigs below the height cap', () => {
+  assert.ok(ARENA_Y - 1 > KILL_Y, 'the disc must not hang through the kill plane')
+  assert.ok(ARENA_Y + 20 < HEIGHT_CAP, 'the spotlight rigs must stay under the height cap')
+})
+
+test('every round in ROUND_NAMES is registered in index.ts, in the same order', () => {
+  // The scheduler indexes its round list by round id. A list that is short, long or out of order
+  // means a slot silently runs the wrong round - or crashes on an undefined one.
+  const index = readFileSync('src/index.ts', 'utf8')
+  const call = index.match(/setupScheduler\(\[([^\]]*)\]\)/)
+  assert.ok(call, 'no setupScheduler([...]) call found in src/index.ts')
+  const registered = call[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+  assert.equal(registered.length, ROUND_NAMES.length, 'index.ts registers a different number of rounds')
+  // A round's export is its name camel-cased, possibly shortened: "Perfect Match" -> perfectMatch,
+  // "Hex-Drop" -> hexDrop, "Sweeper Gates" -> sweeper. Checking the prefix still catches the two
+  // failures that matter - a missing round, and two rounds swapped.
+  for (let i = 0; i < ROUND_NAMES.length; i++) {
+    const words = ROUND_NAMES[i].toLowerCase().split(/[^a-z]+/).filter(Boolean)
+    const camel = words[0] + words.slice(1).map((w) => w[0].toUpperCase() + w.slice(1)).join('')
+    assert.ok(
+      camel.toLowerCase().startsWith(registered[i].toLowerCase()),
+      'slot ' + i + ' registers ' + registered[i] + ' but ROUND_NAMES says ' + ROUND_NAMES[i]
+    )
+  }
+})
+
+test('every round in the pool and the finale is a real round', () => {
+  for (const id of ROUND_POOL) assert.ok(ROUND_NAMES[id] !== undefined, 'pool round ' + id + ' has no name')
+  assert.ok(ROUND_NAMES[FINALE_ROUND] !== undefined)
+  assert.ok(!(ROUND_POOL as readonly number[]).includes(FINALE_ROUND), 'the finale must not also be a pool round')
+  assert.equal(ROUND_DIFFICULTY.length, ROUND_NAMES.length, 'every round needs a difficulty')
 })
