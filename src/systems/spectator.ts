@@ -115,7 +115,9 @@ export function eliminate(): void {
   play('eliminated')
   say('you_lose')
   emitEliminated(Math.round(roundClockMs()))
-  void sendTo(LEDGE)
+  // Knocked out, then dumped on the ledge: the emote plays after the move so it is not cut off by
+  // the teleport, and it is what tells the rest of the room what just happened to you.
+  void sendTo(LEDGE).then(() => triggerEmote({ predefinedEmote: 'knockOut' }))
   // Deliberately NOT frozen. Being locked in place for the rest of a round is the least social
   // thing this game could do, and spectating is meant to be its heart. The ledge is 9m above the
   // arena and 10m clear of it, so a spectator can wander and cheer but cannot rejoin the round.

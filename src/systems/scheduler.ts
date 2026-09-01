@@ -54,6 +54,7 @@ import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds, recordFinaleWin, finaleWinCount } from './records'
 import { titleFor } from '../lib/titles'
+import { podiumShot, cameraSystem } from './camera'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
@@ -116,6 +117,7 @@ export function setupScheduler(roundList: Round[]): void {
   const me = getPlayer()
   if (me && me.name) setName(myAddress(), me.name)
 
+  engine.addSystem(cameraSystem)
   engine.addSystem(schedulerSystem)
 }
 
@@ -415,6 +417,10 @@ function schedulerSystem(dt: number): void {
     } else {
       spectator.sendToLobby()
     }
+
+    // The curtain call. Everyone gets the shot, not only the three on the steps - the point of a
+    // podium is that the room is looking at it.
+    if (cycleEnd) podiumShot()
   }
 
   active.tick(dt, SLOT_SECONDS, false)
