@@ -130,6 +130,15 @@ export function cheer(): void {
   emitCheer(emote)
 }
 
+/**
+ * A chosen reaction, from the results card. Plays locally and goes on the bus so everyone else's
+ * feed sees it - and so it counts towards the crowd's hype like any other cheer.
+ */
+export function react(emote: 'disco' | 'clap' | 'shrug'): void {
+  void triggerEmote({ predefinedEmote: emote })
+  emitCheer(emote)
+}
+
 export function initSpectator(): void {
   // Other players' cheers already animate their own avatars over the network; this just keeps the
   // channel wired so the HUD can react to a crowd reacting.

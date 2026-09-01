@@ -22,7 +22,8 @@
 
 import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
-import { cheer } from '../systems/spectator'
+import { cheer, react } from '../systems/spectator'
+import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
 import { LIVES_PER_ROUND } from '../config'
@@ -120,6 +121,44 @@ function Toasts() {
   )
 }
 
+/**
+ * Three reactions on the results card. Fifteen seconds of standings is dead air otherwise, and a
+ * room that can react to a result together is the difference between a scoreboard and a party.
+ */
+function Reactions() {
+  const buttons: { label: string; emote: 'disco' | 'clap' | 'shrug'; color: Color4 }[] = [
+    { label: 'DANCE', emote: 'disco', color: C.cyan },
+    { label: 'CLAP', emote: 'clap', color: C.yellow },
+    { label: 'SHRUG', emote: 'shrug', color: C.pink }
+  ]
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '50%', left: '25%' },
+        width: '50%',
+        height: 70,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        display: hud.phase === 'results' ? 'flex' : 'none'
+      }}
+    >
+      {buttons.map((b) => (
+        <Button
+          key={b.label}
+          value={b.label}
+          variant="primary"
+          fontSize={24}
+          color={C.navy}
+          onMouseDown={() => react(b.emote)}
+          uiTransform={{ width: '30%', height: 60 }}
+          uiBackground={shape(UI_TEX.pill, b.color)}
+        />
+      ))}
+    </UiEntity>
+  )
+}
+
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
@@ -171,6 +210,7 @@ function Hud() {
       <PlayBanner />
       <Splash />
       <Toasts />
+      <Reactions />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}
