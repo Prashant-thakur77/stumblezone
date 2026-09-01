@@ -66,6 +66,18 @@ export const LEDGE = { x: 32, y: 36, z: 8 }
 /** Where players stand between rounds. */
 export const LOBBY = { x: 32, y: 20, z: 7 }
 
+/**
+ * Standing spots on the podium steps, tallest first. Rank r of the cycle stands at PODIUM_SPOTS[r].
+ *
+ * Lives in config rather than lobby.ts because the scheduler needs it and lobby.ts already imports
+ * the scheduler - putting it there would close an import cycle. It is pure data either way.
+ */
+export const PODIUM_SPOTS = [
+  { x: 32, y: 21.4, z: 4 },
+  { x: 29, y: 21.0, z: 4 },
+  { x: 35, y: 20.7, z: 4 }
+] as const
+
 // --- Palette ----------------------------------------------------------------
 // Chunky, bright, toy-plastic. Fruit colours are deliberately far apart in hue
 // so they stay distinguishable on a small screen in bright sunlight.

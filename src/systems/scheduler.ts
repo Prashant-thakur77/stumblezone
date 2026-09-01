@@ -7,14 +7,23 @@
 
 import { engine } from '@dcl/sdk/ecs'
 import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../lib/schedule'
-import { INTRO_SECONDS, GET_READY_SECONDS, PLAY_SECONDS, ROUND_COUNT, ROUND_NAMES, SLOT_SECONDS } from '../config'
+import {
+  INTRO_SECONDS,
+  GET_READY_SECONDS,
+  PLAY_SECONDS,
+  ROUND_COUNT,
+  ROUND_NAMES,
+  SLOT_SECONDS,
+  PODIUM_SPOTS
+} from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
 import { resolveBanner } from '../lib/banner'
 import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
-import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
+import { award, standings, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
+import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds } from './records'
 import { play, setMusic, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
@@ -216,7 +225,8 @@ function schedulerSystem(dt: number): void {
 
     // One announcer line per result, most specific wins: a sole-survivor win beats a new best,
     // which beats plain qualification. The eliminated heard "you lose" when they fell.
-    if (!spectatingOnly) {
+    const onPodium = roundIndex(slot) === ROUND_COUNT - 1 && standings(3).some((s) => s.address === myAddress())
+    if (!spectatingOnly && !onPodium) {
       const wonOutright = survived && seen.size > 1 && eliminated.size === seen.size - 1
       if (wonOutright) say('congratulations')
       else if (survived && beatIt) say('new_highscore')
@@ -232,7 +242,21 @@ function schedulerSystem(dt: number): void {
         : formatSeconds(survivedMs) + '  ·  best ' + formatSeconds(best(hud.roundName))
 
     spectator.releaseInput()
-    spectator.sendToLobby()
+
+    // The cycle's celebration peak: after the finale, the podium. Each client moves only itself -
+    // rank comes from the shared crown tally, so every client agrees who stands where and everyone
+    // sees the same three avatars arrive on the steps.
+    const cycleEnd = roundIndex(slot) === ROUND_COUNT - 1
+    const rank = cycleEnd ? standings(3).findIndex((s) => s.address === myAddress()) : -1
+    if (rank >= 0) {
+      const spot = PODIUM_SPOTS[rank]
+      void spectator.sendTo({ x: spot.x, y: spot.y, z: spot.z })
+      void triggerEmote({ predefinedEmote: rank === 0 ? 'raiseHand' : 'clap' })
+      setConfetti(true)
+      say('congratulations')
+    } else {
+      spectator.sendToLobby()
+    }
   }
 
   active.tick(dt, SLOT_SECONDS, false)
