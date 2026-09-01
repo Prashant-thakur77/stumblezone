@@ -1,10 +1,11 @@
 # Stumblezone
 
-**A four-round party gauntlet that never stops.** Walk in at any moment, survive the round, win crowns.
+**A four-act party gauntlet that never stops.** Walk in at any moment, survive the round, win crowns.
 Built for the [Decentraland Friendzone Mobile Buildathon](https://dorahacks.io/hackathon/friendzone).
 
-> **Play:** `/goto <world>` in the Decentraland mobile app.
-> *(World name pending — see [docs/DEPLOY-SETUP.md](docs/DEPLOY-SETUP.md).)*
+> **Play it:** open the Decentraland mobile app and go to **`justchatting.dcl.eth`**, or tap
+> <https://decentraland.org/jump/?realm=justchatting.dcl.eth>. A round starts every two minutes,
+> around the clock. No lobby, no queue, no minimum player count.
 
 ---
 
@@ -13,12 +14,18 @@ Built for the [Decentraland Friendzone Mobile Buildathon](https://dorahacks.io/h
 One arena. Four Fall Guys-style rounds, cycling forever on a fixed schedule. A new round starts
 **every two minutes**, whether anyone is watching or not.
 
+**Six rounds, four acts.** Each show draws three rounds from the pool below — seeded by the show
+number, ordered easy to hard, never repeating inside a show — and always ends on Hex-Drop, the only
+round whose floor genuinely runs out. Two shows in a row are two different cards.
+
 | Round | The idea |
 |---|---|
 | **Perfect Match** | A 5×5 grid flashes colours, then blanks. A colour is called. Stand on it or the floor drops. Three waves, shorter memory each time. |
 | **Sweeper Gates** | Walls with a door-sized gap sweep the platform, faster each wave. Find the gap. |
 | **Tip Toe** | Half the bridge tiles are fake and vanish forever once stepped on. Whoever leads sacrifices themselves to reveal the path. |
-| **Hex-Drop** | Two stacked layers of tiles that fall away seconds after you touch them. Last one standing takes the round. |
+| **Spotlight** | The stage goes dark and roaming pools of light hunt you across it. Linger in one and it costs a heart. A third light and a speed-up at 45s. |
+| **Jump Bar** | One low beam sweeps the stage; jump it. At 50s a second beam appears turning the other way. |
+| **Hex-Drop** *(finale)* | Two stacked layers of tiles that fall away seconds after you touch them. Last one standing takes the show. |
 
 ## What it looks and sounds like
 
@@ -51,6 +58,28 @@ Designed for touch from the first commit, not ported to it.
 - Generous gaps and timers tuned for touch imprecision; the memory phase never drops below 2.5s.
 - Mobile tested from day one via `npm run start -- --mobile`, not in a pass at the end.
 
+## Beyond the format
+
+The genre gives you rounds. These are the things layered on top that make it a *show*:
+
+- **A live feed.** "Alice is OUT", "Bob finished 2nd", "Cy cheers!" — three lines in the corner,
+  gone in four seconds. A number tells you the size of the field; a name tells you who you are racing.
+- **A hype meter the crowd controls.** Five spectator cheers inside ten seconds and the stadium
+  erupts: a roar, confetti over the arena and a line on the board. It is the only way an eliminated
+  player changes what happens on screen, and it is entirely in their hands.
+- **Reactions on the results card** — DANCE / CLAP / SHRUG, so the fifteen seconds of standings are
+  a room reacting together rather than dead air.
+- **Worn cosmetics.** The show leader wears a crown on their head; anyone on a two-round qualifying
+  streak wears a star over their name tag. Both are computed identically on every client from the
+  same messages, so everybody sees the same crown on the same head with nothing synced.
+- **Rivalries.** "You outlasted Alice by 4s" — the nearest player to you on the clock, named.
+- **Titles** — PIONEER, IRONFOOT, SURVIVOR, CHAMPION — under your standing.
+- **A daily challenge** worth three crowns, a pure function of the UTC day, so it needs no storage
+  and every client shows the same one.
+- **The Golden Show**: every fourth show pays double crowns, with a gold card, a gold jumbotron and
+  a countdown in the lobby.
+- **A curtain call** — a six-second crane shot of the podium for everyone after the finale.
+
 ### 2. Social value
 The buildathon rules exclude single-player experiences, and the mobile client **has no proximity
 voice chat** — so every social feature here works over text, emotes and shared spectacle.
@@ -59,11 +88,19 @@ voice chat** — so every social feature here works over text, emotes and shared
   everyone sees. They are deliberately *not* frozen — being locked in place for the rest of a round
   is the least social thing this game could do. The ledge is 9m above and 10m clear of the arena, so
   a spectator can wander and heckle but cannot rejoin the round.
+- **The cheer button does something.** Five cheers in ten seconds sets the crowd off for everyone —
+  spectators are participants, not an audience.
+- **Reactions on the results card** and **a named live feed** of who fell, who finished and who cheered.
 - **Tip Toe's sacrificial pathfinding** — the leader burns fake tiles for everyone behind them.
-- **A live crown board** in the lobby, and an "N alive" counter that makes the field visible.
+- **A live crown board** in the lobby, a named field readout ("IN: you, Alice, Bob +2"), and a
+  crown worn by whoever leads the show.
 - Shared spectacle: everyone in the World runs the same round at the same instant.
 
 ### 3. Mobile UX and accessibility
+- **Every rounded plate in the HUD is a tinted PNG, not a `borderRadius`** — the mobile client
+  ignores that property, so a HUD built the obvious way comes out as hard rectangles on the one
+  device this scene is for. Same for the things mobile does not support at all: no particle systems,
+  no dynamic lights, no nine-slice textures, no input modifiers.
 - Countdown at 64px dead centre; round name, lives and alive-count on dark plates that survive any
   background.
 - UI kept clear of the device safe area **and** of the client's own on-screen controls — nothing is
@@ -71,7 +108,9 @@ voice chat** — so every social feature here works over text, emotes and shared
 - Onboarding is three lines on a sign at spawn. It is readable in the four seconds before a round.
 
 ### 4. Performance and optimisation
-- **448 entities total — 9% of the mobile soft limit** (4,800) and 7% of the hard limit.
+- **Under 10% of the mobile entity soft limit** (4,800), with every round's pool built once at boot.
+- **`npm run budget`** prints the asset weight and fails over the limits: currently **3.6 MB**, 1.5%
+  of this scene's 240 MB allowance.
 - **Tiles are pooled, never respawned.** All 448 entities are created once at scene start and reset
   between rounds, so a World running unattended for a week has a flat entity count.
 - SDK primitives for everything with many copies; fourteen small CC0 GLBs (2 MB, ~25k triangles
@@ -87,6 +126,12 @@ solo mode** — and the scheduling trick underneath it: the entire round schedul
 UTC time, so there is no server, no host, and no authority to fail.
 
 ### 6. Retention and discovery value
+- **A daily challenge** worth three crowns — a reason to come back tomorrow that needs no account.
+- **The Golden Show** every fourth show, with a countdown in the lobby — a reason to stay another
+  twenty minutes.
+- **A different card every show**: three of five pool rounds, drawn by seed, so the second show a
+  judge plays is not the first one again.
+- **Titles and streaks** to chase that are not just a number.
 - Crowns accumulate across the session; the board is the first thing you see in the lobby.
 - **Personal bests** per round, so a judge walking in alone at 3am still has something to beat.
 - Only 29% of each cycle is intro and results — the rest is playing.
@@ -102,7 +147,8 @@ Four rounds share one tile system and one scheduler. Roughly 60% of the code is 
 
 ## The architecture, in one paragraph
 
-**There is no backend.** Round scheduling is `slot = floor(utc / 120)`, `round = slot % 4`,
+**There is no backend.** Round scheduling is `slot = floor(utc / 120)`, `act = slot % 4`,
+`round = act < 3 ? showRounds(show)[act] : Hex-Drop`,
 `seed = hash(slot)` — computed identically on every client. Every layout, colour, wall speed and gap
 position derives from that seed through a seeded PRNG, so a player joining mid-round reconstructs the
 exact board everyone else sees without exchanging a message. The only network traffic is what players
@@ -124,8 +170,9 @@ The version is pinned in `package.json` via Volta.
 
 ```bash
 npm install
-npm test          # 24 unit tests over the scheduler, PRNG and layout generators
+npm test          # 70 unit tests over the scheduler, PRNG, layouts and show rules
 npm run build     # bundle + type check
+npm run budget    # asset weight against the scene's limits
 npm run start     # desktop preview
 npm run start -- --mobile   # prints a QR to open the scene on your phone
 ```
@@ -139,15 +186,23 @@ src/lib/        pure logic, no SDK imports, fully unit-tested
   prng.ts       splitmix32 hash + mulberry32
   schedule.ts   UTC slot math - the thing that replaces the server
   layouts.ts    seeded per-round layouts
-src/arena/      tile pool, lobby, and the four rounds
-src/systems/    scheduler and spectator/elimination
+  spotlight.ts  roaming-light paths and the linger timer
+  jumbar.ts     beam pacing
+  feed.ts       the corner feed's expiry rules
+  hype.ts       the crowd meter
+  daily.ts      the day's challenge
+  field.ts      field readout and rivalries
+  titles.ts     PIONEER / IRONFOOT / SURVIVOR / CHAMPION
+  streak.ts     qualifying streaks
+src/arena/      tile pool, lobby, the shared round stage, and the six rounds
+src/systems/    scheduler, spectator, cosmetics, camera, feed, hype
 src/net/        message bus wrapper and session crown tally
 src/ui/         mobile HUD
 ```
 
 ## Tests
 
-`npm test` runs 31 tests over the parts where a bug is invisible until a live round breaks:
+`npm test` runs 70 tests over the parts where a bug is invisible until a live round breaks:
 
 - **Clock skew** — samples 1,200 points across a slot and asserts two clients one second apart only
   disagree at the boundary. This is the evidence for shipping with no clock synchronisation.
@@ -156,6 +211,12 @@ src/ui/         mobile HUD
   that *every client agrees on* — no crash, no error, just a round nobody can finish.
 - **Perfect Match fairness** — every board, every seed, has at least four safe tiles so a crowd has
   somewhere to stand.
+- **Show variety** — every show for 50 shows draws three distinct pool rounds, ordered easy to hard,
+  ending on the finale, and shows differ from one another.
+- **Spotlight paths stay on the stage** — every light, every quarter-second, for the whole round.
+  A Lissajous figure whose two axes each swing the full radius would leave the disc at the corners.
+- **The UI never uses `borderRadius`** and every texture it names exists on disk. Both are silent
+  failures on a phone: no error, just a flat rectangle or an invisible plate.
 - **Geometry and pacing invariants** — the kill plane must clear every standable surface, every
   round must fit inside the scene bounds, wall pacing must stay within touch reaction time, and the
   call window must be long enough to cross the board. Each of these encodes a bug that was found
@@ -164,9 +225,9 @@ src/ui/         mobile HUD
 
 ## Roadmap
 
-Cross-session crown persistence (Decentraland Multiplayer Server or a small signed-fetch service),
-daily challenges, and ghost times are designed for but deliberately not depended on — see
-ARCHITECTURE.md Layer 2. Post-buildathon, this is a candidate for the DCL Regenesis Labs Grants
+Cross-session crown persistence (Decentraland Multiplayer Server or a small signed-fetch service)
+and ghost times are designed for but deliberately not depended on — see ARCHITECTURE.md Layer 2.
+Daily challenges shipped without needing any of it. Post-buildathon, this is a candidate for the DCL Regenesis Labs Grants
 Program and the Creator Success Program.
 
 ## Licence and credits

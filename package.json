@@ -8,7 +8,9 @@
     "build": "sdk-commands build",
     "upgrade-sdk": "npm install --save-dev @dcl/sdk@latest",
     "upgrade-sdk:next": "npm install --save-dev @dcl/sdk@next",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "budget": "node tools/budget.mjs",
+    "ui": "node tools/make-ui.mjs"
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.27.0",

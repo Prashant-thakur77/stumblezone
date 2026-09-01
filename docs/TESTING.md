@@ -97,3 +97,50 @@ Most useful, in order:
 
 Two-player testing is worth doing once it works solo — a second phone, or a friend, on the same
 World. Elimination, the alive counter and the crown board only really exercise with a crowd.
+
+---
+
+## Phone checklist for the "beyond Fall Guys" features
+
+Run `npm run start -- --mobile` and scan the QR. Everything below is a mobile-only failure mode —
+none of it can be caught in the desktop preview.
+
+**HUD shapes (the reason this pass exists)**
+- [ ] Every pill and card is *rounded*. A hard rectangle means a texture failed to load — check the
+      console for `images/ui/*.png` and re-run `npm run ui`.
+- [ ] Each plate has a dark edge under it, offset down-right. No edge means the shadow copy is
+      drawing on top rather than underneath.
+- [ ] Life dots are circles, not squares.
+- [ ] The CHEER button is a rounded pill and is tappable with a thumb.
+
+**Feed, hype and reactions**
+- [ ] Get eliminated on one device and confirm the other device shows "<name> is OUT" within a
+      second, and that it disappears after four.
+- [ ] Cheer five times in ten seconds from the ledge: the crowd roars, confetti fires, and
+      "THE CROWD IS GOING WILD" appears. Then confirm a sixth cheer does *not* fire it again.
+- [ ] On the results card, tap DANCE / CLAP / SHRUG. Your avatar plays the emote and the other
+      device's feed says you cheered.
+
+**Rounds**
+- [ ] Jump Bar: the beam is jumpable from a standing jump at the start and still jumpable at the end.
+      At 50s a second beam appears turning the other way, and it does not take a heart before it is
+      visible.
+- [ ] Spotlight: the stage is clearly darker than the lights. Standing in one turns it red for about
+      half a second and ticks before it takes a heart. Stepping out cancels it.
+- [ ] Both rounds: walk to the edge of the disc and confirm you can fall off it.
+- [ ] Confirm the disc is *gone* during Tip Toe and Hex-Drop — an invisible collider left behind
+      would let you stand in mid-air.
+
+**Show rules**
+- [ ] Watch two consecutive shows and confirm the three acts differ between them, and that both end
+      on Hex-Drop.
+- [ ] The intro card tag reads "ROUND 2 · SURVIVAL", not a round id.
+- [ ] On a Golden Show the card, the top tag and the jumbotron are gold, and the lobby board says
+      "GOLDEN SHOW NOW - DOUBLE CROWNS".
+- [ ] The lobby board shows "TODAY: <challenge>" and a countdown to the next Golden Show.
+
+**Cosmetics and camera**
+- [ ] With two accounts, confirm the show leader wears a crown on *both* screens.
+- [ ] Qualify twice in a row and confirm a star appears over your name tag on the other device.
+- [ ] After a finale, the podium crane shot plays for about six seconds and control comes back.
+      If the camera sticks, that is `virtualCameraEntity` not being cleared — a hard blocker.
