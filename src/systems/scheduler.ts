@@ -46,6 +46,7 @@ import { feed, toast } from './feed'
 import { hype } from './hype'
 import { Streaks } from '../lib/streak'
 import { refreshCosmetics } from './cosmetics'
+import { fieldLine, rivalry } from '../lib/field'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -72,6 +73,8 @@ let finishers = 0
 let wildUntil = 0
 /** Consecutive qualifications, for the star over a hot player's name tag. */
 const streaks = new Streaks()
+/** How long each eliminated player lasted this round, for the rivalry line. */
+let outMs = new Map<string, number>()
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -82,6 +85,7 @@ export function setupScheduler(roundList: Round[]): void {
   onEliminated((p, isSelf) => {
     seen.add(p.address)
     eliminated.add(p.address)
+    outMs.set(p.address, p.ms)
     // Your own elimination already has a stinger, a splash and an emote. Other people's do not.
     if (!isSelf) toast(displayName(p.address) + ' is OUT')
   })
@@ -107,6 +111,7 @@ function beginSlot(slot: number): void {
   scored = false
   seen = new Set<string>([myAddress()])
   eliminated = new Set<string>()
+  outMs = new Map<string, number>()
   firstFinisher = ''
 
   setConfetti(false)
@@ -170,6 +175,9 @@ function schedulerSystem(dt: number): void {
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()
   hud.alive = Math.max(1, seen.size - eliminated.size)
+  // Names, not just a count: knowing you are down to you and Alice is the whole tension.
+  const stillIn = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).map(displayName)
+  hud.fieldLine = fieldLine([...(!hud.out && !spectatingOnly ? ['you'] : []), ...stillIn])
 
   // Your place in the current show. This is the line that makes four rounds feel like one evening.
   const rank = showRank(myAddress())
@@ -331,6 +339,16 @@ function schedulerSystem(dt: number): void {
       : beatIt
         ? 'New best! ' + formatSeconds(survivedMs)
         : formatSeconds(survivedMs) + '  ·  best ' + formatSeconds(best(hud.roundName))
+
+    // One named comparison beats any number of seconds. Whoever finished nearest you on the clock
+    // is the person you will talk to about this round.
+    if (!spectatingOnly && seen.size > 1) {
+      const others = [...seen]
+        .filter((a) => a !== myAddress())
+        .map((a) => ({ name: displayName(a), outMs: outMs.has(a) ? (outMs.get(a) as number) : null }))
+      const line = rivalry({ name: 'you', outMs: survived ? null : Math.round(outAt * 1000) }, others)
+      if (line !== '') hud.resultDetail += '  ·  ' + line
+    }
 
     spectator.releaseInput()
 

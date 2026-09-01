@@ -30,6 +30,8 @@ export type HudState = {
   toasts: string[]
   /** How hot the crowd is, 0 to 1. Spectators drive it by cheering. */
   hype: number
+  /** Who is still standing, by name: "IN: you, Alice, Bob +2". */
+  fieldLine: string
 }
 
 export const hud: HudState = {
@@ -47,7 +49,8 @@ export const hud: HudState = {
   roundClock: 0,
   showLine: '',
   toasts: [],
-  hype: 0
+  hype: 0,
+  fieldLine: ''
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

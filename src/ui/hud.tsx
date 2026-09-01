@@ -202,7 +202,14 @@ function Hud() {
       />
 
       {/* Top right: the field, and your standing in the show. */}
-      <Pill text={hud.alive + ' IN'} width={130} position={{ top: 16, right: 16 }} color={C.cyan} textColor={C.navy} />
+      <Pill
+        text={hud.fieldLine || hud.alive + ' IN'}
+        width={340}
+        position={{ top: 16, right: 16 }}
+        color={C.cyan}
+        textColor={C.navy}
+        fontSize={20}
+      />
       <Pill text={hud.showLine} width={200} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />
 
       <IntroCard />

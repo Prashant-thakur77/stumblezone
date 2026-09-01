@@ -26,6 +26,8 @@ let relocating = false
 let fallHandler: (() => void) | null = null
 /** True only while a round's play phase is running. Falls outside it are free rides home. */
 let roundLive = false
+/** When the whistle went, so an elimination can say how long it lasted. */
+let liveSinceMs = 0
 
 /** Height of the lowest surface a player can legitimately stand on this round. */
 let floorY = ARENA_Y
@@ -40,6 +42,12 @@ export function setFloorY(y: number): void {
 
 export function setRoundLive(live: boolean): void {
   roundLive = live
+  if (live) liveSinceMs = Date.now()
+}
+
+/** Milliseconds since the round went live, for elimination timing. Zero before the whistle. */
+export function roundClockMs(): number {
+  return liveSinceMs === 0 ? 0 : Date.now() - liveSinceMs
 }
 
 export function livesLeft(): number {
@@ -106,7 +114,7 @@ export function eliminate(): void {
   out = true
   play('eliminated')
   say('you_lose')
-  emitEliminated()
+  emitEliminated(Math.round(roundClockMs()))
   void sendTo(LEDGE)
   // Deliberately NOT frozen. Being locked in place for the rest of a round is the least social
   // thing this game could do, and spectating is meant to be its heart. The ledge is 9m above the

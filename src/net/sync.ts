@@ -15,7 +15,7 @@ import { getPlayer } from '@dcl/sdk/players'
 
 const bus = new MessageBus()
 
-export type Eliminated = { slot: number; address: string }
+export type Eliminated = { slot: number; address: string; ms: number }
 export type Finished = { slot: number; address: string; ms: number }
 export type TileStep = { slot: number; address: string; tileId: number }
 export type Cheer = { slot: number; address: string; emote: string }
@@ -51,8 +51,9 @@ function on<T extends { slot: number; address: string }>(
   })
 }
 
-export function emitEliminated(): void {
-  bus.emit('eliminated', { slot: currentSlot(), address: myAddress() } as Eliminated)
+/** `ms` is how long the sender lasted in the round, so everyone can compute rivalries locally. */
+export function emitEliminated(ms: number): void {
+  bus.emit('eliminated', { slot: currentSlot(), address: myAddress(), ms } as Eliminated)
 }
 export function onEliminated(cb: (p: Eliminated, isSelf: boolean) => void): void {
   on<Eliminated>('eliminated', cb)
