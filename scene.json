@@ -75,5 +75,8 @@
   },
   "skyboxConfig": {
     "fixedTime": 57600
+  },
+  "worldConfiguration": {
+    "name": "justchatting.dcl.eth"
   }
 }
