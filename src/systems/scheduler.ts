@@ -10,6 +10,7 @@ import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../lib
 import { INTRO_SECONDS, GET_READY_SECONDS, PLAY_SECONDS, ROUND_NAMES, SLOT_SECONDS } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
+import { resolveBanner } from '../lib/banner'
 import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
 import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
@@ -161,6 +162,17 @@ function schedulerSystem(dt: number): void {
     if (spectator.isOut() && outAt === 0) outAt = playElapsed
 
     active.tick(dt, playElapsed, true)
+
+    // Rounds write whatever suits their own state machine; this has the final word, so no round
+    // can tell an eliminated player they are still doing well.
+    const resolved = resolveBanner({
+      out: spectator.isOut(),
+      spectatingOnly,
+      banner: hud.banner,
+      subtitle: hud.subtitle
+    })
+    hud.banner = resolved.banner
+    hud.subtitle = resolved.subtitle
     return
   }
 

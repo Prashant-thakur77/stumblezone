@@ -19,7 +19,8 @@ import {
   perfectMatchWaveSeconds,
   PM_WAVE_COUNT,
   PM_BLANK_SECONDS,
-  PM_CALL_SECONDS
+  PM_CALL_SECONDS,
+  PM_REVEAL_SECONDS as REVEAL_SECONDS
 } from '../../lib/layouts'
 import {
   ARENA_CENTER_X,
@@ -44,6 +45,7 @@ let starts: number[] = []
 let judged = -1
 let shown = -1
 let warned = -1
+let revealed = -1
 
 function safeSpot(wave: PerfectMatchWave): Vector3 {
   const i = wave.fruits.indexOf(wave.target)
@@ -84,6 +86,7 @@ export const perfectMatch: Round = {
     judged = -1
     shown = -1
     warned = -1
+    revealed = -1
     grid.setVisible(true)
     grid.resetAll()
     grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
@@ -104,7 +107,9 @@ export const perfectMatch: Round = {
     const { index, t } = locate(elapsed)
     // Past the last wave the round is simply won - hold the board and let the clock run out.
     if (index >= PM_WAVE_COUNT || elapsed > starts[PM_WAVE_COUNT - 1] + perfectMatchWaveSeconds(PM_WAVE_COUNT - 1)) {
-      setBanner('SURVIVED', 'Hold on until the round ends')
+      // The scheduler's banner resolver replaces this for anyone who is out, so it can never claim
+      // an eliminated player made it to the end.
+      setBanner('ALL WAVES CLEARED', 'Hold on until the round ends')
       return
     }
 
@@ -138,13 +143,23 @@ export const perfectMatch: Round = {
           if (wave.fruits[i] !== wave.target) grid.warn(i, TILE_WARNING)
         }
       }
+    } else if (t < judgeAt + REVEAL_SECONDS) {
+      // The reveal. Every tile shows its colour again for a beat before the wrong ones go, so you
+      // find out whether you were right by looking at the floor rather than by falling through it.
+      // This is the moment the round is actually about, and it was missing entirely.
+      if (revealed < index) {
+        revealed = index
+        for (let i = 0; i < wave.fruits.length; i++) {
+          grid.setColor(i, FRUIT_COLORS[wave.fruits[i]], wave.fruits[i] === wave.target ? 1.8 : 0)
+        }
+      }
+      setBanner('', 'It was ' + FRUIT_NAMES[wave.target])
     } else if (judged < index) {
       judged = index
       for (let i = 0; i < wave.fruits.length; i++) {
         if (wave.fruits[i] !== wave.target) grid.sink(i)
-        else grid.setColor(i, FRUIT_COLORS[wave.target], 1.6)
       }
-      setBanner('', waveLabel + ' survived')
+      setBanner('', waveLabel + ' cleared')
     }
   },
 

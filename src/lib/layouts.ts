@@ -18,12 +18,14 @@ export const PM_WAVE_COUNT = FRUIT_KINDS.length
 /** Seconds each wave spends on: blank board, colour called, then settling after the drop. */
 export const PM_BLANK_SECONDS = 1
 export const PM_CALL_SECONDS = 6
-export const PM_SETTLE_SECONDS = 3
+/** The beat where every tile shows its colour again, before the wrong ones drop. */
+export const PM_REVEAL_SECONDS = 1.2
+export const PM_SETTLE_SECONDS = 1.8
 
 /** Wall-clock length of one wave, which shortens as the memory phase does. */
 export function perfectMatchWaveSeconds(wave: number): number {
   const w = Math.min(wave, MEMORY_MS.length - 1)
-  return MEMORY_MS[w] / 1000 + PM_BLANK_SECONDS + PM_CALL_SECONDS + PM_SETTLE_SECONDS
+  return MEMORY_MS[w] / 1000 + PM_BLANK_SECONDS + PM_CALL_SECONDS + PM_REVEAL_SECONDS + PM_SETTLE_SECONDS
 }
 
 /** Cumulative start time of each wave, so `tick` can locate itself from elapsed seconds alone. */
