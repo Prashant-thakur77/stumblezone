@@ -30,7 +30,12 @@ export function refreshCosmetics(leaderAddress: string, hot: string[]): void {
     crownOn = leaderAddress
     if (isAvatar(leaderAddress)) {
       crownEntity = engine.addEntity()
-      GltfContainer.create(crownEntity, { src: 'assets/Models/crown.glb' })
+      // No colliders on anything worn: a crown you can bump into would shove players around.
+      GltfContainer.create(crownEntity, {
+        src: 'assets/Models/crown.glb',
+        visibleMeshesCollisionMask: 0,
+        invisibleMeshesCollisionMask: 0
+      })
       Transform.create(crownEntity, { position: Vector3.create(0, 0.25, 0), scale: Vector3.create(0.4, 0.4, 0.4) })
       AvatarAttach.create(crownEntity, { avatarId: leaderAddress, anchorPointId: AvatarAnchorPointType.AAPT_HEAD })
     }
@@ -46,7 +51,11 @@ export function refreshCosmetics(leaderAddress: string, hot: string[]): void {
   for (const address of want) {
     if (halos.has(address)) continue
     const e = engine.addEntity()
-    GltfContainer.create(e, { src: 'assets/Models/star.glb' })
+    GltfContainer.create(e, {
+      src: 'assets/Models/star.glb',
+      visibleMeshesCollisionMask: 0,
+      invisibleMeshesCollisionMask: 0
+    })
     Transform.create(e, { position: Vector3.create(0, 0.5, 0), scale: Vector3.create(0.3, 0.3, 0.3) })
     AvatarAttach.create(e, { avatarId: address, anchorPointId: AvatarAnchorPointType.AAPT_NAME_TAG })
     halos.set(address, e)
