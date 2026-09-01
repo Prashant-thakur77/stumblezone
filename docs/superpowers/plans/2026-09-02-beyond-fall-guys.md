@@ -32,7 +32,7 @@
 **Interfaces:**
 - Produces: `Pill`, `Card`, `Dots` keep their props; new `UI_TEX = { pill, card, dot }` string paths exported from `parts.tsx`; `Plate({ tex, color, width, height, position?, children })` internal helper.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/ui-manifest.test.ts
@@ -61,9 +61,9 @@ test('the textures are real PNGs', () => {
 })
 ```
 
-- [ ] **Step 2: Run it** — `npm test` → FAIL (`images/ui/pill.png` missing, `borderRadius` found).
+- [x] **Step 2: Run it** — `npm test` → FAIL (`images/ui/pill.png` missing, `borderRadius` found).
 
-- [ ] **Step 3: Write the texture generator**
+- [x] **Step 3: Write the texture generator**
 
 ```js
 // tools/make-ui.mjs — writes the HUD's plate shapes as white RGBA PNGs the UI tints at runtime.
@@ -118,7 +118,7 @@ console.log('wrote images/ui/{pill,card,dot}.png')
 
 Run `node tools/make-ui.mjs`.
 
-- [ ] **Step 4: Rewrite parts.tsx on textures**
+- [x] **Step 4: Rewrite parts.tsx on textures**
 
 Replace the whole file body after the imports with:
 
@@ -246,9 +246,9 @@ export function Dots(props: DotsProps) {
 
 Then in `hud.tsx` the CHEER button: replace `uiTransform={{ width: '100%', height: 64, borderRadius: 32, borderWidth: 3, borderColor: C.shadow }} uiBackground={{ color: C.yellow }}` with `uiTransform={{ width: '100%', height: 64 }} uiBackground={{ texture: { src: UI_TEX.pill }, textureMode: 'stretch', color: C.yellow }}` and import `UI_TEX` from `./parts`. Remove `R` from `theme.ts` and its comment line about radii. Update the header comment of hud.tsx ("Every plate is drawn from layout props - no textures" → "every plate is a tinted PNG because borderRadius is invisible on mobile").
 
-- [ ] **Step 5: Run** `node tools/make-ui.mjs && npm run build && npm test` → PASS (48 tests).
+- [x] **Step 5: Run** `node tools/make-ui.mjs && npm run build && npm test` → PASS (48 tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tools/make-ui.mjs images/ui src/ui tests/ui-manifest.test.ts
@@ -266,7 +266,7 @@ git commit -m "feat(ui): texture-based pills, cards and dots so the HUD renders 
 **Interfaces:**
 - Produces: `class Feed { push(text: string, nowMs: number): void; visible(nowMs: number): string[] }`, `FEED_TTL_MS = 4000`, `FEED_MAX = 3`. Exported singleton `feed` in `src/systems/scheduler.ts`? No — keep the instance in `src/systems/feed.ts`: `export const feed = new Feed()` plus `export function toast(text: string)` (uses `Date.now()`).
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 
 ```ts
 // tests/feed.test.ts
@@ -298,9 +298,9 @@ test('the same text twice in a row is shown once', () => {
 })
 ```
 
-- [ ] **Step 2: Run** → FAIL (module not found).
+- [x] **Step 2: Run** → FAIL (module not found).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 ```ts
 // src/lib/feed.ts — a short, self-expiring list of one-line events for the corner of the HUD.
@@ -358,9 +358,9 @@ and render `<Toasts />` after `<Splash />`.
 
 `scheduler.ts`: import `{ feed, toast }` from `./feed`, `displayName` is already imported. In `setupScheduler`: in `onEliminated((p, isSelf) => …)` add `if (!isSelf) toast(displayName(p.address) + ' is OUT')`; in `onFinished((p, isSelf) => …)` add `toast(displayName(p.address) + ' finished ' + ordinal(finishers))` with a module counter `let finishers = 0` incremented first and reset in `beginSlot`. In `schedulerSystem` first lines: `hud.toasts = feed.visible(now)`. In `src/systems/spectator.ts` `initSpectator`, replace the `onCheer(() => {})` placeholder with `onCheer((p, isSelf) => { if (!isSelf) toast(displayName(p.address) + ' cheers!') })` (import `toast` from `./feed`, `displayName` from `../net/crowns`).
 
-- [ ] **Step 4: Run** `npm run build && npm test` → PASS.
+- [x] **Step 4: Run** `npm run build && npm test` → PASS.
 
-- [ ] **Step 5: Commit** `git commit -am "feat: elimination feed toasts" && git add -A src/lib/feed.ts src/systems/feed.ts tests/feed.test.ts && git commit --amend --no-edit`
+- [x] **Step 5: Commit** `git commit -am "feat: elimination feed toasts" && git add -A src/lib/feed.ts src/systems/feed.ts tests/feed.test.ts && git commit --amend --no-edit`
 
 ---
 
@@ -373,7 +373,7 @@ and render `<Toasts />` after `<Splash />`.
 **Interfaces:**
 - Produces: `class Hype { cheer(nowMs): void; level(nowMs): number /*0..1*/; consumeWild(nowMs): boolean }`, `HYPE_WINDOW_MS 10000`, `HYPE_CHEERS 5`, `HYPE_COOLDOWN_MS 20000`. `src/systems/hype.ts` exports `export const hype = new Hype()`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 
 ```ts
 // tests/hype.test.ts
@@ -402,9 +402,9 @@ test('five cheers in ten seconds goes wild exactly once until the cooldown passe
 })
 ```
 
-- [ ] **Step 2: Run** → FAIL.
+- [x] **Step 2: Run** → FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 ```ts
 // src/lib/hype.ts — the crowd's temperature. Cheers in a sliding window; enough of them and the stadium erupts.
@@ -459,7 +459,7 @@ else if (wildUntil !== 0 && wildUntil <= now && phase === 'play') { setConfetti(
 ```
 Module state `let wildUntil = 0`, reset in `beginSlot`. `state.ts`: `hype: number` initial 0. `hud.tsx`: below the SPECTATING/Dots pill: `<Pill text={'HYPE ' + '|'.repeat(Math.round(hud.hype * 5))} width={170} position={{ top: 72, left: 16 }} color={hud.hype >= 1 ? C.pink : C.plate} fontSize={20} show={hud.hype > 0} />`.
 
-- [ ] **Step 4: Run** build + test → PASS. **Step 5: Commit** `feat: hype meter - five cheers in ten seconds sets the crowd off`.
+- [x] **Step 4: Run** build + test → PASS. **Step 5: Commit** `feat: hype meter - five cheers in ten seconds sets the crowd off`.
 
 ---
 
@@ -467,7 +467,7 @@ Module state `let wildUntil = 0`, reset in `beginSlot`. `state.ts`: `hype: numbe
 
 **Files:** Modify `src/systems/spectator.ts` (export `react(emote)`), `src/ui/hud.tsx` (three Buttons in results).
 
-- [ ] **Step 1:** In `spectator.ts` add
+- [x] **Step 1:** In `spectator.ts` add
 ```ts
 /** A chosen reaction on the results card: played locally and broadcast so the feed shows it. */
 export function react(emote: 'disco' | 'clap' | 'shrug'): void {
@@ -475,8 +475,8 @@ export function react(emote: 'disco' | 'clap' | 'shrug'): void {
   emitCheer(emote)
 }
 ```
-- [ ] **Step 2:** In `hud.tsx` add a row shown only when `hud.phase === 'results'`, at `{ top: '48%', left: '25%' }`, width `50%`, height 70, `flexDirection: 'row'`, `justifyContent: 'space-around'`; three `Button`s `DANCE` / `CLAP` / `SHRUG` (`onMouseDown={() => react('disco')}` etc.), each `width: '30%'`, `height: 60`, `fontSize 24`, `color C.navy`, pill texture background tinted `C.cyan`, `C.yellow`, `C.pink`.
-- [ ] **Step 3:** build + test → PASS. Commit `feat(ui): DANCE / CLAP / SHRUG reactions on the results card`.
+- [x] **Step 2:** In `hud.tsx` add a row shown only when `hud.phase === 'results'`, at `{ top: '48%', left: '25%' }`, width `50%`, height 70, `flexDirection: 'row'`, `justifyContent: 'space-around'`; three `Button`s `DANCE` / `CLAP` / `SHRUG` (`onMouseDown={() => react('disco')}` etc.), each `width: '30%'`, `height: 60`, `fontSize 24`, `color C.navy`, pill texture background tinted `C.cyan`, `C.yellow`, `C.pink`.
+- [x] **Step 3:** build + test → PASS. Commit `feat(ui): DANCE / CLAP / SHRUG reactions on the results card`.
 
 ---
 
@@ -489,7 +489,7 @@ export function react(emote: 'disco' | 'clap' | 'shrug'): void {
 **Interfaces:**
 - Produces: `class Streaks { qualified(a: string): void; eliminated(a: string): void; streak(a: string): number; hot(min = 2): string[] }`; `refreshCosmetics(leader: string, hot: string[]): void`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/streak.test.ts
 import { test } from 'node:test'
@@ -507,7 +507,7 @@ test('qualifying builds a streak and elimination breaks it', () => {
   assert.deepEqual(s.hot(2), [])
 })
 ```
-- [ ] **Step 2:** Run → FAIL. **Step 3:** Implement:
+- [x] **Step 2:** Run → FAIL. **Step 3:** Implement:
 ```ts
 // src/lib/streak.ts — consecutive qualifications per player, for the halo over hot players' heads.
 export class Streaks {
@@ -555,7 +555,7 @@ export function refreshCosmetics(leaderAddress: string, hot: string[]): void {
 }
 ```
 `scheduler.ts`: module `const streaks = new Streaks()`; in the results block after awards: `for (const a of seen) eliminated.has(a) ? streaks.eliminated(a) : streaks.qualified(a)` (skip self when `spectatingOnly`), then `refreshCosmetics(leader(), streaks.hot())`; expose `export function myStreak() { return streaks.streak(myAddress()) }` for Task 12.
-- [ ] **Step 4:** build + test → PASS. **Step 5:** Commit `feat: leader crown and streak halo on avatars`.
+- [x] **Step 4:** build + test → PASS. **Step 5:** Commit `feat: leader crown and streak halo on avatars`.
 
 ---
 
@@ -568,7 +568,7 @@ export function refreshCosmetics(leaderAddress: string, hot: string[]): void {
 **Interfaces:**
 - Produces: `fieldLine(names: string[], max = 3): string` → `'IN: you, Alice, Bob +2'` (caller puts `'you'` first); `rivalry(me: { name: string; outMs: number | null }, others: { name: string; outMs: number | null }[]): string`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/field.test.ts
 import { test } from 'node:test'
@@ -589,7 +589,7 @@ test('rivalry picks the closest rival you outlasted, or who outlasted you', () =
   assert.equal(rivalry(me, []), '')
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:** Implement:
+- [x] **Step 2:** FAIL. **Step 3:** Implement:
 ```ts
 // src/lib/field.ts — who is still in, and who you were closest to. Names make an elimination personal.
 export function fieldLine(names: string[], max = 3): string {
@@ -618,7 +618,7 @@ export function rivalry(me: Out, others: Out[]): string {
 }
 ```
 `sync.ts`: `Eliminated = { slot, address, ms }`, `emitEliminated(ms: number)`. `spectator.ts`: `eliminate()` calls `emitEliminated(Math.round(roundClockMs()))` — add `let liveSinceMs = 0` set in `setRoundLive(true)` and `roundClockMs = () => Date.now() - liveSinceMs`. `scheduler.ts`: `outMs = new Map<string, number>()` filled in `onEliminated`, reset in `beginSlot`; each tick during play/results `hud.fieldLine = fieldLine([...(!spectator.isOut() && !spectatingOnly ? ['you'] : []), ...[...seen].filter(a => a !== myAddress() && !eliminated.has(a)).map(displayName)])`; at results append `' · ' + rivalry(...)` to `hud.resultDetail` when non-empty (`me.outMs = survived ? null : outAt*1000`; others from `seen` minus self with `outMs.get(a) ?? null`). `hud.tsx`: replace the `hud.alive + ' IN'` pill text with `hud.fieldLine || hud.alive + ' IN'` and width 340.
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat: named field readout and rivalry line`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat: named field readout and rivalry line`.
 
 ---
 
@@ -631,7 +631,7 @@ export function rivalry(me: Out, others: Out[]): string {
 **Interfaces:**
 - Produces: `buildDisc(color: Color4): Entity[]` (a cylinder r=`DISC_RADIUS`, height 1, top at `ARENA_Y`, plus a ring lip; parts start hidden), `setDiscVisible(parts, on)`. `jumpBarSpeed(elapsed: number): number` (deg/s: 30 → 55 linearly over 0..85 s), `jumpBarBeams(seed): { angle: number; direction: 1 | -1 }[]` (1 beam; a second, counter-rotating, from `JUMPBAR_SECOND_AT = 50` s), `export const jumpBar: Round`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/jumpbar.test.ts
 import { test } from 'node:test'
@@ -656,7 +656,7 @@ test('beams are seeded, the second one counter-rotates and arrives late', () => 
   assert.equal(JUMPBAR_SECOND_AT, 50)
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:** Implement:
+- [x] **Step 2:** FAIL. **Step 3:** Implement:
 ```ts
 // src/lib/jumpbar.ts — one low beam sweeping a disc; jump it or lose a life. A second one at 50s.
 import { PLAY_SECONDS } from '../config'
@@ -682,7 +682,7 @@ export function jumpBarBeams(seed: number): { angle: number; direction: 1 | -1 }
 `src/arena/disc.ts`: cylinder `MeshRenderer.setCylinder(e)` + `MeshCollider.setCylinder(e)` at `(32, ARENA_Y - 0.5, 36)` scale `(DISC_RADIUS*2, 1, DISC_RADIUS*2)`, `Material.setPbrMaterial` with the given colour, roughness 0.35, `specularIntensity 1`; a second thin cylinder ring lip at radius+0.3, height 0.3, colour `WALL_COLOR`. Both `VisibilityComponent { visible: false }`. `setDiscVisible` toggles `VisibilityComponent` and adds/removes `MeshCollider`.
 
 `src/arena/rounds/jumpBar.ts`: copy `buildSpinner` from `sweeper.ts` but pivot at `(32, ARENA_Y + 0.45, 36)`, beam scale `(DISC_RADIUS*2 - 1, 0.6, 0.6)` (low enough to jump), pink `C`-like colour `Color4.create(1, 0.24, 0.62, 1)`; build two pivots (`beams[0..1]`), the second hidden until `JUMPBAR_SECOND_AT`. Trigger handler identical to sweeper's (`running`, `HIT_COOLDOWN_MS 1200`, `loseLife`, knockback strength 14 towards centre with `DISC_RADIUS`). `start(seed)`: `layout = jumpBarBeams(seed)`, set each pivot rotation `fromEulerDegrees(0, angle, 0)`, `Tween RotateContinuous` speed `jumpBarSpeed(0) * direction`, show disc + beam 0, hide beam 1. `tick(dt, elapsed, playing)`: every 5 s re-create the Tween with `jumpBarSpeed(elapsed)`; at `elapsed >= JUMPBAR_SECOND_AT` show beam 1 once and `play('whistle')`. `stop()`: hide all. `spawn()` = `(32, ARENA_Y + 1, 36 + 6)`. `name 'Jump Bar'`, `hint 'Jump the beam.'`.
-- [ ] **Step 4:** build + test PASS. **Step 5:** Commit `feat(round): Jump Bar`.
+- [x] **Step 4:** build + test PASS. **Step 5:** Commit `feat(round): Jump Bar`.
 
 ---
 
@@ -694,7 +694,7 @@ export function jumpBarBeams(seed: number): { angle: number; direction: 1 | -1 }
 **Interfaces:**
 - Produces: `SPOT_HIT_SECONDS 1.2`, `SPOT_WARN_SECONDS 0.6`, `SPOT_RADIUS 1.8`, `SPOT_THIRD_AT 45`, `spotCount(elapsed): number` (2, then 3 from 45 s), `spotSpeed(elapsed): number` (1 → 1.5 at 45 s), `spotCentre(seed, i, t): { x: number; z: number }` (Lissajous inside `DISC_RADIUS - 2` around 0,0), `class SpotTracker { update(inside: boolean, dt): 'ok' | 'warn' | 'hit' }`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/spotlight.test.ts
 import { test } from 'node:test'
@@ -728,7 +728,7 @@ test('standing in the light warns then hits; stepping out resets', () => {
   assert.equal(s.update(true, 0.1), 'ok')  // timer restarts after a hit
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:** Implement:
+- [x] **Step 2:** FAIL. **Step 3:** Implement:
 ```ts
 // src/lib/spotlight.ts — "Stay out of the light." Roaming pools of light on a disc; linger and lose a life.
 import { DISC_RADIUS } from '../config'
@@ -764,7 +764,7 @@ export class SpotTracker {
 }
 ```
 `src/arena/rounds/spotlight.ts`: uses `buildDisc(Color4.create(0.2, 0.16, 0.4, 1))` (dark stage), three spot rigs each = searchlight GLB (`decorModel('assets/Models/searchlight.glb')` pattern from `models.ts`) at `y = ARENA_Y + 20`, rotation `fromEulerDegrees(-90, 0, 0)`, scale `(0.62, 0.62, 0.25)`, plus a floor pool: cylinder scale `(SPOT_RADIUS*2, 0.05, SPOT_RADIUS*2)` at `ARENA_Y + 0.03`, emissive yellow `Color3.create(1, 0.9, 0.4)` intensity 2. `tick(dt, elapsed, playing)`: for i < `spotCount(elapsed)` set each rig's x,z from `spotCentre(seed, i, elapsed)` + `ARENA_CENTER`; hide the third until needed (`play('whistle')` + `setBanner('THIRD LIGHT', 'Keep moving')` when it appears). Inside test: player `Transform.get(engine.PlayerEntity).position` horizontal distance < `SPOT_RADIUS` to any visible pool and `|y - ARENA_Y| < 3`. `tracker.update(inside, dt)`: `'warn'` → pool material emissive red `Color3.create(1, 0.2, 0.2)` + `play('tick')` once per warn; `'hit'` → `play('squeak')`, `loseLife()`, and `Physics.applyKnockbackToPlayer(poolCentre, 10, 4)` if still in; `'ok'` restores yellow. `spawn()` = `(32, ARENA_Y + 1, 36)`. `name 'Spotlight'`, `hint 'Stay out of the light.'`.
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat(round): Spotlight`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat(round): Spotlight`.
 
 ---
 
@@ -777,7 +777,7 @@ export class SpotTracker {
 **Interfaces:**
 - Produces: `ROUND_NAMES = ['Perfect Match','Sweeper Gates','Tip Toe','Hex-Drop','Spotlight','Jump Bar']`, `ROUND_POOL = [0,1,2,4,5]`, `FINALE_ROUND = 3`, `ROUND_DIFFICULTY = [1,4,5,6,2,3]` (index = round id); `showRounds(show: number): number[]` (three ids, easy→hard); `roundIndex(slot)` returns a round id.
 
-- [ ] **Step 1: Failing tests** (append to `tests/show.test.ts`)
+- [x] **Step 1: Failing tests** (append to `tests/show.test.ts`)
 ```ts
 import { showRounds, roundIndex, actIndex, isFinale } from '../src/lib/schedule'
 import { ROUND_POOL, FINALE_ROUND, ROUND_DIFFICULTY, ROUND_COUNT } from '../src/config'
@@ -805,7 +805,7 @@ test('shows differ from each other and the draw is stable', () => {
 })
 ```
 In `tests/schedule.test.ts` replace the "roundIndex cycles 0..3" assertion with `for (let s = -8; s < 8; s++) assert.ok(roundIndex(s) >= 0 && roundIndex(s) < ROUND_NAMES.length)` and `assert.equal(roundIndex(3), FINALE_ROUND)`.
-- [ ] **Step 2:** FAIL. **Step 3:** Implement in `schedule.ts`:
+- [x] **Step 2:** FAIL. **Step 3:** Implement in `schedule.ts`:
 ```ts
 export function actIndex(slot: number): number { return ((slot % ROUND_COUNT) + ROUND_COUNT) % ROUND_COUNT }
 export function isFinale(slot: number): boolean { return actIndex(slot) === ROUND_COUNT - 1 }
@@ -821,7 +821,7 @@ export function roundIndex(slot: number): number {
 }
 ```
 (`showIndex` stays `Math.floor(slot / ROUND_COUNT)`.) `index.ts`: `setupScheduler([perfectMatch, sweeper, tipToe, hexDrop, spotlight, jumpBar])` with the comment "Order must match ROUND_NAMES". `scheduler.ts`: wherever `roundTag(roundIndex(slot), …)` is used for the act number, switch to `actIndex(slot)`.
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat: seeded per-show round draw from a pool of five`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat: seeded per-show round draw from a pool of five`.
 
 ---
 
@@ -834,7 +834,7 @@ export function roundIndex(slot: number): number {
 **Interfaces:**
 - Produces: `DAILY_CROWNS = 3`, `type Daily = { id: number; text: string; roundId: number; kind: 'qualify' | 'first' | 'survive' }`, `dayIndex(nowMs): number`, `dailyFor(day: number): Daily`, `dailyDone(d: Daily, r: { roundId: number; survived: boolean; first: boolean; survivedMs: number }): boolean`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/daily.test.ts
 import { test } from 'node:test'
@@ -862,7 +862,7 @@ test('completion rules', () => {
   assert.ok(dailyDone(s, { roundId: 2, survived: false, first: false, survivedMs: 60000 }))
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:** Implement:
+- [x] **Step 2:** FAIL. **Step 3:** Implement:
 ```ts
 // src/lib/daily.ts — one small goal a day, worth three crowns. A reason to come back tomorrow.
 import { ROUND_NAMES } from '../config'
@@ -898,7 +898,7 @@ export function dailyDone(d: Daily, r: { roundId: number; survived: boolean; fir
 }
 ```
 `scheduler.ts`: `let dailyDoneDay = -1`; at results (not `spectatingOnly`): `const d = dailyFor(dayIndex(now)); if (dailyDoneDay !== dayIndex(now) && dailyDone(d, { roundId: roundIndex(slot), survived, first: firstFinisher === myAddress(), survivedMs })) { dailyDoneDay = dayIndex(now); award(myAddress(), DAILY_CROWNS); toast('DAILY CHALLENGE DONE  +' + DAILY_CROWNS); play('crown') }`. Each tick: `hud.daily = dailyDoneDay === dayIndex(now) ? 'DAILY: DONE' : 'DAILY: ' + d.text.toUpperCase()`. `lobby.ts` `refreshBoards`: append `'\nTODAY: ' + dailyFor(dayIndex(Date.now())).text` to the schedule board text.
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat: daily challenge worth three crowns`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat: daily challenge worth three crowns`.
 
 ---
 
@@ -908,7 +908,7 @@ export function dailyDone(d: Daily, r: { roundId: number; survived: boolean; fir
 - Create: `tests/golden.test.ts`
 - Modify: `src/lib/schedule.ts` (`isGolden(show)`, `slotsUntilGolden(slot)`), `src/systems/scheduler.ts` (stakes ×2, tag prefix, jumbotron gold), `src/arena/lobby.ts` (countdown line), `src/net/crowns.ts` (`GOLDEN_MULTIPLIER = 2`)
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/golden.test.ts
 import { test } from 'node:test'
@@ -928,7 +928,7 @@ test('slots until the next golden show, 0 while inside one', () => {
   assert.equal(slotsUntilGolden(4 * ROUND_COUNT), 3 * ROUND_COUNT)
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:** Implement in `schedule.ts`:
+- [x] **Step 2:** FAIL. **Step 3:** Implement in `schedule.ts`:
 ```ts
 export const GOLDEN_EVERY = 4
 export function isGolden(show: number): boolean { return ((show % GOLDEN_EVERY) + GOLDEN_EVERY) % GOLDEN_EVERY === GOLDEN_EVERY - 1 }
@@ -940,7 +940,7 @@ export function slotsUntilGolden(slot: number): number {
 }
 ```
 `crowns.ts`: `export const GOLDEN_MULTIPLIER = 2`. `scheduler.ts`: `const stakes = (isFinale(slot) ? FINALE_MULTIPLIER : 1) * (isGolden(showIndex(slot)) ? GOLDEN_MULTIPLIER : 1)`; `hud.roundTag` gets `'GOLDEN SHOW · '` prefix when golden; `setJumbotronColor(gold)` during a golden intro (`Color4.create(1, 0.83, 0.25, 1)`); `hud.finale || golden` drives the yellow card. `lobby.ts` `refreshBoards`: `const n = slotsUntilGolden(slot); line = n === 0 ? 'GOLDEN SHOW - DOUBLE CROWNS' : 'GOLDEN SHOW in ' + n + ' rounds'`, appended to the schedule board.
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat: golden show every fourth show, double crowns`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat: golden show every fourth show, double crowns`.
 
 ---
 
@@ -948,7 +948,7 @@ export function slotsUntilGolden(slot: number): number {
 
 **Files:** Create `src/lib/titles.ts`, `tests/titles.test.ts`; modify `src/systems/scheduler.ts` (`hud.showLine` suffix), `src/systems/records.ts` (`finaleWins` counter).
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 ```ts
 // tests/titles.test.ts
 import { test } from 'node:test'
@@ -962,7 +962,7 @@ test('titles rank champion > survivor > ironfoot > pioneer', () => {
   assert.equal(titleFor({ crowns: 0, streak: 3, finaleWins: 1 }), 'CHAMPION')
 })
 ```
-- [ ] **Step 2:** FAIL. **Step 3:**
+- [x] **Step 2:** FAIL. **Step 3:**
 ```ts
 // src/lib/titles.ts — a word under your name that says what kind of night you are having.
 export function titleFor(s: { crowns: number; streak: number; finaleWins: number }): string {
@@ -973,7 +973,7 @@ export function titleFor(s: { crowns: number; streak: number; finaleWins: number
 }
 ```
 `records.ts`: `let finaleWins = 0; export function recordFinaleWin() { finaleWins++ } export function finaleWinCount() { return finaleWins }`. `scheduler.ts`: at podium `rank === 0` → `recordFinaleWin()`; each tick `hud.showLine = rankLine + ' · ' + titleFor({ crowns: crownsFor(myAddress()), streak: streaks.streak(myAddress()), finaleWins: finaleWinCount() })` (widen that pill to 300).
-- [ ] **Step 4:** PASS. **Step 5:** Commit `feat: player titles`.
+- [x] **Step 4:** PASS. **Step 5:** Commit `feat: player titles`.
 
 ---
 
@@ -981,7 +981,7 @@ export function titleFor(s: { crowns: number; streak: number; finaleWins: number
 
 **Files:** Modify `src/config.ts` (`SHARE_URL = 'decentraland.org/jump/?realm=justchatting.dcl.eth'`), `src/arena/lobby.ts` (a sign `'Bring a friend:\n' + SHARE_URL` at `(32, LOBBY.y + 4.6, SIGN_Z)` size 1.6), `src/systems/scheduler.ts` (finale results subtitle for the champion: `'Champion! Bring a friend: ' + SHARE_URL`), `README.md` Play it section.
 
-- [ ] Implement, build + test PASS, commit `feat: share link in lobby and on the champion card`.
+- [x] Implement, build + test PASS, commit `feat: share link in lobby and on the champion card`.
 
 ---
 
@@ -989,7 +989,7 @@ export function titleFor(s: { crowns: number; streak: number; finaleWins: number
 
 **Files:** Create `src/systems/camera.ts`; modify `src/systems/scheduler.ts` (podium block), `src/systems/spectator.ts` (`eliminate`).
 
-- [ ] **Step 1:** `camera.ts`:
+- [x] **Step 1:** `camera.ts`:
 ```ts
 // A six-second crane shot of the podium after the finale, for everyone. VirtualCamera is local.
 import { engine, Entity, Transform, VirtualCamera, MainCamera } from '@dcl/sdk/ecs'
@@ -1020,8 +1020,8 @@ export function cameraSystem(): void {
 }
 ```
 Register `engine.addSystem(cameraSystem)` in `setupScheduler`. In the results block, after the podium `sendTo` (both branches, so spectators see it too): `if (cycleEnd) podiumShot()`.
-- [ ] **Step 2:** `spectator.ts` `eliminate()`: replace `void sendTo(LEDGE)` with `void sendTo(LEDGE).then(() => triggerEmote({ predefinedEmote: 'knockOut' }))`.
-- [ ] **Step 3:** build + test PASS. Commit `feat: podium crane shot and knock-out emote`.
+- [x] **Step 2:** `spectator.ts` `eliminate()`: replace `void sendTo(LEDGE)` with `void sendTo(LEDGE).then(() => triggerEmote({ predefinedEmote: 'knockOut' }))`.
+- [x] **Step 3:** build + test PASS. Commit `feat: podium crane shot and knock-out emote`.
 
 ---
 
@@ -1029,11 +1029,30 @@ Register `engine.addSystem(cameraSystem)` in `setupScheduler`. In the results bl
 
 **Files:** Create `tools/budget.mjs`, `docs/SUBMISSION.md`; modify `README.md`, `docs/TESTING.md`, `CREDITS.md` (no new assets — confirm), `docs/VISION.md`.
 
-- [ ] **Step 1:** `tools/budget.mjs` walks `assets/` and `images/` and prints per-folder MB and file counts, then exits non-zero if any single file > 5 MB or the total > 15 MB × 16 parcels. Add `"budget": "node tools/budget.mjs"` script.
-- [ ] **Step 2:** README: "Play it" (jump link, `npm run start -- --mobile`), rounds table (six rounds, pool + finale), "What's beyond Fall Guys" list (feed, hype, reactions, crown/halo, varied shows, daily, golden show, titles, cinematic). TESTING.md: a phone checklist per track. `docs/SUBMISSION.md`: the DoraHacks text (title, one-liner, judging-criteria mapping, links, wallet address, how to run).
-- [ ] **Step 3:** `npm run budget && npm run build && npm test` → PASS. Commit `docs: submission pack, budget tool, testing checklist`.
+- [x] **Step 1:** `tools/budget.mjs` walks `assets/` and `images/` and prints per-folder MB and file counts, then exits non-zero if any single file > 5 MB or the total > 15 MB × 16 parcels. Add `"budget": "node tools/budget.mjs"` script.
+- [x] **Step 2:** README: "Play it" (jump link, `npm run start -- --mobile`), rounds table (six rounds, pool + finale), "What's beyond Fall Guys" list (feed, hype, reactions, crown/halo, varied shows, daily, golden show, titles, cinematic). TESTING.md: a phone checklist per track. `docs/SUBMISSION.md`: the DoraHacks text (title, one-liner, judging-criteria mapping, links, wallet address, how to run).
+- [x] **Step 3:** `npm run budget && npm run build && npm test` → PASS. Commit `docs: submission pack, budget tool, testing checklist`.
 
 ---
+
+## Outcome
+
+All sixteen tasks are implemented and committed on `master`, `npm run verify` green (82 tests).
+Deviations from the plan, all deliberate:
+
+- The `borderRadius` test checks for property *use*, not the string, so the comments explaining why
+  it is banned can still name it.
+- `Plate` drops the padding prop: the content layer is a centred absolute column, which the pill and
+  card both wanted, and padding fought it.
+- Spotlight's Lissajous radius is scaled by `1/sqrt(2)`: both axes swing the full radius, so the
+  corners of that box were off the stage. Caught by the geometry test the plan called for.
+- `setDiscVisible` removes the floor's collider when hidden, not just its visibility - an invisible
+  disc still blocking movement would sit inside every other round's arena.
+- The round-registration test matches by prefix (`sweeper` for "Sweeper Gates") rather than exact
+  camel case, which still catches a missing or swapped round.
+- Beyond the plan: CLUTCH / COMEBACK / CROWD BONUS payouts (`src/lib/bonus.ts`), a session summary on
+  the end-of-show card (`src/lib/session.ts`), a WATCH ARENA spectator camera, a fist pump on
+  qualifying, and the show's card on the lobby board.
 
 ## Self-review
 

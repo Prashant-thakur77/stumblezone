@@ -197,10 +197,11 @@ function schedulerSystem(dt: number): void {
   // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
   // than thirty times a second.
   const today = dayIndex(now)
-  if (today !== dailyShownDay || dailyPaidDay === today !== dailyShownDone) {
+  const doneToday = dailyPaidDay === today
+  if (today !== dailyShownDay || doneToday !== dailyShownDone) {
     dailyShownDay = today
-    dailyShownDone = dailyPaidDay === today
-    hud.daily = dailyShownDone ? 'DAILY: DONE' : 'DAILY: ' + dailyFor(today).text.toUpperCase()
+    dailyShownDone = doneToday
+    hud.daily = doneToday ? 'DAILY: DONE' : 'DAILY: ' + dailyFor(today).text.toUpperCase()
   }
   // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
   // over the arena and the board saying so, for four seconds.
