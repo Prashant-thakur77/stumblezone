@@ -28,4 +28,10 @@ export type Round = {
 
   /** Called when the slot ends. Hides the round's geometry. */
   stop(): void
+
+  /**
+   * Height of the lowest surface you can stand on. Only a round with a stack of decks needs to
+   * say; anything else is the arena deck. Below this, with air underneath, the fall sound plays.
+   */
+  floorY?: number
 }

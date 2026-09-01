@@ -68,6 +68,8 @@ function currentDeck(): number {
 
 export const hexDrop: Round = {
   name: 'Hex-Drop',
+  // Dropping a deck is progress, not a fall. Only the drop off the bottom deck is.
+  floorY: ARENA_Y - (HEX_LAYERS - 1) * HEX_LAYER_GAP,
   hint: 'Do not stop moving.',
 
   spawn() {

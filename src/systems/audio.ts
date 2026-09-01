@@ -13,9 +13,23 @@ import { engine, Entity, Transform, AudioSource } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y } from '../config'
 
-export type Clip = 'tick' | 'go' | 'crack' | 'eliminated' | 'survive' | 'crown'
+export type Clip =
+  | 'tick'
+  | 'go'
+  | 'whistle'
+  | 'crack'
+  | 'eliminated'
+  | 'survive'
+  | 'qualified'
+  | 'crown'
+  | 'fall'
+  | 'squeak'
+  | 'boing'
+  | 'crowd-cheer'
+  | 'crowd-aww'
 
-export type Track = 'music-lobby' | 'music-round' | 'music-tense'
+/** Looping beds. The crowd bed is layered under the music rather than swapped with it. */
+export type Track = 'music-lobby' | 'music-round' | 'music-tense' | 'crowd-bed'
 
 /** Announcer lines - CC0 recordings from Kenney's Voiceover Pack, one consistent male voice. */
 export type Voice =
@@ -46,11 +60,20 @@ const VOICES: Voice[] = [
 const VOLUMES: Record<Clip, number> = {
   tick: 0.35,
   go: 0.6,
+  whistle: 0.55,
   crack: 0.4,
   eliminated: 0.7,
   survive: 0.7,
-  crown: 0.8
+  qualified: 0.75,
+  crown: 0.8,
+  fall: 0.5,
+  squeak: 0.5,
+  boing: 0.5,
+  'crowd-cheer': 0.55,
+  'crowd-aww': 0.5
 }
+
+const MUSIC: Track[] = ['music-lobby', 'music-round', 'music-tense']
 
 const sources = new Map<Clip, Entity>()
 const music = new Map<Track, Entity>()
@@ -73,15 +96,16 @@ export function initAudio(): void {
     sources.set(clip, e)
   }
 
-  for (const track of ['music-lobby', 'music-round', 'music-tense'] as Track[]) {
+  for (const track of [...MUSIC, 'crowd-bed'] as Track[]) {
     const e = engine.addEntity()
     Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z) })
     AudioSource.create(e, {
       audioClipUrl: 'assets/Audio/' + track + '.mp3',
       playing: false,
       loop: true,
-      // Audible under the cues without competing with a countdown tick.
-      volume: 0.6,
+      // Music sits audibly under the cues without competing with a countdown tick. The crowd is
+      // quieter still: it is the room, not the band.
+      volume: track === 'crowd-bed' ? 0.28 : 0.6,
       global: true
     })
     music.set(track, e)
@@ -112,16 +136,28 @@ export function say(v: Voice): void {
 /**
  * Cross to a music bed, or silence with `null`.
  *
- * Both beds are eight bars at 120bpm and loop seamlessly. The lobby track is calm enough to talk
- * over; the round track adds a kick and an eighth-note arpeggio to push you to move.
+ * All three beds are sixteen bars at 150bpm in F sharp minor and loop seamlessly. The lobby track
+ * is calm enough to talk over; the round track brings the full slap bass, breakbeat and brass.
  */
 export function setMusic(track: Track | null): void {
   if (track === currentTrack) return
   currentTrack = track
-  for (const [name, entity] of music) {
-    const src = AudioSource.getMutable(entity)
+  for (const name of MUSIC) {
+    const src = AudioSource.getMutable(music.get(name)!)
     src.playing = name === track
   }
+}
+
+let crowdOn = false
+
+/**
+ * The stadium crowd, murmuring under the round. Fall Guys is a game show in a stadium and the
+ * crowd is the thing that says so; it runs whenever a round is live and stops with it.
+ */
+export function setCrowd(on: boolean): void {
+  if (on === crowdOn) return
+  crowdOn = on
+  AudioSource.getMutable(music.get('crowd-bed')!).playing = on
 }
 
 export function play(clip: Clip): void {

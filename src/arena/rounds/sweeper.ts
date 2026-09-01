@@ -36,6 +36,7 @@ import {
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { loseLife, isOut } from '../../systems/spectator'
+import { play } from '../../systems/audio'
 
 const PLATFORM_SIZE = 30
 const WALL_COUNT = 4
@@ -99,6 +100,8 @@ function buildSlab(): Entity {
     if (result.trigger?.entity !== engine.PlayerEntity) return
     if (isOut() || clock - lastHitAt < HIT_COOLDOWN_MS) return
     lastHitAt = clock
+    // Squeaky toy: a wall in Fall Guys is foam, and foam squeaks.
+    play('squeak')
     if (!loseLife()) {
       // A shove, not a teleport. Being flicked backwards by a wall you can see reads as the wall
       // hitting you; blinking to a spawn point reads as the game glitching.
@@ -162,6 +165,7 @@ function buildSpinner(): void {
     if (result.trigger?.entity !== engine.PlayerEntity) return
     if (isOut() || clock - lastHitAt < HIT_COOLDOWN_MS) return
     lastHitAt = clock
+    play('squeak')
     if (!loseLife()) {
       Physics.applyKnockbackToPlayer(
         Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z),

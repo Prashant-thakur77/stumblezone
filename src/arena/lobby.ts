@@ -27,6 +27,7 @@ import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../c
 import { standings, showStandings, displayName } from '../net/crowns'
 import { buildCrown, buildBalloons, buildTree } from './models'
 import { upcoming } from '../systems/scheduler'
+import { play } from '../systems/audio'
 
 let crownBoard: Entity
 let scheduleBoard: Entity
@@ -194,6 +195,7 @@ function buildJumpPads(): void {
     TriggerArea.setBox(trigger)
     triggerAreaEventsSystem.onTriggerEnter(trigger, (result) => {
       if (result.trigger?.entity !== engine.PlayerEntity) return
+      play('boing')
       Physics.applyImpulseToPlayer(Vector3.create(0, 1, 0), 14)
     })
   }

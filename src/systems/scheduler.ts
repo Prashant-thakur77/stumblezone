@@ -15,7 +15,8 @@ import {
   ROUND_NAMES,
   SLOT_SECONDS,
   WARMUP_SECONDS,
-  PODIUM_SPOTS
+  PODIUM_SPOTS,
+  ARENA_Y
 } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
@@ -37,7 +38,7 @@ import {
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds } from './records'
-import { play, setMusic, say } from './audio'
+import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 
 let rounds: Round[] = []
@@ -105,6 +106,7 @@ function beginSlot(slot: number): void {
   syncShow(showIndex(slot))
 
   active = rounds[roundIndex(slot)]
+  spectator.setFloorY(active.floorY ?? ARENA_Y)
   active.start(seedForSlot(slot))
   if (isFinale(slot)) say('final_round')
 
@@ -150,6 +152,8 @@ function schedulerSystem(dt: number): void {
   // faster, busier one for the last 20 seconds - landing with HURRY UP and the spinner speed-up so
   // every tension signal fires at once.
   setMusic(phase !== 'play' ? 'music-lobby' : hud.roundClock <= 20 ? 'music-tense' : 'music-round')
+  // The stadium is only full while something is happening in it.
+  setCrowd(phase === 'play')
 
   if (phase === 'intro') {
     const next = Math.ceil(INTRO_SECONDS - elapsed)
@@ -199,7 +203,7 @@ function schedulerSystem(dt: number): void {
       spectator.setRoundLive(true)
       if (!spectator.isOut()) {
         spectator.releaseInput()
-        play('go')
+        play('whistle')
         say('go')
       }
     }
@@ -248,7 +252,15 @@ function schedulerSystem(dt: number): void {
       if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN * stakes)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
-    if (survived) play('crown')
+    // The stinger and the crowd's verdict, before any announcer line.
+    if (spectatingOnly) {
+      // Watched, did not play: no fanfare and no groan for you.
+    } else if (survived) {
+      play('qualified')
+      play('crowd-cheer')
+    } else {
+      play('crowd-aww')
+    }
     setConfetti(survived)
 
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
@@ -285,6 +297,7 @@ function schedulerSystem(dt: number): void {
       void spectator.sendTo({ x: spot.x, y: spot.y, z: spot.z })
       void triggerEmote({ predefinedEmote: rank === 0 ? 'raiseHand' : 'clap' })
       setConfetti(true)
+      play('crown')
       say('congratulations')
     } else {
       spectator.sendToLobby()

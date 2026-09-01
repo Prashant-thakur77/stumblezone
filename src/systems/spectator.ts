@@ -10,7 +10,7 @@
 import { engine, Transform, InputModifier, InputAction, inputSystem, PointerEventType } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { movePlayerTo, triggerEmote } from '~system/RestrictedActions'
-import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND } from '../config'
+import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND, ARENA_Y } from '../config'
 import { emitCheer, emitEliminated, onCheer } from '../net/sync'
 import { play, say } from './audio'
 
@@ -23,6 +23,17 @@ let relocating = false
 let fallHandler: (() => void) | null = null
 /** True only while a round's play phase is running. Falls outside it are free rides home. */
 let roundLive = false
+
+/** Height of the lowest surface a player can legitimately stand on this round. */
+let floorY = ARENA_Y
+let falling = false
+
+/** Rounds with a stack of decks (Hex-Drop) set this to the lowest one, so that dropping a deck
+ *  is not scored as a fall by the sound. Everyone else leaves it at ARENA_Y. */
+export function setFloorY(y: number): void {
+  floorY = y
+  falling = false
+}
 
 export function setRoundLive(live: boolean): void {
   roundLive = live
@@ -124,7 +135,20 @@ export function initSpectator(): void {
   engine.addSystem(function fallWatcher() {
     if (relocating) return
     const t = Transform.getOrNull(engine.PlayerEntity)
-    if (!t || t.position.y > KILL_Y) return
+    if (!t) return
+
+    // The slide whistle. It plays the moment you are clearly below the floor with air under you,
+    // not two seconds later at the kill plane - by then the fall is over and the joke is late.
+    if (t.position.y < floorY - 3) {
+      if (!falling && roundLive && !out) {
+        falling = true
+        play('fall')
+      }
+    } else {
+      falling = false
+    }
+
+    if (t.position.y > KILL_Y) return
 
     // Spectators can walk off the ledge. Put them back rather than letting them fall forever.
     if (out) {
