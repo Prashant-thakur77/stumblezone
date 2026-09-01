@@ -1,8 +1,16 @@
 // Shared HUD state. Rounds and the scheduler write it; the UI reads it every frame.
 // Keeping it in one tiny module avoids every round importing the UI and vice versa.
 
+/** Which layout the centre of the screen is in. The scheduler sets it; the HUD only reads it. */
+export type HudPhase = 'card' | 'countdown' | 'play' | 'results'
+
 export type HudState = {
+  phase: HudPhase
   roundName: string
+  /** The category tag over the name on the intro card: "ROUND 2  ·  SURVIVAL" or "FINAL ROUND". */
+  roundTag: string
+  /** True during the show's final act: the card goes gold. */
+  finale: boolean
   /** Big centre-screen line: the instruction that matters right now. */
   banner: string
   /** Smaller line under the banner. */
@@ -21,7 +29,10 @@ export type HudState = {
 }
 
 export const hud: HudState = {
+  phase: 'card',
   roundName: '',
+  roundTag: '',
+  finale: false,
   banner: '',
   subtitle: '',
   countdown: 0,

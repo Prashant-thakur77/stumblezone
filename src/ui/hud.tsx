@@ -14,45 +14,17 @@
 //     which would double up on top of it.
 //   - Only the cheer Button carries a pointer handler. A handler on the full-screen wrapper would
 //     capture every click on screen and make the entire game unclickable while still looking fine.
+//
+// The look is a game show's (docs/FALLGUYS-PRESENTATION.md): rounded bordered pills for readouts, a
+// category-tagged intro card, a countdown that flips colour each second, and a full splash for
+// QUALIFIED / ELIMINATED. Every plate is drawn from layout props - no textures, no fonts to load.
 
 import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
-import { Color4 } from '@dcl/sdk/math'
 import { hud } from './state'
 import { cheer } from '../systems/spectator'
-
-const plate = Color4.create(0, 0, 0, 0.45)
-const white = Color4.White()
-
-/** The SDK's position values are a template-literal union, so a plain `string` is too wide. */
-type PosUnit = number | `${number}px` | `${number}%`
-
-type ChipProps = {
-  text: string
-  width: number
-  /** Passed through whole, so an absent edge stays absent rather than becoming `undefined`. */
-  position: { top?: PosUnit; left?: PosUnit; right?: PosUnit }
-  show?: boolean
-}
-
-/** A dark plate with a single line of centred text. */
-function Chip(props: ChipProps) {
-  return (
-    <UiEntity
-      uiTransform={{
-        positionType: 'absolute',
-        position: props.position,
-        width: props.width,
-        height: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-        display: props.show === false ? 'none' : 'flex'
-      }}
-      uiBackground={{ color: plate }}
-    >
-      <Label value={props.text} fontSize={20} color={white} textAlign="middle-center" uiTransform={{ width: '100%', height: '100%' }} />
-    </UiEntity>
-  )
-}
+import { C, countdownColor } from './theme'
+import { Pill, Card, ChunkyText, Dots } from './parts'
+import { LIVES_PER_ROUND } from '../config'
 
 function formatClock(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -60,59 +32,113 @@ function formatClock(seconds: number): string {
   return m + ':' + (s < 10 ? '0' : '') + s
 }
 
+/** The intro card: tag, name, three-word hint. Gold when it is the final. */
+function IntroCard() {
+  return (
+    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale ? C.yellow : C.plate} show={hud.phase === 'card'}>
+      <ChunkyText text={hud.roundTag} fontSize={28} width="100%" height={40} color={hud.finale ? C.navy : C.cyan} />
+      <ChunkyText text={hud.roundName.toUpperCase()} fontSize={86} width="100%" height={110} />
+      <ChunkyText text={hud.subtitle} fontSize={32} width="100%" height={50} color={hud.finale ? C.navy : C.yellow} />
+    </Card>
+  )
+}
+
+/** 3 - 2 - 1 in three colours. The banner carries the numeral; nothing else is on screen. */
+function Countdown() {
+  const n = parseInt(hud.banner, 10)
+  const isNumber = !isNaN(n)
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '18%', left: '20%' },
+        width: '60%',
+        height: 300,
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: hud.phase === 'countdown' ? 'flex' : 'none'
+      }}
+    >
+      <ChunkyText text={hud.banner} fontSize={isNumber ? 200 : 96} width="100%" height={230} color={isNumber ? countdownColor(n) : C.white} />
+      <ChunkyText text={hud.subtitle.toUpperCase()} fontSize={34} width="100%" height={50} color={C.yellow} />
+    </UiEntity>
+  )
+}
+
+/** The in-play centre line: the round's instruction, above true centre so it never fights the controls. */
+function PlayBanner() {
+  const show = hud.phase === 'play' && (hud.banner !== '' || hud.subtitle !== '')
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '22%', left: '15%' },
+        width: '70%',
+        height: 150,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: show ? 'flex' : 'none'
+      }}
+    >
+      <ChunkyText text={hud.banner} fontSize={76} width="100%" height={96} />
+      <ChunkyText text={hud.subtitle} fontSize={28} width="100%" height={44} color={C.yellow} />
+    </UiEntity>
+  )
+}
+
+/** QUALIFIED! in pink and gold, ELIMINATED in slate. The whole centre of the screen, for 15 seconds. */
+function Splash() {
+  const out = hud.out
+  return (
+    <Card width="64%" height={230} position={{ top: '20%', left: '18%' }} color={out ? C.slate : C.pink} show={hud.phase === 'results'}>
+      <ChunkyText text={hud.banner} fontSize={110} width="100%" height={130} color={out ? C.white : C.yellow} />
+      <ChunkyText text={hud.subtitle} fontSize={28} width="100%" height={44} />
+    </Card>
+  )
+}
+
 function Hud() {
-  const showBanner = hud.banner !== '' || hud.subtitle !== ''
+  const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
     <UiEntity uiTransform={{ width: '100%', height: '100%', positionType: 'absolute' }}>
-      <Chip text={hud.roundName} width={360} position={{ top: 16, left: '50%' }} />
-      <Chip
-        text={'Lives ' + '*'.repeat(Math.max(0, hud.lives))}
-        width={150}
-        position={{ top: 16, left: 16 }}
-        show={!hud.out}
-      />
-      <Chip text={hud.alive + ' alive'} width={150} position={{ top: 16, right: 16 }} />
-
-      {/* Your standing in the eight-minute show. */}
-      <Chip text={hud.showLine} width={190} position={{ top: 72, right: 16 }} show={hud.showLine !== ''} />
-
-      {/* Round clock. Always on during play - knowing how long you have left is most of the
-          tension, and without it a round just ends. */}
-      <Chip
-        text={formatClock(hud.roundClock)}
-        width={140}
-        position={{ top: 72, left: '50%' }}
-        show={hud.roundClock > 0}
-      />
-
-      {/* The big centre line. Above true centre so it never fights the on-screen controls. */}
+      {/* Top centre: what round this is, and how long is left in it. A full-width row that
+          centres its children, because an absolute `left: 50%` puts the left EDGE at centre. */}
       <UiEntity
         uiTransform={{
           positionType: 'absolute',
-          position: { top: '24%', left: '15%' },
-          width: '70%',
+          position: { top: 10, left: 0 },
+          width: '100%',
           height: 150,
           flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          display: showBanner ? 'flex' : 'none'
+          alignItems: 'center'
         }}
       >
-        <Label
-          value={hud.banner}
-          fontSize={72}
-          color={white}
-          textAlign="middle-center"
-          uiTransform={{ width: '100%', height: 90 }}
-        />
-        <Label
-          value={hud.subtitle}
-          fontSize={24}
-          color={white}
-          textAlign="middle-center"
-          uiTransform={{ width: '100%', height: 40 }}
+        <Pill text={hud.roundTag} width={300} height={36} fontSize={18} color={hud.finale ? C.yellow : C.plate} textColor={hud.finale ? C.navy : C.white} show={hud.roundTag !== ''} />
+        <Pill text={hud.roundName.toUpperCase()} width={360} color={C.pink} fontSize={24} />
+        <Pill
+          text={formatClock(hud.roundClock)}
+          width={150}
+          color={tense ? C.yellow : C.cyan}
+          textColor={C.navy}
+          fontSize={26}
+          show={hud.roundClock > 0}
         />
       </UiEntity>
+
+      {/* Top left: your lives, as dots. */}
+      <Dots count={Math.max(0, hud.lives)} max={LIVES_PER_ROUND} position={{ top: 16, left: 16 }} show={!hud.out} />
+      <Pill text="SPECTATING" width={170} position={{ top: 16, left: 16 }} color={C.slate} fontSize={20} show={hud.out} />
+
+      {/* Top right: the field, and your standing in the show. */}
+      <Pill text={hud.alive + ' IN'} width={130} position={{ top: 16, right: 16 }} color={C.cyan} textColor={C.navy} />
+      <Pill text={hud.showLine} width={200} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />
+
+      <IntroCard />
+      <Countdown />
+      <PlayBanner />
+      <Splash />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}
@@ -130,14 +156,16 @@ function Hud() {
         <Button
           value="CHEER"
           variant="primary"
-          fontSize={26}
+          fontSize={28}
+          color={C.navy}
           onMouseDown={cheer}
-          uiTransform={{ width: '100%', height: 64 }}
+          uiTransform={{ width: '100%', height: 64, borderRadius: 32, borderWidth: 3, borderColor: C.shadow }}
+          uiBackground={{ color: C.yellow }}
         />
         <Label
           value="Watching from the ledge"
           fontSize={18}
-          color={white}
+          color={C.white}
           textAlign="middle-center"
           uiTransform={{ width: '100%', height: 34 }}
         />

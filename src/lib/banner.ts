@@ -25,3 +25,13 @@ export function resolveBanner(input: BannerInput): BannerOutput {
   }
   return { banner: input.banner, subtitle: input.subtitle }
 }
+
+/**
+ * The category tag over the round name on the intro card: Fall Guys labels every round RACE /
+ * SURVIVAL / FINAL, and the final gets a gold card. Every Stumblezone round is a survival round,
+ * so the tag carries the act number instead - the thing a player actually wants to know.
+ */
+export function roundTag(index: number, finale: boolean): string {
+  if (finale) return 'FINAL ROUND'
+  return 'ROUND ' + (index + 1) + '  ·  SURVIVAL'
+}

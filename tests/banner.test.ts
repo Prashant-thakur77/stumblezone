@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resolveBanner } from '../src/lib/banner.ts'
+import { resolveBanner, roundTag } from '../src/lib/banner.ts'
 
 test('an eliminated player is never told they survived', () => {
   // Regression: Perfect Match printed "SURVIVED" for the whole tail of the round, to everyone,
@@ -27,4 +27,10 @@ test('a player still in the round sees exactly what the round wrote', () => {
   const out = resolveBanner(input)
   assert.equal(out.banner, 'STAND ON RED')
   assert.equal(out.subtitle, '3...')
+})
+
+test('round tags read like a show card', () => {
+  assert.equal(roundTag(0, false), 'ROUND 1  ·  SURVIVAL')
+  assert.equal(roundTag(2, false), 'ROUND 3  ·  SURVIVAL')
+  assert.equal(roundTag(3, true), 'FINAL ROUND')
 })

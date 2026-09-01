@@ -20,7 +20,7 @@ import {
 } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
-import { resolveBanner } from '../lib/banner'
+import { resolveBanner, roundTag } from '../lib/banner'
 import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
 import {
@@ -132,6 +132,8 @@ function schedulerSystem(dt: number): void {
   if (!active) return
 
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
+  hud.finale = isFinale(slot)
+  hud.roundTag = roundTag(roundIndex(slot), hud.finale)
   hud.countdown = Math.ceil(remaining)
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()
@@ -161,6 +163,7 @@ function schedulerSystem(dt: number): void {
     // The hint is the whole of onboarding for a first-timer, so it stays up for most of the intro
     // and only yields to the countdown in the last five seconds.
     if (next <= 5) {
+      hud.phase = 'countdown'
       hud.banner = String(next)
       hud.subtitle = 'Get ready!'
       if (next !== lastTick && next > 0) {
@@ -168,8 +171,9 @@ function schedulerSystem(dt: number): void {
         play('tick')
       }
     } else {
+      hud.phase = 'card'
       hud.banner = active.name
-      hud.subtitle = isFinale(slot) ? 'FINAL ROUND - the show champion is decided here' : active.hint
+      hud.subtitle = isFinale(slot) ? 'The show champion is decided here' : active.hint
     }
     return
   }
@@ -193,11 +197,13 @@ function schedulerSystem(dt: number): void {
         saidSet = true
         say('set')
       }
+      hud.phase = 'countdown'
       hud.banner = String(Math.ceil(GET_READY_SECONDS - playElapsed))
       hud.subtitle = 'Get ready!'
       active.tick(dt, playElapsed, false)
       return
     }
+    hud.phase = 'play'
     if (!released) {
       released = true
       spectator.setRoundLive(true)
@@ -307,7 +313,9 @@ function schedulerSystem(dt: number): void {
   active.tick(dt, SLOT_SECONDS, false)
   // "QUALIFIED" is the party-game word, and it lands harder than "survived" - it says you are
   // through to something, not merely that you are not dead.
-  hud.banner = spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
+  hud.phase = 'results'
+  // A mid-round joiner watched, so they were neither. The card tells them what happens next.
+  hud.banner = spectatingOnly ? 'NEXT ROUND' : spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
 }
 
