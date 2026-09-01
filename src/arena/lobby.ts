@@ -3,8 +3,19 @@
 // Onboarding is three lines and no more. A judge on a phone reads it in the four seconds before
 // the next round starts, or not at all.
 
-import { engine, Entity, Transform, MeshRenderer, MeshCollider, Material, TextShape, Font } from '@dcl/sdk/ecs'
-import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
+import {
+  engine,
+  Entity,
+  Transform,
+  MeshRenderer,
+  MeshCollider,
+  Material,
+  TextShape,
+  Font,
+  Billboard,
+  BillboardMode
+} from '@dcl/sdk/ecs'
+import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR } from '../config'
 import { standings, displayName } from '../net/crowns'
 import { upcoming } from '../systems/scheduler'
@@ -12,12 +23,12 @@ import { upcoming } from '../systems/scheduler'
 let crownBoard: Entity
 let scheduleBoard: Entity
 
-function sign(text: string, position: Vector3, size: number, rotationY = 0): Entity {
+function sign(text: string, position: Vector3, size: number): Entity {
   const e = engine.addEntity()
-  Transform.create(e, {
-    position,
-    rotation: Quaternion.fromEulerDegrees(0, rotationY, 0)
-  })
+  Transform.create(e, { position })
+  // Billboarded around Y so a sign is readable from anywhere in the lobby and stays upright.
+  // Fixed-rotation text is a coin flip: face it the wrong way and the onboarding is invisible.
+  Billboard.create(e, { billboardMode: BillboardMode.BM_Y })
   TextShape.create(e, {
     text,
     fontSize: size,
@@ -49,15 +60,19 @@ export function buildLobby(): void {
   // Spectator ledge, high enough to watch the whole arena from.
   slab(Vector3.create(LEDGE.x, LEDGE.y - 0.5, LEDGE.z), Vector3.create(20, 1, 6))
 
-  sign('STUMBLEZONE', Vector3.create(ARENA_CENTER_X, LOBBY.y + 5, LOBBY.z - 5), 8)
+  // Signs sit on the arena side of the lobby. The spawn point faces +z toward the arena, so
+  // anything placed behind the player is onboarding nobody ever reads.
+  const SIGN_Z = LOBBY.z + 5
+
+  sign('STUMBLEZONE', Vector3.create(ARENA_CENTER_X, LOBBY.y + 6, SIGN_Z), 8)
   sign(
     'Survive the round to win crowns.\nFall and you watch from the ledge.\nA new round starts every 2 minutes.',
-    Vector3.create(ARENA_CENTER_X, LOBBY.y + 2.6, LOBBY.z - 5),
+    Vector3.create(ARENA_CENTER_X, LOBBY.y + 3.4, SIGN_Z),
     2.5
   )
 
-  crownBoard = sign('CROWNS', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y + 3.5, LOBBY.z - 5), 2)
-  scheduleBoard = sign('NEXT UP', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y + 3.5, LOBBY.z - 5), 2)
+  crownBoard = sign('CROWNS', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y + 4, SIGN_Z), 2)
+  scheduleBoard = sign('NEXT UP', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y + 4, SIGN_Z), 2)
 
   // Boards only need refreshing a couple of times a second, not every frame.
   let since = 0
