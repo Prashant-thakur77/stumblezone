@@ -6,6 +6,11 @@ covers **presentation**: soundtrack, sound design, HUD/UX, and the look of the w
 composer interviews, UI databases and portfolio write-ups, art-team threads, and track metadata.
 No video was watched.
 
+**Status: shipped 2026-09-02** (commits `feat(audio)`, `feat(ui)`, `feat(world)`). Two departures
+from the tables below, both deliberate: the searchlights sweep on a bounded yoyo tween rather than
+`RotateContinuous`, so a beam can never point out of the parcel; and the stars went over the
+title and the jump pads rather than the podium spots, where a player stands during results.
+
 ---
 
 ## Part 1 — The soundtrack (Jukio Kallio + Daniel Hagström)

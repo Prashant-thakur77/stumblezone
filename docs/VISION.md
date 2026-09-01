@@ -98,22 +98,40 @@ midway: podium, balloons, trees, bouncy pads, big readable signs. Everything is 
 saturated, and slightly glowing. Nothing is grey. Nothing is still: caps spin, pads bob, clouds
 drift, doomed tiles shudder, the crown rotates. ✅
 
+**It is a stadium.** Eight clusters of animated faces sit between the pillars looking in, four
+searchlights on the parcel corners sweep across the sky above the show, and a rainbow arches over
+the far edge where everyone in the lobby and on the ledge is looking. Tiles and platforms are
+glossy vinyl (roughness 0.35, specular on), not matte foam. The lobby has a spinning star over the
+title, two lollipops with animated faces flanking it, and two inflatables in the back corners —
+things with faces, things that look soft. ✅ (docs/FALLGUYS-PRESENTATION.md, Part 4)
+
 The style rule that keeps it coherent: **SDK primitives for anything with many copies, one GLB for
 anything singular** (crown, finish flag, balloons, clouds, trees, confetti). This is also the
 performance rule — we sit at 12% of the entity budget and 2% of the triangle budget, which is what
 "comfortably inside mobile limits" looks like on a judge's mid-range phone. ✅
 
+### The HUD is a show card
+Rounded pills and cards, chunky white text over a dark shadow copy, pink for "you", yellow for
+stakes, cyan for calm information, navy plates. Every round opens on a tagged intro card
+(**ROUND 2 · SURVIVAL**; **FINAL ROUND** in gold), the countdown flips cyan → pink → yellow, and
+results are a full-width **QUALIFIED!** / **ELIMINATED** splash. Lives are drawn dots, not
+glyphs — the Unity client has none. ✅ (docs/FALLGUYS-PRESENTATION.md, Part 3)
+
 ## 5. Sound — the game should be audible with your eyes closed
 
-- Lobby: calm plucked loop. Round: driving kick-led loop. Phase-switched. ✅
-- Countdown ticks → GO chirp → your own steps cracking tiles → descending sting when you fall →
-  fanfare and confetti when you qualify. ✅
+- A **150 BPM F♯ minor sports theme**: slap bass, breakbeat drums, brass stabs, a whole-tone
+  modulation for the back half of the loop, a balloon squeak every four bars. Lobby bed is the
+  half-time, stab-free version; the tense bed is +2 semitones with double-time hats. ✅
+  (docs/FALLGUYS-PRESENTATION.md, Part 1)
+- A **stadium crowd bed** under every round. Three rising countdown tones → a referee **whistle**
+  on GO → your own steps cracking tiles → a **slide whistle** as you fall → a **brass fanfare and a
+  crowd roar** when you qualify, a **descending minor jingle and a crowd "aww"** when you don't.
+  Bumpers squeak like a toy, jump pads boing. ✅ (Part 2)
 - **A real announcer** (CC0, Kenney Voiceover Pack): READY / SET / GO at every start, HURRY UP at
   15 seconds, YOU WIN / GAME OVER / CONGRATULATIONS / NEW HIGH SCORE to match your actual result,
   YOU LOSE the moment you fall, and FINAL ROUND for Hex-Drop. ✅
-- All synthesised in-repo (tools/make-audio.mjs) — no licensing, 0.5 MB. ✅
-- ▢ *Wanted:* a rising tension layer in each round's last 15 seconds; a soft crowd "oooh" when
-  anyone nearby is eliminated (both synthesisable the same way).
+- All synthesised in-repo (tools/make-audio.mjs) — no licensing, 1.4 MB. ✅
+- The tension layer for the last 20 seconds (`music-tense`) and the crowd "aww" both shipped. ✅
 
 ## 6. Social — designed for a crowd, honest alone
 

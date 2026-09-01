@@ -20,6 +20,21 @@ One arena. Four Fall Guys-style rounds, cycling forever on a fixed schedule. A n
 | **Tip Toe** | Half the bridge tiles are fake and vanish forever once stepped on. Whoever leads sacrifices themselves to reveal the path. |
 | **Hex-Drop** | Two stacked layers of tiles that fall away seconds after you touch them. Last one standing takes the round. |
 
+## What it looks and sounds like
+
+A game show in a stadium, not a test level. The HUD is rounded pills and cards in pink, yellow and
+cyan with chunky drop-shadowed type; each round opens on a category-tagged card (**ROUND 3 ·
+SURVIVAL**, gold **FINAL ROUND**), a 3-2-1 that flips colour every tick, and closes on a
+full-screen **QUALIFIED!** or **ELIMINATED** splash. The soundtrack is a 150 BPM F♯ minor sports
+theme — slap bass, breakbeats, brass stabs, a key change halfway through the loop, a balloon
+squeak on the fours — with a stadium crowd under every round, a referee whistle on GO, a fanfare
+and a roar when you qualify, a sad little jingle and an "aww" when you don't, a slide whistle when
+you fall, squeaky-toy bumpers and springy jump pads. The arena has a crowd of animated faces on
+the pillar ring, four sweeping searchlights, a rainbow behind the far edge, glossy vinyl-toy
+materials, and lollipops with faces in the lobby. All of it is derived from what the Fall Guys
+composers and artists have said in interviews — the research and every decision are in
+[docs/FALLGUYS-PRESENTATION.md](docs/FALLGUYS-PRESENTATION.md).
+
 Every round is a survival challenge **against the arena**, never directly against another player.
 That is what lets the same code be an eight-player elimination race, a two-player grudge match, or a
 solo score attack at 3am — without a lobby, a queue, or a minimum player count.
@@ -59,11 +74,12 @@ voice chat** — so every social feature here works over text, emotes and shared
 - **448 entities total — 9% of the mobile soft limit** (4,800) and 7% of the hard limit.
 - **Tiles are pooled, never respawned.** All 448 entities are created once at scene start and reset
   between rounds, so a World running unattended for a week has a flat entity count.
-- SDK primitives and a shared palette — no GLB downloads, near-zero content size against the World
-  storage cap.
+- SDK primitives for everything with many copies; fourteen small CC0 GLBs (2 MB, ~25k triangles
+  in total) for the singular things — crown, crowd, searchlights, rainbow, toys. `assets/` is
+  3.5 MB against a 36 MB cap.
 - Motion is engine-side `Tween`, not per-frame transform writes.
-- All sound is **synthesised procedurally** by `tools/make-audio.mjs` — six cues, 116 KB total, no
-  downloaded samples and no licensing to track.
+- All music, ambience and cues are **synthesised procedurally** by `tools/make-audio.mjs` — three
+  beds, a crowd bed and thirteen stingers, no downloaded samples and no licensing to track.
 
 ### 5. Creativity and originality
 Other entries are obbies and hangouts. This is an **auto-cycling multi-round gauntlet with a real
