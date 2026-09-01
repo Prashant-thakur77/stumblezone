@@ -17,6 +17,32 @@ export type Clip = 'tick' | 'go' | 'crack' | 'eliminated' | 'survive' | 'crown'
 
 export type Track = 'music-lobby' | 'music-round'
 
+/** Announcer lines - CC0 recordings from Kenney's Voiceover Pack, one consistent male voice. */
+export type Voice =
+  | 'ready'
+  | 'set'
+  | 'go'
+  | 'you_win'
+  | 'you_lose'
+  | 'game_over'
+  | 'congratulations'
+  | 'new_highscore'
+  | 'hurry_up'
+  | 'final_round'
+
+const VOICES: Voice[] = [
+  'ready',
+  'set',
+  'go',
+  'you_win',
+  'you_lose',
+  'game_over',
+  'congratulations',
+  'new_highscore',
+  'hurry_up',
+  'final_round'
+]
+
 const VOLUMES: Record<Clip, number> = {
   tick: 0.35,
   go: 0.6,
@@ -28,6 +54,7 @@ const VOLUMES: Record<Clip, number> = {
 
 const sources = new Map<Clip, Entity>()
 const music = new Map<Track, Entity>()
+const voices = new Map<Voice, Entity>()
 let currentTrack: Track | null = null
 
 export function initAudio(): void {
@@ -59,6 +86,27 @@ export function initAudio(): void {
     })
     music.set(track, e)
   }
+
+  for (const v of VOICES) {
+    const e = engine.addEntity()
+    Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z) })
+    AudioSource.create(e, {
+      audioClipUrl: 'assets/Audio/vo/' + v + '.ogg',
+      playing: false,
+      loop: false,
+      // The announcer sits on top of everything - that is what an announcer is for.
+      volume: 0.9,
+      global: true
+    })
+    voices.set(v, e)
+  }
+}
+
+/** One announcer line. Retriggers from the start if called again mid-line. */
+export function say(v: Voice): void {
+  const e = voices.get(v)
+  if (!e) return
+  AudioSource.playSound(e, 'assets/Audio/vo/' + v + '.ogg')
 }
 
 /**

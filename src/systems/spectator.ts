@@ -12,7 +12,7 @@ import { Vector3 } from '@dcl/sdk/math'
 import { movePlayerTo, triggerEmote } from '~system/RestrictedActions'
 import { KILL_Y, LEDGE, LOBBY, LIVES_PER_ROUND } from '../config'
 import { emitCheer, emitEliminated, onCheer } from '../net/sync'
-import { play } from './audio'
+import { play, say } from './audio'
 
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
 
@@ -91,6 +91,7 @@ export function eliminate(): void {
   if (out) return
   out = true
   play('eliminated')
+  say('you_lose')
   emitEliminated()
   void sendTo(LEDGE)
   // Deliberately NOT frozen. Being locked in place for the rest of a round is the least social

@@ -87,9 +87,11 @@ players; everything derives from the UTC clock and the slot seed. ✅
 
 ## 4. The world — what it should look like when you pan the camera
 
-A **floating carnival at golden hour**. Fixed late-afternoon sky. The arena is a disc of colour in
-the middle of open air: white pillars with spinning glowing caps, cloud puffs drifting at different
-heights, a green ground far, far below — visible, never reachable. The lobby is the carnival's
+A **floating carnival at golden hour**, 24 metres above a solid green ground. Fixed late-afternoon
+sky. The arena is a disc of colour in open air: white pillars rising the full 34m from the ground
+past the arena, cloud puffs drifting in the fall zone below the tiles, a pink splash pad and trees
+on the ground beneath. **A fall is a two-second story** — through the clouds, down the pillars,
+the ground rushing up — ended a moment before impact. The lobby is the carnival's
 midway: podium, balloons, trees, bouncy pads, big readable signs. Everything is fat, rounded,
 saturated, and slightly glowing. Nothing is grey. Nothing is still: caps spin, pads bob, clouds
 drift, doomed tiles shudder, the crown rotates. ✅
@@ -104,6 +106,9 @@ performance rule — we sit at 12% of the entity budget and 2% of the triangle b
 - Lobby: calm plucked loop. Round: driving kick-led loop. Phase-switched. ✅
 - Countdown ticks → GO chirp → your own steps cracking tiles → descending sting when you fall →
   fanfare and confetti when you qualify. ✅
+- **A real announcer** (CC0, Kenney Voiceover Pack): READY / SET / GO at every start, HURRY UP at
+  15 seconds, YOU WIN / GAME OVER / CONGRATULATIONS / NEW HIGH SCORE to match your actual result,
+  YOU LOSE the moment you fall, and FINAL ROUND for Hex-Drop. ✅
 - All synthesised in-repo (tools/make-audio.mjs) — no licensing, 0.5 MB. ✅
 - ▢ *Wanted:* a rising tension layer in each round's last 15 seconds; a soft crowd "oooh" when
   anyone nearby is eliminated (both synthesisable the same way).
@@ -141,7 +146,7 @@ Saying no is part of the vision:
    and HUD sizes are all tuned by arithmetic, not by hands. Two sessions of "play, adjust, replay".
 3. ▢ Jumbotron colour swatch for Perfect Match (small, high value).
 4. ▢ End-of-cycle podium moment (the game's missing celebration peak).
-5. ▢ Tension audio layers + crowd reactions.
+5. ▢ Tension audio layers + crowd reactions (the announcer's HURRY UP covers part of this). ✅ partly
 6. ▢ Tip Toe scars; Hex-Drop deck music layer; spinner acceleration.
 7. ▢ **Submission kit:** thumbnail image, 60–90s two-phone demo video, DoraHacks form, two
    scheduled "crown rush hour" events during judging week so judges can meet a crowd.

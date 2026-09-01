@@ -16,6 +16,10 @@ primitives (`MeshRenderer.setBox`) with a hand-picked colour palette defined in 
 The fruit palette is chosen for maximum hue separation so the colours stay distinguishable on a
 small screen in bright light.
 
+## Audio
+- Announcer voice lines from **Kenney's Voiceover Pack** (kenney.nl) — CC0. Ten clips, male voice.
+- All other sound (music beds and cues) synthesised by `tools/make-audio.mjs` in this repo.
+
 ## Design reference
 Round concepts are inspired by the party-game genre (memory-tile, sweeper, disappearing-bridge and
 hex-decay formats are long-standing genre staples). No assets, code or files from any commercial

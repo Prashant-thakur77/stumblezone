@@ -7,7 +7,7 @@
 
 import { engine } from '@dcl/sdk/ecs'
 import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../lib/schedule'
-import { INTRO_SECONDS, GET_READY_SECONDS, PLAY_SECONDS, ROUND_NAMES, SLOT_SECONDS } from '../config'
+import { INTRO_SECONDS, GET_READY_SECONDS, PLAY_SECONDS, ROUND_COUNT, ROUND_NAMES, SLOT_SECONDS } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
 import { resolveBanner } from '../lib/banner'
@@ -16,7 +16,7 @@ import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync
 import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { record, best, formatSeconds } from './records'
-import { play, setMusic } from './audio'
+import { play, setMusic, say } from './audio'
 import { setJumbotron, setConfetti } from '../arena/scenery'
 
 let rounds: Round[] = []
@@ -34,6 +34,8 @@ let firstFinisher = ''
 let outAt = 0
 /** Last whole second we played a countdown tick on, so each tick fires exactly once. */
 let lastTick = -1
+let saidSet = false
+let saidHurry = false
 /** True when we arrived after this round had already started, so nothing here counts. */
 let spectatingOnly = false
 
@@ -75,9 +77,12 @@ function beginSlot(slot: number): void {
   spectator.releaseInput()
   outAt = 0
   lastTick = -1
+  saidSet = false
+  saidHurry = false
 
   active = rounds[roundIndex(slot)]
   active.start(seedForSlot(slot))
+  if (roundIndex(slot) === ROUND_COUNT - 1) say('final_round')
 
   // Joining after the round has already begun means spectating it. Dropping a latecomer onto a
   // half-decayed board is worse than a clear "you're up next" - and it stops the alive count from
@@ -146,6 +151,11 @@ function schedulerSystem(dt: number): void {
         // together and nobody misses the opening seconds crossing scenery.
         void spectator.sendTo(active.spawn())
         spectator.freezeInput()
+        say('ready')
+      }
+      if (!saidSet && GET_READY_SECONDS - playElapsed <= 2) {
+        saidSet = true
+        say('set')
       }
       hud.banner = String(Math.ceil(GET_READY_SECONDS - playElapsed))
       hud.subtitle = 'Get ready!'
@@ -158,10 +168,16 @@ function schedulerSystem(dt: number): void {
       if (!spectator.isOut()) {
         spectator.releaseInput()
         play('go')
+        say('go')
       }
     }
 
     if (spectator.isOut() && outAt === 0) outAt = playElapsed
+
+    if (!saidHurry && hud.roundClock > 0 && hud.roundClock <= 15) {
+      saidHurry = true
+      if (!spectator.isOut()) say('hurry_up')
+    }
 
     active.tick(dt, playElapsed, true)
 
@@ -196,6 +212,16 @@ function schedulerSystem(dt: number): void {
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
     // A round you watched is not a round you played - it must not set a personal best.
     const beatIt = spectatingOnly ? false : record(hud.roundName, survivedMs)
+
+    // One announcer line per result, most specific wins: a sole-survivor win beats a new best,
+    // which beats plain qualification. The eliminated heard "you lose" when they fell.
+    if (!spectatingOnly) {
+      const wonOutright = survived && seen.size > 1 && eliminated.size === seen.size - 1
+      if (wonOutright) say('congratulations')
+      else if (survived && beatIt) say('new_highscore')
+      else if (survived) say('you_win')
+      else say('game_over')
+    }
     hud.resultDetail = spectatingOnly
       ? 'You watched this one. You are in for the next.'
       : seen.size > 1
