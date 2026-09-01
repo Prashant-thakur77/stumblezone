@@ -10,11 +10,28 @@ All gameplay code in `src/` written for this buildathon. No third-party gameplay
 - **tsx** — TypeScript execution for the unit-test runner
 
 ## Art
-No third-party 3D models, textures or audio are used. Every visual in the scene is built from SDK
-primitives (`MeshRenderer.setBox`) with a hand-picked colour palette defined in `src/config.ts`.
+Tiles, walls, bumpers, slabs and pillars are SDK primitives (`MeshRenderer.setBox` / `setCylinder`)
+with a hand-picked colour palette defined in `src/config.ts`. The fruit palette is chosen for
+maximum hue separation so the colours stay distinguishable on a small screen in bright light.
 
-The fruit palette is chosen for maximum hue separation so the colours stay distinguishable on a
-small screen in bright light.
+The decoration is **CC0 models from the OpenDCL catalog** (models.dclregenesislabs.xyz, mirrored
+by `decentraland/sdk-skills`), downloaded into `assets/Models/` and measured with
+`tools/measure-glb.mjs`:
+
+| File | Catalog name | Use |
+|---|---|---|
+| `crown.glb` | crown | the podium crown |
+| `finish-flag.glb` | finish flag | Tip Toe's finish line |
+| `balloons.glb` | balloons | lobby balloons |
+| `confetti.glb` | confetti | the qualified burst |
+| `cloud-puff.glb` | cloud puff | the clouds under the arena |
+| `tree.glb` | tree | lobby and ground trees |
+| `crowd.glb` | crowd | the stadium audience, eight clusters |
+| `searchlight.glb` | small-light-beam | four corner searchlights |
+| `rainbow.glb` | full-rainbow-animation | the backdrop arch |
+| `star.glb` | star | over the title and every jump pad |
+| `lollipop.glb`, `lolli-face.glb` | lollipop, lolli-face-smile | the two lobby characters |
+| `inflatable-pig.glb`, `inflatable-critter.glb` | deco03, deco04 | the lobby inflatables |
 
 ## Audio
 - Announcer voice lines from **Kenney's Voiceover Pack** (kenney.nl) — CC0. Ten clips, male voice.

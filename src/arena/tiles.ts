@@ -105,7 +105,8 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
       }
       Material.setPbrMaterial(e, {
         albedoColor: Color4.create(TILE_NEUTRAL.r, TILE_NEUTRAL.g, TILE_NEUTRAL.b, 1),
-        roughness: 0.8,
+        roughness: 0.35,
+        specularIntensity: 1,
         metallic: 0
       })
 
@@ -127,7 +128,8 @@ export function createTileGrid(opts: TileGridOptions): TileGrid {
     if (index < 0 || index >= entities.length) return
     Material.setPbrMaterial(entities[index], {
       albedoColor: Color4.create(color.r, color.g, color.b, 1),
-      roughness: 0.8,
+      roughness: 0.35,
+      specularIntensity: 1,
       metallic: 0,
       ...(glow > 0
         ? { emissiveColor: Color3.create(color.r, color.g, color.b), emissiveIntensity: glow }

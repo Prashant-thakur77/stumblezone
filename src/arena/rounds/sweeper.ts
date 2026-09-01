@@ -81,7 +81,8 @@ function slab(position: Vector3, scale: Vector3): Entity {
   MeshCollider.setBox(e)
   Material.setPbrMaterial(e, {
     albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
-    roughness: 0.9
+    roughness: 0.45,
+    specularIntensity: 1
   })
   return e
 }

@@ -22,7 +22,7 @@ import {
   EasingFunction
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
-import { buildConfetti, buildCloud, buildTree, setVisible } from './models'
+import { buildConfetti, buildCloud, buildTree, buildCrowd, buildSearchlight, buildRainbow, setVisible } from './models'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -30,7 +30,10 @@ import {
   ARENA_RADIUS,
   GROUND_Y,
   PARTY_COLORS,
-  PLATFORM_COLOR
+  PLATFORM_COLOR,
+  CROWD_SPOTS,
+  SEARCHLIGHT_SPOTS,
+  SEARCHLIGHT_TARGET
 } from '../config'
 
 const PILLAR_COUNT = 12
@@ -43,8 +46,9 @@ function box(position: Vector3, scale: Vector3, color: { r: number; g: number; b
   MeshRenderer.setBox(e)
   Material.setPbrMaterial(e, {
     albedoColor: Color4.create(color.r, color.g, color.b, 1),
-    roughness: 0.85,
+    roughness: 0.5,
     metallic: 0,
+    specularIntensity: 1,
     ...(glow > 0
       ? { emissiveColor: Color3.create(color.r, color.g, color.b), emissiveIntensity: glow }
       : {})
@@ -133,8 +137,27 @@ export function buildScenery(): void {
     })
   }
 
-  // Round banner above the arena. The HUD covers the player looking forward; this covers the
-  // player looking up, across the arena, or down from the ledge.
+  // The stadium (docs/FALLGUYS-PRESENTATION.md, Part 4). A show needs an audience: eight
+  // clusters of floating faces between the pillars, each turned to look at the arena.
+  for (const spot of CROWD_SPOTS) {
+    const faceY = (Math.atan2(ARENA_CENTER_X - spot.x, ARENA_CENTER_Z - spot.z) * 180) / Math.PI
+    buildCrowd(Vector3.create(spot.x, spot.y, spot.z), faceY)
+  }
+
+  // Searchlights on the four parcel corners, sweeping over the arena at slightly different
+  // speeds so the beams cross rather than move in lockstep.
+  SEARCHLIGHT_SPOTS.forEach((spot, i) => {
+    buildSearchlight(
+      Vector3.create(spot.x, spot.y, spot.z),
+      Vector3.create(SEARCHLIGHT_TARGET.x, SEARCHLIGHT_TARGET.y, SEARCHLIGHT_TARGET.z),
+      6 + i * 1.5
+    )
+  })
+
+  // The backdrop: an animated rainbow behind the far edge, facing the lobby and the ledge, high
+  // enough that the pillar ring passes under the arch rather than through it.
+  buildRainbow(Vector3.create(ARENA_CENTER_X, 38, 59.5))
+
   // Cloud puffs ringing the arena at varying heights. They animate on their own, so the sky is
   // never completely still, and they give the sheer drop below the arena a sense of altitude.
   const CLOUDS = 14

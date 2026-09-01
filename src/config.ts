@@ -119,3 +119,23 @@ export const PARTY_COLORS = [
 /** Decorative ground, far below the kill plane so nobody ever lands on it. */
 export const GROUND_Y = 0
 export const ARENA_RADIUS = 26
+
+/**
+ * Stadium dressing (docs/FALLGUYS-PRESENTATION.md, Part 4). Crowd clusters sit between the
+ * pillars, a little above the arena floor so the faces show over the tile edge. Radius 22 rather
+ * than the pillar ring's 26 because a 26m ring at z=36 would poke past the z=64 parcel edge.
+ */
+export const CROWD_SPOTS = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+  const a = ((i * 45 + 22.5) * Math.PI) / 180
+  return { x: ARENA_CENTER_X + Math.cos(a) * 22, y: ARENA_Y + 2.5, z: ARENA_CENTER_Z + Math.sin(a) * 22 }
+})
+
+/** Four searchlights on the parcel corners, aimed at the sky above the arena. */
+export const SEARCHLIGHT_SPOTS = [
+  { x: 4, y: GROUND_Y, z: 4 },
+  { x: 60, y: GROUND_Y, z: 4 },
+  { x: 4, y: GROUND_Y, z: 60 },
+  { x: 60, y: GROUND_Y, z: 60 }
+]
+/** Where every searchlight beam points: above the jumbotron, so the cones cross over the show. */
+export const SEARCHLIGHT_TARGET = { x: ARENA_CENTER_X, y: 70, z: ARENA_CENTER_Z }

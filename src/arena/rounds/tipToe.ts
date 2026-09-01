@@ -79,7 +79,8 @@ function pad(z: number): Entity {
   MeshCollider.setBox(e)
   Material.setPbrMaterial(e, {
     albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
-    roughness: 0.9
+    roughness: 0.35,
+    specularIntensity: 1
   })
   return e
 }

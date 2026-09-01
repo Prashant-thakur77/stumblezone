@@ -27,7 +27,10 @@ import {
   INTRO_SECONDS,
   RESULTS_SECONDS,
   GET_READY_SECONDS,
-  GROUND_Y
+  GROUND_Y,
+  CROWD_SPOTS,
+  SEARCHLIGHT_SPOTS,
+  SEARCHLIGHT_TARGET
 } from '../src/config.ts'
 
 /** The scene is 4x4 parcels. Anything outside these bounds silently fails to render. */
@@ -60,7 +63,9 @@ test('nothing exceeds the scene height limit', () => {
   for (const [name, y] of [
     ['ledge', LEDGE.y],
     ['jumbotron', ARENA_Y + 13],
-    ['pillar tops', 35]
+    ['pillar tops', 35],
+    ['rainbow top', 38 + 27.4],
+    ['searchlight target', SEARCHLIGHT_TARGET.y]
   ] as [string, number][]) {
     assert.ok(y < MAX - 2, `${name} at ${y}m is over the ${MAX.toFixed(0)}m cap`)
   }
@@ -161,4 +166,21 @@ test('the Perfect Match wave schedule fills the play phase without overrunning i
 test('the get-ready freeze fits inside the play phase', () => {
   assert.ok(GET_READY_SECONDS > 0 && GET_READY_SECONDS < PLAY_SECONDS)
   assert.ok(INTRO_SECONDS > GET_READY_SECONDS, 'intro must be longer than the freeze that follows it')
+})
+
+test('the stadium dressing stays inside the parcels', () => {
+  // Crowd clusters are ~4m across and searchlight bases ~5m, so anything closer than 2m to an
+  // edge would hang over into the neighbour's parcel and be clipped by the client.
+  for (const [name, spots] of [
+    ['crowd', CROWD_SPOTS],
+    ['searchlight', SEARCHLIGHT_SPOTS]
+  ] as [string, { x: number; y: number; z: number }[]][]) {
+    for (const s of spots) {
+      assert.ok(s.x >= 2 && s.x <= 62, `${name} at x=${s.x.toFixed(1)} is on the parcel edge`)
+      assert.ok(s.z >= 2 && s.z <= 62, `${name} at z=${s.z.toFixed(1)} is on the parcel edge`)
+      assert.ok(s.y >= GROUND_Y && s.y < 81, `${name} at y=${s.y.toFixed(1)} is out of the world`)
+    }
+  }
+  assert.equal(CROWD_SPOTS.length, 8)
+  assert.equal(SEARCHLIGHT_SPOTS.length, 4)
 })

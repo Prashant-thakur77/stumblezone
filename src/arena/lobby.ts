@@ -25,7 +25,7 @@ import {
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, LOBBY, LEDGE, PLATFORM_COLOR, PARTY_COLORS } from '../config'
 import { standings, showStandings, displayName } from '../net/crowns'
-import { buildCrown, buildBalloons, buildTree } from './models'
+import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInflatable } from './models'
 import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
 
@@ -58,7 +58,8 @@ function slab(position: Vector3, scale: Vector3): Entity {
   MeshCollider.setBox(e)
   Material.setPbrMaterial(e, {
     albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
-    roughness: 0.9
+    roughness: 0.45,
+    specularIntensity: 1
   })
   return e
 }
@@ -83,6 +84,15 @@ export function buildLobby(): void {
 
   crownBoard = sign('CROWNS', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y + 4, SIGN_Z), 2)
   scheduleBoard = sign('NEXT UP', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y + 4, SIGN_Z), 2)
+
+  // Toys (docs/FALLGUYS-PRESENTATION.md, Part 4). A spinning star crowns the title, two smiling
+  // lollipops flank it, and a pair of inflatables sit in the back corners: things with faces and
+  // things that look soft, which is what tells a newcomer this is a place to fall over safely.
+  buildStar(Vector3.create(ARENA_CENTER_X, LOBBY.y + 7.4, SIGN_Z), 1.6)
+  buildLolli(Vector3.create(ARENA_CENTER_X - 6.5, LOBBY.y, SIGN_Z + 0.5), 0.45, 0)
+  buildLolli(Vector3.create(ARENA_CENTER_X + 6.5, LOBBY.y, SIGN_Z + 0.5), 0.45, 0)
+  buildInflatable('pig', Vector3.create(ARENA_CENTER_X - 9, LOBBY.y, LOBBY.z - 3.5), 35)
+  buildInflatable('critter', Vector3.create(ARENA_CENTER_X + 9, LOBBY.y, LOBBY.z - 3.5), -35)
 
   // The podium. A physical place the leader's name appears is worth more than another line on a
   // board - it gives the crowd something to gather round and someone to point at between rounds.
@@ -170,9 +180,12 @@ function buildJumpPads(): void {
     })
     MeshRenderer.setBox(e)
     MeshCollider.setBox(e)
+    // A spinning star hovers over every pad: "bounce here", with no sign to read.
+    buildStar(Vector3.create(x, LOBBY.y + 2.6, z), 0.8)
     Material.setPbrMaterial(e, {
       albedoColor: Color4.create(padColor.r, padColor.g, padColor.b, 1),
-      roughness: 0.5,
+      roughness: 0.35,
+      specularIntensity: 1,
       emissiveColor: Color3.create(padColor.r, padColor.g, padColor.b),
       emissiveIntensity: 0.9
     })
