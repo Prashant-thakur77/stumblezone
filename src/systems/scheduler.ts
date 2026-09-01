@@ -7,13 +7,14 @@
 
 import { engine } from '@dcl/sdk/ecs'
 import { slotIndex, slotElapsed, roundIndex, phaseAt, seedForSlot } from '../lib/schedule'
-import { INTRO_SECONDS, GET_READY_SECONDS, ROUND_NAMES, SLOT_SECONDS } from '../config'
+import { INTRO_SECONDS, GET_READY_SECONDS, PLAY_SECONDS, ROUND_NAMES, SLOT_SECONDS } from '../config'
 import { Round } from '../arena/rounds/types'
 import { hud } from '../ui/state'
 import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
 import { award, CROWN_SURVIVE, CROWN_WIN, CROWN_FIRST_FINISHER, setName } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
+import { record, best, formatSeconds } from './records'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -26,6 +27,8 @@ let scored = false
 let seen = new Set<string>()
 let eliminated = new Set<string>()
 let firstFinisher = ''
+/** When the local player's run in this slot ended, in seconds into the play phase. */
+let outAt = 0
 
 export function setupScheduler(roundList: Round[]): void {
   rounds = roundList
@@ -61,10 +64,20 @@ function beginSlot(slot: number): void {
 
   spectator.resetForSlot()
   spectator.releaseInput()
-  spectator.sendToLobby()
+  outAt = 0
 
   active = rounds[roundIndex(slot)]
   active.start(seedForSlot(slot))
+
+  // Joining after the round has already begun means spectating it. Dropping a latecomer onto a
+  // half-decayed board is worse than a clear "you're up next" - and it stops the alive count from
+  // claiming a player who never actually played.
+  const joinedLate = slotElapsed(Date.now()) > INTRO_SECONDS + GET_READY_SECONDS
+  if (joinedLate) {
+    spectator.spectateOnly()
+  } else {
+    spectator.sendToLobby()
+  }
 }
 
 function schedulerSystem(dt: number): void {
@@ -85,8 +98,15 @@ function schedulerSystem(dt: number): void {
   if (phase === 'intro') {
     const next = Math.ceil(INTRO_SECONDS - elapsed)
     active.tick(dt, 0, false)
-    hud.banner = next <= 5 ? String(next) : hud.banner
-    hud.subtitle = next <= 5 ? 'Get ready!' : hud.subtitle
+    // The hint is the whole of onboarding for a first-timer, so it stays up for most of the intro
+    // and only yields to the countdown in the last five seconds.
+    if (next <= 5) {
+      hud.banner = String(next)
+      hud.subtitle = 'Get ready!'
+    } else {
+      hud.banner = active.name
+      hud.subtitle = active.hint
+    }
     return
   }
 
@@ -98,6 +118,10 @@ function schedulerSystem(dt: number): void {
     if (playElapsed < GET_READY_SECONDS) {
       if (!frozen) {
         frozen = true
+        // Place everyone on the mark, then freeze. The lobby and the arena are separate spaces on
+        // purpose - players are teleported in rather than walking, so the field always starts
+        // together and nobody misses the opening seconds crossing scenery.
+        void spectator.sendTo(active.spawn())
         spectator.freezeInput()
       }
       hud.banner = String(Math.ceil(GET_READY_SECONDS - playElapsed))
@@ -110,6 +134,8 @@ function schedulerSystem(dt: number): void {
       if (!spectator.isOut()) spectator.releaseInput()
     }
 
+    if (spectator.isOut() && outAt === 0) outAt = playElapsed
+
     active.tick(dt, playElapsed, true)
     return
   }
@@ -120,17 +146,27 @@ function schedulerSystem(dt: number): void {
     const survived = !spectator.isOut()
     if (survived) {
       award(myAddress(), CROWN_SURVIVE)
-      // Sole survivor takes the round.
+      // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is
+      // worth a crown, but it is not a win.
       if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN)
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
+
+    const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
+    const beatIt = record(hud.roundName, survivedMs)
+    hud.resultDetail = seen.size > 1
+      ? (survived ? '+1 crown' : eliminated.size + ' of ' + seen.size + ' went down')
+      : beatIt
+        ? 'New best! ' + formatSeconds(survivedMs)
+        : formatSeconds(survivedMs) + '  ·  best ' + formatSeconds(best(hud.roundName))
+
     spectator.releaseInput()
     spectator.sendToLobby()
   }
 
   active.tick(dt, SLOT_SECONDS, false)
   hud.banner = spectator.isOut() ? 'ELIMINATED' : 'SURVIVED'
-  hud.subtitle = 'Next round in ' + Math.ceil(remaining) + 's'
+  hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
 }
 
 /** What is coming up, for the lobby schedule sign. */

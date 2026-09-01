@@ -65,6 +65,20 @@ export function loseLife(): boolean {
   return true
 }
 
+/**
+ * Sit this round out without being counted as eliminated by anyone else.
+ *
+ * Used for mid-round joiners: they watch from the ledge and are back in for the next slot, but no
+ * `eliminated` message goes out, because they were never in the field to begin with.
+ */
+export function spectateOnly(): void {
+  out = true
+  void sendTo(LEDGE)
+  InputModifier.createOrReplace(engine.PlayerEntity, {
+    mode: InputModifier.Mode.Standard({ disableAll: true })
+  })
+}
+
 export function eliminate(): void {
   if (out) return
   out = true

@@ -70,8 +70,10 @@ export type SweeperWave = {
 /** Wall speed in metres per second, escalating each wave, with a seeded gap position. */
 export function sweeperWaves(seed: number): SweeperWave[] {
   const rng = mulberry32(seed ^ 0x5eed)
-  const BASE_SPEED = 3.0
-  const STEP = 0.9
+  // Tuned against DCL avatar locomotion (~2 m/s walking) and touch reaction time. At the old
+  // 3.0 + 0.9 the final wave closed every 1.6s, which no joystick player can read in time.
+  const BASE_SPEED = 2.2
+  const STEP = 0.5
   return [0, 1, 2, 3].map((i) => ({
     speed: BASE_SPEED + i * STEP,
     gapCol: Math.floor(rng() * SWEEPER_COLUMNS)

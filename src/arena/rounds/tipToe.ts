@@ -4,8 +4,8 @@
 // round. That permanence is the round's whole social point: whoever goes first burns themselves
 // revealing the path for everyone behind, so a first-finisher bonus exists to make leading worth it.
 
-import { engine, Transform } from '@dcl/sdk/ecs'
-import { Vector3 } from '@dcl/sdk/math'
+import { engine, Entity, Transform, MeshRenderer, MeshCollider, Material, VisibilityComponent } from '@dcl/sdk/ecs'
+import { Vector3, Color4 } from '@dcl/sdk/math'
 import { createTileGrid, TileGrid } from '../tiles'
 import { tipToeFakes } from '../../lib/layouts'
 import {
@@ -16,7 +16,8 @@ import {
   TIPTOE_LENGTH,
   TILE_SIZE,
   TILE_NEUTRAL,
-  PLATFORM_COLOR
+  PLATFORM_COLOR,
+  TILE_WARNING
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -26,16 +27,43 @@ import { emitTile, onTile, emitFinished } from '../../net/sync'
 const DECAY_MS = 400
 
 let grid: TileGrid
+/** Solid ground at both ends. Without these the bridge floats in mid-air with no way on or off. */
+let startPad: Entity
+let finishPad: Entity
 let fakes: boolean[] = []
 let pending: { index: number; at: number }[] = []
 let clock = 0
 let finished = false
 let startAt = 0
 
-/** Just before the first row, where a fallen player is put back. */
+const PAD_DEPTH = 6
+
+function firstRowZ(): number {
+  return grid.homes[0].z
+}
+
+function lastRowZ(): number {
+  return grid.homes[grid.homes.length - 1].z
+}
+
+/** On the start pad, where a fallen player is put back. */
 function startSpot(): Vector3 {
-  const h = grid.homes[Math.floor(TIPTOE_WIDTH / 2)]
-  return Vector3.create(h.x, h.y + 2, h.z - TILE_SIZE * 2)
+  return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, firstRowZ() - PAD_DEPTH / 2 - TILE_SIZE / 2)
+}
+
+function pad(z: number): Entity {
+  const e = engine.addEntity()
+  Transform.create(e, {
+    position: Vector3.create(ARENA_CENTER_X, ARENA_Y - 0.25, z),
+    scale: Vector3.create(TIPTOE_WIDTH * (TILE_SIZE + 0.15) + 2, 0.5, PAD_DEPTH)
+  })
+  MeshRenderer.setBox(e)
+  MeshCollider.setBox(e)
+  Material.setPbrMaterial(e, {
+    albedoColor: Color4.create(PLATFORM_COLOR.r, PLATFORM_COLOR.g, PLATFORM_COLOR.b, 1),
+    roughness: 0.9
+  })
+  return e
 }
 
 function step(index: number): void {
@@ -43,11 +71,16 @@ function step(index: number): void {
   if (!fakes[index]) return
   if (pending.some((p) => p.index === index)) return
   pending.push({ index, at: clock + DECAY_MS })
-  grid.setColor(index, PLATFORM_COLOR)
+  grid.setColor(index, TILE_WARNING)
 }
 
 export const tipToe: Round = {
   name: 'Tip Toe',
+  hint: 'Half the tiles are fake. Whoever leads finds them the hard way.',
+
+  spawn() {
+    return startSpot()
+  },
 
   build() {
     grid = createTileGrid({
@@ -56,7 +89,10 @@ export const tipToe: Round = {
       center: Vector3.create(ARENA_CENTER_X, ARENA_Y, ARENA_CENTER_Z),
       tileSize: TILE_SIZE
     })
+    startPad = pad(grid.homes[0].z - PAD_DEPTH / 2 - TILE_SIZE / 2)
+    finishPad = pad(grid.homes[grid.homes.length - 1].z + PAD_DEPTH / 2 + TILE_SIZE / 2)
     grid.setVisible(false)
+    setPadsVisible(false)
     onTile((p, isSelf) => {
       if (!isSelf) step(p.tileId)
     })
@@ -69,6 +105,7 @@ export const tipToe: Round = {
     finished = false
     startAt = 0
     grid.setVisible(true)
+    setPadsVisible(true)
     grid.resetAll()
     grid.setAllColors(TILE_NEUTRAL)
     onFall(() => {
@@ -103,9 +140,8 @@ export const tipToe: Round = {
       emitTile(index)
     }
 
-    // Past the far edge of the last row is the finish line.
-    const lastRowZ = grid.homes[grid.homes.length - 1].z
-    if (t.position.z > lastRowZ + TILE_SIZE) {
+    // Reaching the finish pad ends your run.
+    if (t.position.z > lastRowZ() + TILE_SIZE) {
       finished = true
       emitFinished(Math.round((elapsed - startAt) * 1000))
       setBanner('FINISHED!', '')
@@ -114,6 +150,18 @@ export const tipToe: Round = {
 
   stop() {
     grid.setVisible(false)
+    setPadsVisible(false)
     pending = []
+  }
+}
+
+function setPadsVisible(visible: boolean): void {
+  for (const e of [startPad, finishPad]) {
+    VisibilityComponent.createOrReplace(e, { visible })
+    if (visible) {
+      if (!MeshCollider.has(e)) MeshCollider.setBox(e)
+    } else {
+      MeshCollider.deleteFrom(e)
+    }
   }
 }

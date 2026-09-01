@@ -43,7 +43,14 @@ export const ARENA_CENTER_Z = 36
 
 /** Play surface height. Falling below KILL_Y counts as a fall. */
 export const ARENA_Y = 4
-export const KILL_Y = -1
+
+/**
+ * Must sit well below the LOWEST standable surface in any round - which is Hex-Drop's second
+ * layer at ARENA_Y - HEX_LAYER_GAP. At -1 it was level with that layer, so simply standing on
+ * the lower deck was a coin flip between playing on and being eliminated.
+ */
+export const HEX_LAYER_GAP = 4
+export const KILL_Y = -6
 
 /** Eliminated players watch from here. High enough to see the whole arena. */
 export const LEDGE = { x: 32, y: 13, z: 8 }
@@ -66,6 +73,8 @@ export const FRUIT_COLORS = [
 export const FRUIT_NAMES = ['RED', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
 
 export const TILE_NEUTRAL = { r: 0.93, g: 0.93, b: 0.9 }
+/** A tile that has been stepped on and is about to give way. Reads as danger at a glance. */
+export const TILE_WARNING = { r: 0.98, g: 0.55, b: 0.15 }
 export const TILE_FAKE_HINT = { r: 0.85, g: 0.85, b: 0.82 }
 export const WALL_COLOR = { r: 0.99, g: 0.42, b: 0.31 }
 export const PLATFORM_COLOR = { r: 0.55, g: 0.76, b: 0.88 }

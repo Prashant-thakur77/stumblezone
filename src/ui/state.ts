@@ -12,6 +12,8 @@ export type HudState = {
   lives: number
   out: boolean
   alive: number
+  /** Result-phase detail line: crowns won, or the solo time and personal best. */
+  resultDetail: string
 }
 
 export const hud: HudState = {
@@ -21,7 +23,8 @@ export const hud: HudState = {
   countdown: 0,
   lives: 3,
   out: false,
-  alive: 1
+  alive: 1,
+  resultDetail: ''
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

@@ -11,7 +11,14 @@
 import { engine, Transform } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { createTileGrid, TileGrid } from '../tiles'
-import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, PLATFORM_COLOR, TILE_NEUTRAL } from '../../config'
+import {
+  ARENA_CENTER_X,
+  ARENA_CENTER_Z,
+  ARENA_Y,
+  HEX_LAYER_GAP,
+  TILE_NEUTRAL,
+  TILE_WARNING
+} from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { eliminate, isOut, onFall } from '../../systems/spectator'
@@ -22,7 +29,6 @@ const ROWS = 12
 const HEX_SIZE = 2
 /** Grace between a step and the tile giving way. Long enough to run across, short enough to fear. */
 const DECAY_MS = 500
-const LAYER_GAP = 5
 
 type Pending = { layer: number; index: number; at: number }
 
@@ -39,18 +45,23 @@ function markStepped(layer: number, index: number): void {
   if (layers[layer].isSunk(index)) return
   if (pending.some((p) => p.layer === layer && p.index === index)) return
   pending.push({ layer, index, at: clock + DECAY_MS })
-  layers[layer].setColor(index, PLATFORM_COLOR)
+  layers[layer].setColor(index, TILE_WARNING)
 }
 
 export const hexDrop: Round = {
   name: 'Hex-Drop',
+  hint: 'Every tile you touch falls away. Keep moving.',
+
+  spawn() {
+    return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)
+  },
 
   build() {
     layers = [0, 1].map((l) =>
       createTileGrid({
         cols: COLS,
         rows: ROWS,
-        center: Vector3.create(ARENA_CENTER_X, ARENA_Y - l * LAYER_GAP, ARENA_CENTER_Z),
+        center: Vector3.create(ARENA_CENTER_X, ARENA_Y - l * HEX_LAYER_GAP, ARENA_CENTER_Z),
         tileSize: HEX_SIZE,
         gap: 0.2,
         stagger: true,
@@ -103,7 +114,7 @@ export const hexDrop: Round = {
 
     // Which layer are we standing on? Whichever one is just below our feet.
     for (let l = 0; l < layers.length; l++) {
-      const surfaceY = ARENA_Y - l * LAYER_GAP
+      const surfaceY = ARENA_Y - l * HEX_LAYER_GAP
       if (t.position.y < surfaceY - 0.2 || t.position.y > surfaceY + 3) continue
       const index = layers[l].indexAt(t.position)
       if (index < 0 || layers[l].isSunk(index)) continue

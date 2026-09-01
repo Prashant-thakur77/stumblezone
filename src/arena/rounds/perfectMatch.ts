@@ -24,7 +24,9 @@ import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
 const WAVES = 3
 const WAVE_SECONDS = 25
 const BLANK_SECONDS = 1
-const CALL_SECONDS = 3
+// Long enough to cross the 15m grid at walking pace after the colour is called. At 3s this round
+// was unwinnable for anyone standing on the far side of the board.
+const CALL_SECONDS = 6
 
 let grid: TileGrid
 let seed = 0
@@ -40,6 +42,11 @@ function safeSpot(wave: PerfectMatchWave): Vector3 {
 
 export const perfectMatch: Round = {
   name: 'Perfect Match',
+  hint: 'Memorise the colours. When one is called, stand on it.',
+
+  spawn() {
+    return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)
+  },
 
   build() {
     grid = createTileGrid({

@@ -74,6 +74,11 @@ function buildSlab(): Entity {
 
 export const sweeper: Round = {
   name: 'Sweeper Gates',
+  hint: 'Walls sweep across. Get through the gap, keep your hearts.',
+
+  spawn() {
+    return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z - PLATFORM_SIZE / 2 + 3)
+  },
 
   build() {
     platform = engine.addEntity()
