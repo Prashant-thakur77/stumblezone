@@ -13,6 +13,7 @@ import { buildHall } from './arena/hall'
 import { buildCannon } from './arena/cannon'
 import { buildSky } from './arena/sky'
 import { buildDrop } from './arena/drop'
+import { buildHost } from './arena/host'
 import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
@@ -40,6 +41,7 @@ export function main() {
   buildCannon()
   buildSky()
   buildDrop()
+  buildHost()
   initSpectator()
   initHats()
   setupHud()

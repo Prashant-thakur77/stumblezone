@@ -35,3 +35,7 @@ export function errandLine(): string {
   const next = errands.next()
   return 'ERRANDS ' + errands.count() + '/' + ERRANDS.length + ' - next: ' + (next ? next.text : '')
 }
+
+export function errandNext(): { id: ErrandId; text: string } | null {
+  return errands.next()
+}
