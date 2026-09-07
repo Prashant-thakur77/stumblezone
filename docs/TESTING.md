@@ -201,3 +201,15 @@ none of it can be caught in the desktop preview.
       a heart at once; running out of time costs one at the end. The emote wheel counts too.
 - [ ] Results card shows "BEAT THE HOUSE +1" when you outlasted the house time, or the house time
       you missed. Alone, this is the line that gives the round a score.
+
+**Later on 09-08**
+- [ ] Other players show by real name in the feed and on the boards, not as 0x addresses.
+- [ ] "<name> joined the show" / "left" appear in the feed on the other device.
+- [ ] A SHIELD shows as a blue bubble around you (visible on the other device); BOOST shows a star
+      over your name tag.
+- [ ] The results card ends with "NEXT: <round> in Ns" and, after a rival round, "vs <name> this
+      show: 2-1".
+- [ ] While climbing the tower or running the lap, a green stopwatch pill counts under the round tag.
+- [ ] After a finale: ENCORE toast, pose buttons open for everyone for fifteen seconds.
+- [ ] Copycat's coach is dancing on the stage during the round card; the jumbotron shows the crowd
+      favourite once anyone picks.
