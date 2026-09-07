@@ -6,6 +6,7 @@
 import { buildLobby } from './arena/lobby'
 import { buildVillage } from './arena/village'
 import { buildTower } from './arena/tower'
+import { buildRing } from './arena/ring'
 import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
@@ -26,6 +27,7 @@ export function main() {
   buildLobby()
   buildVillage()
   buildTower()
+  buildRing()
   initSpectator()
   initHats()
   setupHud()

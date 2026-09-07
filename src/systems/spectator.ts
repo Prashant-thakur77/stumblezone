@@ -50,6 +50,11 @@ export function roundClockMs(): number {
   return liveSinceMs === 0 ? 0 : Date.now() - liveSinceMs
 }
 
+/** True between the whistle and the end of play. Village toys stay out of a live round. */
+export function isRoundLive(): boolean {
+  return roundLive
+}
+
 export function livesLeft(): number {
   return lives
 }

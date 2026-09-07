@@ -118,6 +118,16 @@ export const STAR_SPOTS = [
   { x: 40, z: 15.5 }
 ]
 export const STARS_PER_DAY = 5
+// --- The ring road ----------------------------------------------------------
+//
+// Two lanes down the sides of the stadium and a plaza in each north corner, all at village
+// height. The pillars stand at radius 26 from the arena centre (x 6..58), so both lanes and both
+// plazas are clear of them - at five metres wide. Six put the west kerb inside the 180-degree pillar.
+export const WEST_LANE = { x: 2.5, z: 40, width: 5, depth: 44 }
+export const EAST_LANE = { x: 61.5, z: 40, width: 5, depth: 44 }
+export const NW_PLAZA = { x: 4, z: 60, size: 8 }
+export const NE_PLAZA = { x: 60, z: 60, size: 8 }
+
 /** The Stumble Tower: a spiral of platforms in the west corner, climbed against the clock. */
 export const TOWER = { x: 2.6, z: 12, radius: 2.1, steps: 12, rise: 1.05, stepDegrees: 55 }
 
