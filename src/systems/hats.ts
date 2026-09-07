@@ -14,10 +14,6 @@ import { errandDone } from './errands'
 
 let worn = ''
 
-export function myHat(): string {
-  return worn
-}
-
 export function hatStats(): HatStats {
   const s = session.stats()
   return {

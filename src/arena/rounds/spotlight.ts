@@ -17,8 +17,8 @@ import {
   GltfContainer
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
-import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, DISC_RADIUS } from '../../config'
-import { spotCentre, spotCount, SpotTracker, SPOT_RADIUS, SPOT_THIRD_AT, inBlackout, BLACKOUT_AT } from '../../lib/spotlight'
+import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y } from '../../config'
+import { spotCentre, spotCount, SpotTracker, SPOT_RADIUS, SPOT_THIRD_AT, inBlackout } from '../../lib/spotlight'
 import { buildDisc, setDiscVisible } from '../disc'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'

@@ -48,10 +48,7 @@ function showBoostStar(on: boolean): void {
   }
 }
 
-/** The shield bubble follows the spectator's shield state; called from the tick. */
-export function setShieldVisual(on: boolean): void {
-  showBubble(on)
-}
+
 
 function buildRig(): { star: Entity; ring: Entity } {
   const star = buildStar(Vector3.create(0, ARENA_Y + 1.4, 0), 0.6)

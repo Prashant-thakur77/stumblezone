@@ -20,7 +20,7 @@
 // QUALIFIED / ELIMINATED. Every plate is a tinted PNG (see parts.tsx): the mobile client does not
 // render `borderRadius`, and this HUD has to look right on a phone first.
 
-import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
+import ReactEcs, { ReactEcsRenderer, UiEntity, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
 import { cheer, boo, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'

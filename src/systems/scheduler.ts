@@ -21,7 +21,6 @@ import {
   INTRO_SECONDS,
   GET_READY_SECONDS,
   PLAY_SECONDS,
-  ROUND_COUNT,
   ROUND_NAMES,
   SLOT_SECONDS,
   WARMUP_SECONDS,
@@ -38,7 +37,6 @@ import * as spectator from './spectator'
 import { bindSlotSource, onEliminated, onFinished, myAddress } from '../net/sync'
 import {
   award,
-  standings,
   showStandings,
   showRank,
   syncShow,
@@ -74,7 +72,7 @@ import { feed, toast } from './feed'
 import { hype } from './hype'
 import { Streaks } from '../lib/streak'
 import { refreshCosmetics } from './cosmetics'
-import { fieldLine, rivalry } from '../lib/field'
+import { fieldLine, rivalry, nearestRival } from '../lib/field'
 import { dailyFor, dailyDone, dayIndex, DAILY_CROWNS } from '../lib/daily'
 import { bonusesFor } from '../lib/bonus'
 
@@ -630,26 +628,16 @@ function schedulerSystem(dt: number): void {
     if (!spectatingOnly && seen.size > 1) {
       const others = [...seen]
         .filter((a) => a !== myAddress())
-        .map((a) => ({ name: displayName(a), outMs: outMs.has(a) ? (outMs.get(a) as number) : null }))
-      const line = rivalry({ name: 'you', outMs: survived ? null : Math.round(outAt * 1000) }, others)
+        .map((a) => ({ name: displayName(a), outMs: outMs.get(a) ?? null, address: a }))
+      const me = { name: 'you', outMs: survived ? null : Math.round(outAt * 1000) }
+      const line = rivalry(me, others)
       if (line !== '') hud.resultDetail += '  ·  ' + line
-      // The GG goes to the same person: nearest to you on the clock.
-      const mine = survived ? Infinity : Math.round(outAt * 1000)
-      let best = Infinity
-      for (const a of seen) {
-        if (a === myAddress()) continue
-        const t = outMs.has(a) ? (outMs.get(a) as number) : Infinity
-        const d = mine === Infinity && t === Infinity ? 0 : Math.abs(t - mine)
-        if (d < best) {
-          best = d
-          rivalAddress = a
-        }
-      }
-      hud.ggTo = rivalAddress === '' ? '' : displayName(rivalAddress)
-      if (rivalAddress !== '') {
-        const theirs = outMs.has(rivalAddress) ? (outMs.get(rivalAddress) as number) : Infinity
-        // A tie (both survived) counts for nobody.
-        if (mine !== theirs) h2h.record(rivalAddress, mine > theirs)
+      // The GG and the head-to-head go to the same person the line named.
+      const near = nearestRival(me, others)
+      if (near && near.rival.address) {
+        rivalAddress = near.rival.address
+        hud.ggTo = displayName(rivalAddress)
+        h2h.record(rivalAddress, near.beaten)
         const score = h2h.score(rivalAddress)
         if (score !== '') hud.resultDetail += '  ·  vs ' + displayName(rivalAddress) + ' this show: ' + score
       }
@@ -673,7 +661,7 @@ function schedulerSystem(dt: number): void {
       play('crown')
       say('congratulations')
       // The one moment somebody is most likely to tell a friend about this is the moment they win.
-      if (rank === 0) hud.resultDetail = 'SHOW CHAMPION  ·  Bring a friend: ' + SHARE_URL
+      if (rank === 0) hud.resultDetail = 'SHOW CHAMPION  ·  Bring a friend: ' + SHARE_URL + '  ·  ' + hud.resultDetail
     } else {
       spectator.sendToLobby()
     }
@@ -723,11 +711,6 @@ export function sendGG(): void {
   hud.ggSent = true
   emitGG(rivalAddress)
   toast('GG sent to ' + displayName(rivalAddress))
-}
-
-/** Your own qualifying streak, for the title under your standing. */
-export function myStreak(): number {
-  return streaks.streak(myAddress())
 }
 
 function ordinal(n: number): string {

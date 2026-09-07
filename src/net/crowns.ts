@@ -91,10 +91,6 @@ export function standings(limit = 10): { address: string; crowns: number }[] {
     .slice(0, limit)
 }
 
-export function totalPlayers(): number {
-  return crowns.size
-}
-
 /**
  * Merge a peer's tally into ours, taking the higher count per player.
  *

@@ -24,7 +24,6 @@ import {
   Font,
   Billboard,
   BillboardMode,
-  GltfContainer,
   AudioSource
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'

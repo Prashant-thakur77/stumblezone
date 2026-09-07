@@ -12,7 +12,6 @@ import {
   Entity,
   Transform,
   MeshRenderer,
-  MeshCollider,
   Material,
   VisibilityComponent,
   TriggerArea,
