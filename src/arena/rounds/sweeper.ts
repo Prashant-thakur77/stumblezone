@@ -220,7 +220,8 @@ export const sweeper: Round = {
   // Walls, waves, lights and beams all come from the seed and the clock - a latecomer sees
   // exactly what everyone else sees, so they play rather than wait.
   joinSafe: true,
-  pickupRadius: 12,
+  // The floor is two end strips and a 10m causeway; only the causeway is a disc around the centre.
+  pickupRadius: 4.5,
   hint: 'Dodge the walls.',
   twist: 'Walls speed up every wave',
 

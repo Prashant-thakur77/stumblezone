@@ -33,3 +33,20 @@ export function jumpBarBeams(seed: number): { angle: number; direction: 1 | -1 }
     { angle: (first + 90) % 360, direction: -1 }
   ]
 }
+
+/**
+ * Where a beam is at `elapsed`, in degrees, from its seeded start: the integral of the speed ramp,
+ * reversed after JUMPBAR_REVERSE_AT. The engine turns the beam between ticks; this is what every
+ * client resets the pivot to every few seconds, so a latecomer or a hitching phone sees the same
+ * beam everyone else does.
+ */
+export function jumpBarAngle(base: number, direction: 1 | -1, elapsed: number): number {
+  const travelled = (t: number) => {
+    const c = Math.min(Math.max(t, 0), PLAY_SECONDS)
+    // integral of MIN + (MAX-MIN) * t / PLAY from 0 to c, plus the flat tail past PLAY
+    return MIN_SPEED * c + ((MAX_SPEED - MIN_SPEED) * c * c) / (2 * PLAY_SECONDS) + Math.max(0, t - PLAY_SECONDS) * MAX_SPEED
+  }
+  const forward = travelled(Math.min(elapsed, JUMPBAR_REVERSE_AT))
+  const back = elapsed > JUMPBAR_REVERSE_AT ? travelled(elapsed) - travelled(JUMPBAR_REVERSE_AT) : 0
+  return (((base + direction * (forward - back)) % 360) + 360) % 360
+}

@@ -175,7 +175,12 @@ export const spotlight: Round = {
       setBanner('THIRD LIGHT', 'And they are faster now')
     }
 
-    if (!playing || isOut()) return
+    if (!playing || isOut()) {
+      // Nothing is hunting you: no pool stays red, and no timer keeps counting.
+      for (let i = 0; i < spots.length; i++) paint(spots[i], false)
+      tracker = new SpotTracker()
+      return
+    }
 
     const t = Transform.getOrNull(engine.PlayerEntity)
     if (!t) return

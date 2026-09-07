@@ -23,6 +23,7 @@ export type Standings = { slot: number; address: string; crowns: [string, number
 export type Wear = { slot: number; address: string; hat: string }
 export type GG = { slot: number; address: string; to: string }
 export type Pick = { slot: number; address: string; to: string }
+export type Here = { slot: number; address: string }
 
 /** Stable identity for this client. Falls back to a per-session id for guests. */
 let cachedAddress = ''
@@ -139,4 +140,16 @@ export function emitPick(to: string): void {
 }
 export function onPick(cb: (p: Pick, isSelf: boolean) => void): void {
   on<Pick>('pick', cb)
+}
+
+// --- Presence ---------------------------------------------------------------
+// "I am in this round." Without it, a client only learns of a player when they fall or finish,
+// and everything that counts the field - picks, FINAL TWO, the named readout - runs on the
+// players who are already out. Sent at every slot start by everyone who is playing, and again in
+// reply to a newcomer's hello, so a latecomer learns the field within a frame.
+export function emitHere(): void {
+  bus.emit('here', { slot: currentSlot(), address: myAddress() } as Here)
+}
+export function onHere(cb: (p: Here, isSelf: boolean) => void): void {
+  on<Here>('here', cb)
 }

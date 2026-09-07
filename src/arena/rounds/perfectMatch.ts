@@ -51,7 +51,8 @@ let revealed = -1
 let switchedOn = -1
 
 function safeSpot(wave: PerfectMatchWave): Vector3 {
-  const i = wave.fruits.indexOf(wave.target)
+  // After a SWITCH the original colour is gone; the respawn tile must be one that survived.
+  const i = wave.fruits.indexOf(effectiveTarget(wave, 0))
   return Vector3.create(grid.homes[i].x, grid.homes[i].y + 2, grid.homes[i].z)
 }
 

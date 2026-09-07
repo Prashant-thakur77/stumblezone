@@ -66,7 +66,15 @@ function refreshSign(): void {
 
 /** The running climb, as a stopwatch, or '' when the clock is not running. */
 export function towerClock(): string {
-  return startedAt === 0 ? '' : formatTime(Date.now() - startedAt)
+  if (startedAt === 0) return ''
+  // Abandoned: two minutes, or wandering off. Walking across the base pad is not a climb.
+  const t = Transform.getOrNull(engine.PlayerEntity)
+  const far = t ? Math.hypot(t.position.x - TOWER.x, t.position.z - TOWER.z) > 9 : false
+  if (Date.now() - startedAt > 120000 || far) {
+    startedAt = 0
+    return ''
+  }
+  return formatTime(Date.now() - startedAt)
 }
 
 /** "TOWER BEST 0:41.7" for the lobby board, or an invitation if nobody has climbed it. */

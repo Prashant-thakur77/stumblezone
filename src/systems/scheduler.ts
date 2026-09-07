@@ -63,7 +63,7 @@ import { beatTheHouse, HOUSE_CROWNS } from '../lib/house'
 import { HeadToHead } from '../lib/rivals'
 import { towerClock } from '../arena/tower'
 import { lapClock } from '../arena/lap'
-import { emitGG, onGG, emitPick, onPick } from '../net/sync'
+import { emitGG, onGG, emitPick, onPick, emitHere, onHere } from '../net/sync'
 import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
 import { flyover } from './camera'
 import { play, setMusic, setCrowd, setCrowdLevel, say } from './audio'
@@ -97,6 +97,10 @@ let saidHurry = false
 let spectatingOnly = false
 /** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
 let joinedLive = false
+/** Seconds into play when a live latecomer arrived, for their own warm-up window. */
+let joinedAtPlay = 0
+/** Whom we have already replied to with our own presence this slot. */
+let greeted = new Set<string>()
 /** Throttle for the standing line and the hat rows: both sort or filter, neither changes often. */
 let sinceLine = 1
 /** Rounds won and lost against each rival this show. */
@@ -154,6 +158,17 @@ export function setupScheduler(roundList: Round[]): void {
 
   const me = getPlayer()
   if (me && me.name) setName(myAddress(), me.name)
+
+  // Presence: who is in the field this round. A reply to every newcomer, once, so they learn us.
+  onHere((p, isSelf) => {
+    if (isSelf) return
+    const wasNew = !seen.has(p.address)
+    seen.add(p.address)
+    if (wasNew && seen.has(myAddress()) && !greeted.has(p.address)) {
+      greeted.add(p.address)
+      emitHere()
+    }
+  })
 
   // Arrivals and departures are news. A room you can see filling up is a room you stay in.
   onEnterScene((p) => {
@@ -249,9 +264,16 @@ function beginSlot(slot: number): void {
   const joinedLate = elapsedNow > INTRO_SECONDS + GET_READY_SECONDS
   joinedLive = joinedLate && canJoinLate(elapsedNow, active.joinSafe === true)
   spectatingOnly = joinedLate && !joinedLive
-  if (!spectatingOnly) seen.add(myAddress())
+  greeted = new Set<string>()
+  if (!spectatingOnly) {
+    seen.add(myAddress())
+    emitHere()
+  }
   if (joinedLive) {
+    joinedAtPlay = elapsedNow - INTRO_SECONDS
     void spectator.sendTo(active.spawn())
+    // Dropped onto a board mid-round: the first thing that hits you is on the house.
+    spectator.addShield()
   } else if (joinedLate) {
     spectator.spectateOnly()
   } else {
@@ -303,7 +325,7 @@ function schedulerSystem(dt: number): void {
   }
   if (wildUntil !== 0 && now >= wildUntil) {
     wildUntil = 0
-    if (phase === 'play') setConfetti(false)
+    if (phase === 'play' || spectator.isOut()) setConfetti(false)
   }
   hud.roundName = ROUND_NAMES[roundIndex(slot)]
   hud.finale = isFinale(slot)
@@ -413,7 +435,9 @@ function schedulerSystem(dt: number): void {
     hud.phase = 'play'
     if (!released) {
       released = true
-      spectator.setRoundLive(true)
+      // The whistle clock starts from the true whistle even for a latecomer released mid-round.
+      spectator.setRoundLive(true, Math.round((playElapsed - GET_READY_SECONDS) * 1000))
+      setJumbotronColor(null)
       if (!spectator.isOut()) {
         spectator.releaseInput()
         play('whistle')
@@ -421,7 +445,8 @@ function schedulerSystem(dt: number): void {
       }
     }
 
-    if (spectator.isOut() && outAt === 0) outAt = playElapsed
+    // Time since the whistle, the same clock every peer's `eliminated` carries.
+    if (spectator.isOut() && outAt === 0) outAt = playElapsed - GET_READY_SECONDS
 
     if (!saidHurry && hud.roundClock > 0 && hud.roundClock <= 15) {
       saidHurry = true
@@ -432,7 +457,8 @@ function schedulerSystem(dt: number): void {
     // around and understand the space before anything can kill them. Fall Guys teaches through
     // level design rather than text, and its levels open with a survivable stretch for exactly
     // this reason. Rounds receive `playing: false` and hold their hazards.
-    const warm = playElapsed < GET_READY_SECONDS + WARMUP_SECONDS
+    // A live latecomer gets the same warm-up everyone else had, counted from their arrival.
+    const warm = playElapsed < GET_READY_SECONDS + WARMUP_SECONDS || (joinedLive && playElapsed < joinedAtPlay + WARMUP_SECONDS)
     active.tick(dt, playElapsed, !warm)
     tickPowerups(playElapsed)
 

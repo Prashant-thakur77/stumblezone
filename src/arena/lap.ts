@@ -1,5 +1,6 @@
 // The Speed Lap on the east lane: a start pad at the village end, a turnaround pad on the plaza.
 
+import { engine, Transform } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { EAST_LANE, NE_PLAZA, LOBBY } from '../config'
 import { Lap } from '../lib/lap'
@@ -17,7 +18,15 @@ const TURN = { x: NE_PLAZA.x, z: NE_PLAZA.z + 1 }
 
 /** The running lap, as a stopwatch, or '' when the clock is not running. */
 export function lapClock(): string {
-  return lap.running() ? formatTime(Date.now() - lap.startedAtMs()) : ''
+  if (!lap.running()) return ''
+  // A lap nobody is running any more: three minutes, or leaving the east side of the scene.
+  const t = Transform.getOrNull(engine.PlayerEntity)
+  const gone = t ? t.position.x < EAST_LANE.x - EAST_LANE.width / 2 - 6 : false
+  if (Date.now() - lap.startedAtMs() > 180000 || gone) {
+    lap.cancel()
+    return ''
+  }
+  return formatTime(Date.now() - lap.startedAtMs())
 }
 
 /** "LAP BEST: 0:24.3" for the lobby board. */

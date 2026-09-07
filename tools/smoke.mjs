@@ -21,7 +21,7 @@ const ok = async () => ({})
 // --- Load accounting: every PUT the scene sends the renderer, by entity and component. -----------
 // This is the mobile budget measured rather than estimated: distinct entities, and how many carry
 // a MeshRenderer (a draw call each), a GltfContainer, or a TextShape.
-const COMPONENT_NAMES = { 1: 'Transform', 1017: 'MeshRenderer', 1041: 'GltfContainer', 1030: 'TextShape', 1019: 'MeshCollider', 1028: 'AudioSource', 1080: 'AvatarShape' }
+const COMPONENT_NAMES = { 1: 'Transform', 1017: 'Material', 1018: 'MeshRenderer', 1041: 'GltfContainer', 1030: 'TextShape', 1019: 'MeshCollider', 1028: 'AudioSource', 1080: 'AvatarShape' }
 const entities = new Set()
 const perComponent = {}
 const entityHas = {}

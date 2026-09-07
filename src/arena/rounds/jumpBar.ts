@@ -22,7 +22,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, DISC_RADIUS } from '../../config'
-import { jumpBarBeams, jumpBarSpeed, jumpBarDirection, JUMPBAR_SECOND_AT, JUMPBAR_REVERSE_AT } from '../../lib/jumpbar'
+import { jumpBarBeams, jumpBarSpeed, jumpBarDirection, jumpBarAngle, JUMPBAR_SECOND_AT, JUMPBAR_REVERSE_AT } from '../../lib/jumpbar'
 import { buildDisc, setDiscVisible } from '../disc'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -156,6 +156,8 @@ export const jumpBar: Round = {
       spin(beams[i], jumpBarSpeed(0), layout[i].direction)
       setBeamVisible(beams[i], i === 0)
     }
+    // The first tick snaps to the clock, which matters for a client that starts mid-round.
+    lastSpinAt = -5
   },
 
   tick(dt: number, elapsed: number, playing: boolean) {
@@ -163,12 +165,16 @@ export const jumpBar: Round = {
     clock += dt * 1000
     if (!playing) return
 
-    // Re-arm the tween every few seconds rather than every frame: a continuous-rotation tween runs
-    // in the engine, and replacing it 30 times a second would cost more than the round does.
+    // Every few seconds, snap the pivot to where the clock says the beam is and re-arm the tween at
+    // the current speed. The engine turns it between snaps; the snap is what keeps a latecomer, a
+    // hitching phone and everyone else looking at the same beam - the round's joinSafe promise.
     if (elapsed - lastSpinAt >= 5) {
       lastSpinAt = elapsed
       const speed = jumpBarSpeed(elapsed)
-      for (let i = 0; i < beams.length; i++) spin(beams[i], speed, jumpBarDirection(layout[i].direction, elapsed))
+      for (let i = 0; i < beams.length; i++) {
+        Transform.getMutable(beams[i].pivot).rotation = Quaternion.fromEulerDegrees(0, jumpBarAngle(layout[i].angle, layout[i].direction, elapsed), 0)
+        spin(beams[i], speed, jumpBarDirection(layout[i].direction, elapsed))
+      }
     }
 
     // The reversal. Re-armed at once, not on the next five-second tick, so it lands with the call.

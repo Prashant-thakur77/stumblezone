@@ -28,7 +28,8 @@ let judgedWave = -1
 let coachShown = ''
 let coachTimestamp = 0
 let penalised = false
-let lastRecorded: { pose: string; at: number } = { pose: '', at: -10 }
+/** Recent recordings, so the explorer's echo of a button press is not counted as a second pose. */
+let recent: { pose: string; at: number }[] = []
 let clock = 0
 let lastIdleDance = -10
 
@@ -73,9 +74,11 @@ export function performPose(pose: Pose): void {
 
 function record(pose: Pose): void {
   if (!running || !hud.poses || isOut()) return
-  // The explorer reports the emote the button just triggered too; one press is one pose.
-  if (lastRecorded.pose === pose && clock - lastRecorded.at < 1.2) return
-  lastRecorded = { pose, at: clock }
+  // The explorer reports the emote the button just triggered too, sometimes a few frames late
+  // and after a second tap; any repeat of a pose recorded in the last 1.5s is that echo.
+  recent = recent.filter((r) => clock - r.at < 1.5)
+  if (recent.some((r) => r.pose === pose)) return
+  recent.push({ pose, at: clock })
   const wave = waves[performingWave]
   if (!wave) return
   const verdict = perf.perform(pose, wave.poses)
@@ -125,6 +128,7 @@ export const copycat: Round = {
     clock = 0
     lastIdleDance = -10
     perf.reset()
+    recent = []
     setDiscVisible(disc, true)
     VisibilityComponent.createOrReplace(coach, { visible: true })
   },
@@ -144,9 +148,10 @@ export const copycat: Round = {
     const at = locate(waves, elapsed)
     const wave = waves[Math.min(at.index, waves.length - 1)]
 
-    // Judge the wave that just ended, once.
-    const ended = at.phase === 'done' ? waves.length - 1 : at.phase === 'wait' ? at.index - 1 : -1
-    if (ended >= 0 && ended > judgedWave && performingWave === ended) {
+    // Judge the wave whose window has closed, by the clock - not by happening to observe the gap
+    // between waves, which a hitching phone can skip entirely.
+    if (performingWave >= 0 && performingWave > judgedWave && elapsed >= waves[performingWave].endAt) {
+      const ended = performingWave
       judgedWave = ended
       hud.poses = false
       if (perf.passed(waves[ended].poses)) {

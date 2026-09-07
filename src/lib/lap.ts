@@ -25,6 +25,11 @@ export class Lap {
     return this.startedAt
   }
 
+  cancel(): void {
+    this.startedAt = 0
+    this.turned = false
+  }
+
   /** Elapsed ms for a completed lap, or null if the clock was not running or the turn was skipped. */
   finish(nowMs: number): number | null {
     if (this.startedAt === 0 || !this.turned) return null

@@ -33,19 +33,21 @@ export function slotElapsed(nowMs: number): number {
  * a judge who plays two shows back to back should see a different card the second time. The draw
  * is seeded by the show number, so every client agrees without a word passing between them.
  */
-let drawnShow = NaN
-let drawnActs: number[] = []
+const drawn = new Map<number, number[]>()
 
 export function showRounds(show: number): number[] {
-  // Memoised: roundIndex is on the hot path (the scheduler asks several times a frame, and the
-  // lobby board asks for three future slots twice a second), and a shuffle allocates.
-  if (show === drawnShow) return drawnActs
+  // Memoised: roundIndex is on the hot path (the scheduler asks for this show and the next every
+  // frame of a finale, and the lobby board asks for three future slots twice a second), and a
+  // shuffle allocates. A handful of shows is enough; older ones are dropped.
+  const hit = drawn.get(show)
+  if (hit) return hit
   const rng = mulberry32(hashSlot(show * 7919 + 31))
-  drawnActs = shuffle(rng, ROUND_POOL as readonly number[])
+  const acts = shuffle(rng, ROUND_POOL as readonly number[])
     .slice(0, ROUND_COUNT - 1)
     .sort((a, b) => ROUND_DIFFICULTY[a] - ROUND_DIFFICULTY[b])
-  drawnShow = show
-  return drawnActs
+  drawn.set(show, acts)
+  if (drawn.size > 8) drawn.delete(drawn.keys().next().value as number)
+  return acts
 }
 
 /** Which round (an index into ROUND_NAMES) a slot runs. The finale is always the same round. */

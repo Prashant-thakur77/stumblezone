@@ -44,9 +44,10 @@ export function setFloorY(y: number): void {
   falling = false
 }
 
-export function setRoundLive(live: boolean): void {
+/** `alreadyElapsedMs` lets a latecomer's clock start from the real whistle, not their arrival. */
+export function setRoundLive(live: boolean, alreadyElapsedMs = 0): void {
   roundLive = live
-  if (live) liveSinceMs = Date.now()
+  if (live) liveSinceMs = Date.now() - alreadyElapsedMs
 }
 
 /** Milliseconds since the round went live, for elimination timing. Zero before the whistle. */
