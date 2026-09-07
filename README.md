@@ -119,9 +119,9 @@ Places are where you go; these are what happens to you while you're there:
 
 - **The establishing shot** — a six-second crane over the arena during every round card, so you see
   the board before you're on it.
-- **Power-ups** — a SHIELD (absorbs one heart) and a BOOST (faster, higher for eight seconds) appear
-  at 20 s and 50 s on the clock-driven rounds. Seeded, per player, takeable once each: fair with no
-  server, and nobody watches one vanish.
+- **Power-ups** — a SHIELD (absorbs one heart; a bubble around you) and a BOOST (faster, higher for
+  eight seconds; a star over your name) appear at 20 s and 50 s on the clock-driven rounds. Seeded,
+  per player, takeable once each: fair with no server, and nobody watches one vanish.
 - **Twists** — Perfect Match's later waves may **SWITCH** the call 1.8 s before the judge; Jump Bar's
   beams **reverse** at 70 s; Spotlight goes to **BLACKOUT** for two seconds at 60 s and the lights
   come back somewhere else; Hex-Drop's top deck **crumbles** on its own at 60 s; Tip Toe has a
@@ -133,6 +133,8 @@ Places are where you go; these are what happens to you while you're there:
 - **Call-outs** — "Alice leads the show with 5" at the whistle, **FINAL TWO** when the field is down
   to two, **ON FIRE** at three in a row, **PAST YOUR BEST** the second you beat it, **MVP** at results.
 - **The last five seconds** as 150 px numerals, and a crowd bed that swells with the hype meter.
+- **The encore** — after every finale, the podium is a dance floor: everyone's pose buttons open
+  for fifteen seconds. Joins and departures are in the feed, by real name.
 
 ## Beyond the format
 

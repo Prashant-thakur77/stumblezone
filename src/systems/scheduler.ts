@@ -221,6 +221,7 @@ function beginSlot(slot: number): void {
   hud.ggSent = false
   hud.pick = ''
   hud.candidates = []
+  hud.poses = false
   picks = new Map<string, string>()
 
   // Name the person to beat. The board says it; saying it at the whistle makes it a rivalry.
@@ -662,7 +663,13 @@ function schedulerSystem(dt: number): void {
 
     // The curtain call. Everyone gets the shot, not only the three on the steps - the point of a
     // podium is that the room is looking at it.
-    if (cycleEnd) podiumShot()
+    if (cycleEnd) {
+      podiumShot()
+      // Then the encore: fifteen seconds where everyone's pose buttons are open and the podium
+      // is a dance floor. A show should end with people dancing, not reading a card.
+      hud.poses = true
+      toast('ENCORE - everyone dance')
+    }
   }
 
   active.tick(dt, SLOT_SECONDS, false)

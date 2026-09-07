@@ -30,6 +30,7 @@ let coachTimestamp = 0
 let penalised = false
 let lastRecorded: { pose: string; at: number } = { pose: '', at: -10 }
 let clock = 0
+let lastIdleDance = -10
 
 const LABEL: Record<Pose, string> = { dance: 'DANCE', clap: 'CLAP', wave: 'WAVE', dab: 'DAB', robot: 'ROBOT', fistpump: 'FIST PUMP' }
 
@@ -122,6 +123,7 @@ export const copycat: Round = {
     coachShown = ''
     penalised = false
     clock = 0
+    lastIdleDance = -10
     perf.reset()
     setDiscVisible(disc, true)
     VisibilityComponent.createOrReplace(coach, { visible: true })
@@ -132,6 +134,11 @@ export const copycat: Round = {
     clock += dt
     if (!playing) {
       hud.poses = false
+      // During the card the coach loops a dance, so the stage is already a show before it starts.
+      if (clock - lastIdleDance > 8) {
+        lastIdleDance = clock
+        coachDo('dance')
+      }
       return
     }
     const at = locate(waves, elapsed)
