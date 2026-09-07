@@ -48,7 +48,8 @@ import {
   GOLDEN_MULTIPLIER,
   setName,
   displayName,
-  leader
+  leader,
+  flushStandings
 } from '../net/crowns'
 import { getPlayer, onEnterScene, onLeaveScene } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
@@ -313,6 +314,8 @@ function schedulerSystem(dt: number): void {
   }
   hud.hype = hype.level(now)
   setCrowdLevel(hud.hype)
+  // Crowns changed? Everyone hears about it within two seconds.
+  flushStandings(now)
   // A stopwatch while the tower or the lap clock is running.
   const tower = towerClock()
   const lap = lapClock()

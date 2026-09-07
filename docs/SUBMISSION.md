@@ -13,6 +13,8 @@ own avatar's emotes as the controls and one where players fight over the same th
 - `npm run verify` on every push (GitHub Actions, green): type check, 126 unit tests, asset budget,
   and a **headless boot of the real bundle** that drives a player through every round and phase
   for 14 slots and fails on any throw. It found and fixed a per-frame crash in Sweeper Gates.
+- A **two-client run** wires two copies of the bundle together over the message bus and asserts
+  they agree on tallies and winners - it found and fixed the standings sync.
 - Measured load from that run: **1,124 entities, 665 mesh renderers, 113 GLTFs, 32 text shapes** -
   under a quarter of the 16-parcel mobile allowance. Assets: 5.6 MB.
 - Every rounded HUD shape is a texture, because `borderRadius` does not render on the mobile client.

@@ -19,7 +19,7 @@ export type Eliminated = { slot: number; address: string; ms: number }
 export type Finished = { slot: number; address: string; ms: number }
 export type TileStep = { slot: number; address: string; tileId: number }
 export type Cheer = { slot: number; address: string; emote: string }
-export type Standings = { slot: number; address: string; crowns: [string, number][] }
+export type Standings = { slot: number; address: string; crowns: [string, number][]; show: number; showCrowns: [string, number][] }
 export type Wear = { slot: number; address: string; hat: string }
 export type GG = { slot: number; address: string; to: string }
 export type Pick = { slot: number; address: string; to: string }
@@ -100,8 +100,8 @@ export function onStandingsRequested(cb: (fromAddress: string) => void): void {
   })
 }
 
-export function emitStandings(crowns: [string, number][]): void {
-  bus.emit('standings', { slot: currentSlot(), address: myAddress(), crowns } as Standings)
+export function emitStandings(crowns: [string, number][], show: number, showCrowns: [string, number][]): void {
+  bus.emit('standings', { slot: currentSlot(), address: myAddress(), crowns, show, showCrowns } as Standings)
 }
 export function onStandings(cb: (p: Standings) => void): void {
   bus.on('standings', (p: Standings) => {

@@ -315,6 +315,11 @@ src/ui/         mobile HUD
   mocked, lets the SDK's own startup call `main()`, and runs 1,100 frames through every round and
   phase. It found a wall in Sweeper Gates built without a `Transform` — a throw every frame of that
   round that the type checker, the unit tests and the desktop preview all missed.
+- **Two clients on one bus** (`tools/smoke2.mts`) loads the bundle twice, wires each client's
+  message bus into the other's, steers one player into the Crown Rush zone and the other out of
+  it, runs twelve slots, and asserts both clients agree on every crown tally and name the same
+  winner. Its first run found that crowns were only ever shared when someone joined - and that the
+  per-show tally was never shared at all, so every client's "show leader" was itself.
 - **The UI never uses `borderRadius`** and every texture it names exists on disk. Both are silent
   failures on a phone: no error, just a flat rectangle or an invisible plate.
 - **Geometry and pacing invariants** — the kill plane must clear every standable surface, every

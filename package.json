@@ -11,8 +11,9 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "budget": "node tools/budget.mjs",
     "ui": "node tools/make-ui.mjs",
-    "verify": "npm run build && npm test && npm run budget && npm run smoke",
-    "smoke": "node tools/smoke.mjs"
+    "verify": "npm run build && npm test && npm run budget && npm run smoke && npm run smoke2",
+    "smoke": "node tools/smoke.mjs",
+    "smoke2": "tsx tools/smoke2.mts"
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.27.0",

@@ -33,6 +33,22 @@ const names = new Map<string, string>()
 export function award(address: string, amount: number): void {
   crowns.set(address, (crowns.get(address) ?? 0) + amount)
   showCrowns.set(address, (showCrowns.get(address) ?? 0) + amount)
+  dirty = true
+}
+
+/**
+ * Standings go out whenever they change, at most every two seconds, and on request. Each client
+ * only ever awards itself, so a max-merge of everyone's broadcasts is exact - and without the
+ * broadcast, every client's show leader would be the only player it knows about: itself.
+ */
+let dirty = false
+let lastFlushMs = 0
+
+export function flushStandings(nowMs = Date.now()): void {
+  if (!dirty || nowMs - lastFlushMs < 2000) return
+  dirty = false
+  lastFlushMs = nowMs
+  emitStandings(Array.from(crowns.entries()), currentShow, Array.from(showCrowns.entries()))
 }
 
 /** Start a new show if the slot belongs to one we have not seen. Idempotent per show. */
@@ -111,11 +127,22 @@ export function mergeStandings(incoming: [string, number][]): void {
   }
 }
 
+/** The same merge for the current show's tally. A peer on another show (clock skew) is ignored. */
+export function mergeShowStandings(show: number, incoming: [string, number][]): void {
+  if (show !== currentShow) return
+  for (const [address, count] of incoming) {
+    if (count > (showCrowns.get(address) ?? 0)) showCrowns.set(address, count)
+  }
+}
+
 export function setupCrownSync(): void {
-  onStandings((p) => mergeStandings(p.crowns))
+  onStandings((p) => {
+    mergeStandings(p.crowns)
+    if (p.showCrowns) mergeShowStandings(p.show, p.showCrowns)
+  })
   onStandingsRequested(() => {
     // Only answer if we actually have something to share, so an empty scene stays quiet.
-    if (crowns.size > 0) emitStandings(Array.from(crowns.entries()))
+    if (crowns.size > 0) emitStandings(Array.from(crowns.entries()), currentShow, Array.from(showCrowns.entries()))
   })
   requestStandings()
 }
