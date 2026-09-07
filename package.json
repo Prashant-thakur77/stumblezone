@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.27.0",
-    "@dcl/sdk": "latest",
+    "@dcl/sdk": "7.27.0",
     "tsx": "^4.23.13"
   },
   "engines": {
