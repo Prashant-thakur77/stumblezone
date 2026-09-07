@@ -8,6 +8,9 @@ import { buildVillage } from './arena/village'
 import { buildTower } from './arena/tower'
 import { buildRing } from './arena/ring'
 import { buildLap } from './arena/lap'
+import { buildPractice } from './arena/practice'
+import { buildHall } from './arena/hall'
+import { buildCannon } from './arena/cannon'
 import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
@@ -30,6 +33,9 @@ export function main() {
   buildTower()
   buildRing()
   buildLap()
+  buildPractice()
+  buildHall()
+  buildCannon()
   initSpectator()
   initHats()
   setupHud()
