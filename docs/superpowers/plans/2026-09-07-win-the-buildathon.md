@@ -21,9 +21,9 @@
 
 - [ ] **G1 Redeploy.** The live World is the Sep 1 build; everything since (6 rounds, feed, hype,
       textures) is only on this machine. `npm run deploy -- --target-content https://worlds-content-server.decentraland.org`
-- [ ] **G2 Public GitHub repo.** `git remote -v` is empty. Create `stumblezone` (public) on GitHub, then
-      `git remote add origin git@github.com:<you>/stumblezone.git && git push -u origin master`.
-      Then put the URL in README.md and docs/SUBMISSION.md where it says `<REPO_URL>`.
+- [x] **G2 Public GitHub repo.** `git remote -v` is empty. Create `stumblezone` (public) on GitHub, then
+      `git remote add origin git@github.com:<you>/stumblezone.git && git push -u origin main`.
+      Then put the URL in README.md and docs/SUBMISSION.md where it says https://github.com/Prashant-thakur77/stumblezone.
 - [ ] **G3 Submit the BUIDL now** with the text in docs/SUBMISSION.md; edit until the deadline.
 
 ## Task 1: Late joiners play instead of waiting — *onboarding, first 30 s*

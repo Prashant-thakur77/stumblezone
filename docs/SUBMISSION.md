@@ -21,7 +21,7 @@ built for a phone: walk and jump, nothing else.
 | What | Where |
 |---|---|
 | Play (mobile app or desktop) | `justchatting.dcl.eth` — <https://decentraland.org/jump/?realm=justchatting.dcl.eth> |
-| Source | `<REPO_URL>` — public GitHub repo (create it: `git remote add origin git@github.com:<you>/stumblezone.git && git push -u origin master`) |
+| Source | <https://github.com/Prashant-thakur77/stumblezone> |
 | Video | `<VIDEO_URL>` — 75 s, script below |
 | Design and research | [docs/VISION.md](VISION.md), [docs/FALLGUYS-PRESENTATION.md](FALLGUYS-PRESENTATION.md) |
 | Architecture | [docs/ARCHITECTURE.md](ARCHITECTURE.md) |

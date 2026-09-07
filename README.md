@@ -17,7 +17,7 @@ on the pads. **Walk and jump is the entire control scheme.** Fall, and you land 
 arena with a CHEER button - five cheers in ten seconds sets the stadium off for everyone. Four
 rounds make a show; the show ends on a podium. The whole loop is eight minutes.
 
-Source: `<REPO_URL>` · Video: `<VIDEO_URL>` · Submission notes: [docs/SUBMISSION.md](docs/SUBMISSION.md)
+Source: <https://github.com/Prashant-thakur77/stumblezone> · Video: `<VIDEO_URL>` · Submission notes: [docs/SUBMISSION.md](docs/SUBMISSION.md)
 
 ## What it is
 
