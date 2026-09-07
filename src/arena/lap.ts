@@ -15,6 +15,11 @@ const lap = new Lap()
 const START = { x: EAST_LANE.x, z: EAST_LANE.z - EAST_LANE.depth / 2 + 3 }
 const TURN = { x: NE_PLAZA.x, z: NE_PLAZA.z + 1 }
 
+/** The running lap, as a stopwatch, or '' when the clock is not running. */
+export function lapClock(): string {
+  return lap.running() ? formatTime(Date.now() - lap.startedAtMs()) : ''
+}
+
 /** "LAP BEST: 0:24.3" for the lobby board. */
 export function lapLine(): string {
   const best = lapBest()

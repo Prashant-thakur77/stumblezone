@@ -324,6 +324,7 @@ function Hud() {
           show={hud.roundTag !== ''}
         />
         <Pill text={hud.roundName.toUpperCase()} width={360} color={C.pink} fontSize={24} />
+        <Pill text={hud.activity} width={220} color={C.green} textColor={C.navy} fontSize={24} show={hud.activity !== ''} />
         <Pill
           text={formatClock(hud.roundClock)}
           width={150}

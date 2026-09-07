@@ -62,6 +62,9 @@ import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { Bet } from '../lib/bet'
 import { beatTheHouse, HOUSE_CROWNS } from '../lib/house'
+import { HeadToHead } from '../lib/rivals'
+import { towerClock } from '../arena/tower'
+import { lapClock } from '../arena/lap'
 import { emitGG, onGG, emitPick, onPick } from '../net/sync'
 import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
 import { flyover } from './camera'
@@ -96,6 +99,8 @@ let saidHurry = false
 let spectatingOnly = false
 /** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
 let joinedLive = false
+/** Rounds won and lost against each rival this show. */
+const h2h = new HeadToHead()
 /** Our own finish time this round (Tip Toe), or null. */
 let myFinishMs: number | null = null
 /** A spectator's pick for the round, resolved at results. */
@@ -207,6 +212,7 @@ function beginSlot(slot: number): void {
   crowdWentWild = false
 
   syncShow(showIndex(slot))
+  if (actIndex(slot) === 0) h2h.reset()
 
   active = rounds[roundIndex(slot)]
   spectator.setFloorY(active.floorY ?? ARENA_Y)
@@ -269,6 +275,10 @@ function schedulerSystem(dt: number): void {
   }
   hud.hype = hype.level(now)
   setCrowdLevel(hud.hype)
+  // A stopwatch while the tower or the lap clock is running.
+  const tower = towerClock()
+  const lap = lapClock()
+  hud.activity = tower !== '' ? 'TOWER ' + tower : lap !== '' ? 'LAP ' + lap : ''
   // The hat panel's rows, only while someone is standing in the market.
   if (hud.shop) hud.hats = shopEntries()
   // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
@@ -636,6 +646,13 @@ function schedulerSystem(dt: number): void {
         }
       }
       hud.ggTo = rivalAddress === '' ? '' : displayName(rivalAddress)
+      if (rivalAddress !== '') {
+        const theirs = outMs.has(rivalAddress) ? (outMs.get(rivalAddress) as number) : Infinity
+        // A tie (both survived) counts for nobody.
+        if (mine !== theirs) h2h.record(rivalAddress, mine > theirs)
+        const score = h2h.score(rivalAddress)
+        if (score !== '') hud.resultDetail += '  ·  vs ' + displayName(rivalAddress) + ' this show: ' + score
+      }
     }
 
     spectator.releaseInput()

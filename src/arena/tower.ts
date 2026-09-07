@@ -64,6 +64,11 @@ function refreshSign(): void {
   TextShape.getMutable(topSign).text = 'STUMBLE TOWER\n' + (best > 0 ? 'best ' + formatTime(best) : 'Climb it against the clock')
 }
 
+/** The running climb, as a stopwatch, or '' when the clock is not running. */
+export function towerClock(): string {
+  return startedAt === 0 ? '' : formatTime(Date.now() - startedAt)
+}
+
 /** "TOWER BEST 0:41.7" for the lobby board, or an invitation if nobody has climbed it. */
 export function towerLine(): string {
   const best = towerBest()

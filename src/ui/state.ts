@@ -54,6 +54,8 @@ export type HudState = {
   poses: boolean
   /** The one-time HOW TO PLAY card, up until GOT IT or the first round. */
   welcome: boolean
+  /** A running stopwatch: "TOWER 0:12.3" or "LAP 0:08.1", or ''. */
+  activity: string
   /** Who a GG would go to on the results card (the rival), and whether it went. */
   ggTo: string
   ggSent: boolean
@@ -88,7 +90,8 @@ export const hud: HudState = {
   ggTo: '',
   ggSent: false,
   poses: false,
-  welcome: true
+  welcome: true,
+  activity: ''
 }
 
 export function setBanner(banner: string, subtitle = ''): void {
