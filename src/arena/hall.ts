@@ -9,7 +9,7 @@ import { NW_PLAZA, LOBBY, PARTY_COLORS, WALL_COLOR } from '../config'
 import { standings, displayName } from '../net/crowns'
 import { buildCrown } from './models'
 import { sign, solid, zone } from './build'
-import { hud } from '../ui/state'
+import { toast } from '../systems/feed'
 import { triggerEmote } from '~system/RestrictedActions'
 
 const Y = LOBBY.y
@@ -50,7 +50,7 @@ export function buildHall(): void {
     if (Date.now() - cheeseAt < 4000) return
     cheeseAt = Date.now()
     void triggerEmote({ predefinedEmote: 'wave' })
-    hud.subtitle = 'Say cheese'
+    toast('Say cheese')
   })
 
   refresh()

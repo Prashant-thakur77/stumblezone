@@ -87,6 +87,25 @@ to walk, an island, a garage. The village is that place, at lobby height around 
 - Houses, cabins, lamps, bushes and a fountain along the back, so the town reads as a town from the
   arena and from the ledge.
 
+## The stadium, walked
+
+The village was the middle third of the scene. The rest is now places too, and every one of them
+feeds crowns, the board and the errand list:
+
+| Where | What |
+|---|---|
+| **West lane** | **Practice Yard** — a 3×3 patch of tiles that sink and return, a roaming light that turns red, a beam that only nudges. No lives: learn the moves, then play. |
+| **East lane** | **Speed Lap** — out to the corner pad and back against the clock. A finish without the turn is nothing, so the course cannot be cut. |
+| **North-west plaza** | **Hall of Fame** — five plinths, the top five names, a crown turning on the first; a photo frame facing the arena. |
+| **North-east plaza** | **Sky Cannon** — step on the pad and it throws you fifteen metres up for the one view a phone camera never gives you. |
+| **The sky** | **Sky Course** — fourteen platforms from the tower's lookout to a glass-floored **Sky Box** 25 m over the village. Every step is a phone-sized jump, by test. |
+| **Village floor** | **The Big Drop** — off the Sky Box's south edge onto three rings. Inside the middle one: PERFECT LANDING, +2. |
+| **Spawn** | **Sam the Host** — an avatar with a speech bubble that says what's next: the schedule, the daily, the errand you're on, the hat you could unlock. |
+| **Everywhere** | **Village Errands** — six things per visit (a hat, a dance, the tower, three stars, a lap, the drop), one crown each, five more and the **VILLAGER** title for all six. |
+
+The Disco Deck has its own music now — a synthesised disco loop from a speaker on the deck, spatial,
+so it fades in as you walk over — and when the crowd goes wild the twelve pillar caps flash white.
+
 ## Beyond the format
 
 The genre gives you rounds. These are the things layered on top that make it a *show*:
@@ -232,6 +251,12 @@ src/lib/        pure logic, no SDK imports, fully unit-tested
   hats.ts       the six hats and what unlocks each
   stars.ts      the daily star hunt
   tower.ts      the tower spiral, with a test that every step is a phone-sized jump
+  sky.ts        the sky course, same rule, plus the box over the drop pad
+  drop.ts       landing scoring: height in the last three seconds, rings, pay-once
+  lap.ts        the speed lap's start/turn/finish rule
+  practice.ts   sinking-tile timing
+  errands.ts    the six errands and the pay-once rule
+  tips.ts       what the host says, and in what order
 src/arena/      tile pool, lobby, village, the shared round stage, and the six rounds
 src/systems/    scheduler, spectator, cosmetics, camera, feed, hype
 src/net/        message bus wrapper and session crown tally

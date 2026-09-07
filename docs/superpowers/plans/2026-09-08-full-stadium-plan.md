@@ -54,22 +54,22 @@ Two lanes and two plazas, so the stadium can be walked around and the corners ex
 **Files:** `src/config.ts` (+`LANES`, `PLAZAS`), `src/arena/ring.ts` (new), `src/index.ts`,
 `src/systems/spectator.ts` (verify fall-out-of-round), `tests/space.test.ts` (new)
 
-- [ ] Config:
+- [x] Config:
   ```ts
   export const WEST_LANE = { x: 3, z: 40, width: 6, depth: 44 }   // x 0..6, z 18..62
   export const EAST_LANE = { x: 61, z: 40, width: 6, depth: 44 }  // x 58..64
   export const NW_PLAZA = { x: 4, z: 60, size: 8 }
   export const NE_PLAZA = { x: 60, z: 60, size: 8 }
   ```
-- [ ] `ring.ts`: `buildRing()` — four slabs (PLATFORM_COLOR, collider), a 0.3 m kerb along each
+- [x] `ring.ts`: `buildRing()` — four slabs (PLATFORM_COLOR, collider), a 0.3 m kerb along each
   lane's inner edge (x 6 / x 58) and along the plazas' arena-facing edges, `lampost-small` every
   8 m on the outer edge, two `bush-02` per plaza, a `crowd.glb` cluster on each plaza facing the
   arena (`buildCrowd`, scale 1.8).
-- [ ] Test: every slab/kerb/lamp inside the scene; lanes do not overlap the village floor
+- [x] Test: every slab/kerb/lamp inside the scene; lanes do not overlap the village floor
   (z ≥ 18) or any pillar (`hypot(x-32, z-36) - 26 > 1` for lane inner edges).
-- [ ] Verify `fallWatcher`: below `KILL_Y` with no live round → `sendToLobby()`. If it eliminates,
+- [x] Verify `fallWatcher`: below `KILL_Y` with no live round → `sendToLobby()`. If it eliminates,
   guard with `if (!roundLive) { sendToLobby(); return }`.
-- [ ] Commit `feat(space): ring road - two lanes and two corner plazas`.
+- [x] Commit `feat(space): ring road - two lanes and two corner plazas`.
 
 ---
 
@@ -82,13 +82,13 @@ The lane is a straight; the game is out-and-back against the clock, like the tow
 **Files:** `src/lib/lap.ts`, `tests/lap.test.ts`, `src/arena/lap.ts`, `src/systems/records.ts`
 (`recordLap/lapBest`), `src/arena/lobby.ts` (board line)
 
-- [ ] `lap.ts` (lib): `class Lap { start(nowMs); turn(nowMs); finish(nowMs): number | null }` —
+- [x] `lap.ts` (lib): `class Lap { start(nowMs); turn(nowMs); finish(nowMs): number | null }` —
   a finish without a turn returns null (you cannot cut the course). Reuse `formatTime` from
   `lib/tower.ts`.
-- [ ] Arena: start/finish pad at (61, 20, 20) (emissive yellow 2×2), turnaround pad on the NE
+- [x] Arena: start/finish pad at (61, 20, 20) (emissive yellow 2×2), turnaround pad on the NE
   plaza at (60, 20, 60). Toast "LAP 0:24.3 · NEW BEST"; `play('whistle')` on start.
-- [ ] Board: `LAP BEST: 0:24.3` under the tower line.
-- [ ] Tests: start→finish with no turn is null; start→turn→finish returns elapsed; a second start
+- [x] Board: `LAP BEST: 0:24.3` under the tower line.
+- [x] Tests: start→finish with no turn is null; start→turn→finish returns elapsed; a second start
   resets. Pads inside the lane.
 
 ### Task 3: Practice Yard (west lane) — learn the hazards with nothing at stake
@@ -98,39 +98,39 @@ feedback is the hazard itself (a sinking tile, a red light, a beam that shoves y
 
 **Files:** `src/lib/practice.ts`, `tests/practice.test.ts`, `src/arena/practice.ts`
 
-- [ ] **Hex patch** (z 24–31): 3×3 tiles of 1.8 m at y 20.05 over the lane floor. Stepping on
+- [x] **Hex patch** (z 24–31): 3×3 tiles of 1.8 m at y 20.05 over the lane floor. Stepping on
   one (Transform-over-tile check like Hex-Drop) sinks it 1.2 m over 0.5 s after `SINK_DELAY 0.6`,
   restores after `RESPAWN 4 s`. Pure lib: `class Patch { step(i, now); tick(now): TileState[] }`.
-- [ ] **Roaming light** (z 34–44): one `spotCentre` pool (reuse `lib/spotlight.ts` with a 3.5 m
+- [x] **Roaming light** (z 34–44): one `spotCentre` pool (reuse `lib/spotlight.ts` with a 3.5 m
   radius figure) that turns red after `SPOT_HIT_SECONDS`; no life lost — toast "That would have
   cost a heart" once per entry.
-- [ ] **Mini beam** (z 47–56): a 4 m beam on a pivot at y 20.45, 40°/s, `applyKnockbackToPlayer`
+- [x] **Mini beam** (z 47–56): a 4 m beam on a pivot at y 20.45, 40°/s, `applyKnockbackToPlayer`
   strength 6 towards the lane centre on contact. Same trigger pattern as Jump Bar.
-- [ ] Sign at (3, 24, 21): "PRACTICE YARD - no lives here. Learn the moves, then play."
-- [ ] Tests: patch timing (sink after delay, restore after respawn, never both), practice light
+- [x] Sign at (3, 24, 21): "PRACTICE YARD - no lives here. Learn the moves, then play."
+- [x] Tests: patch timing (sink after delay, restore after respawn, never both), practice light
   stays inside the lane, beam ends inside x 0..6.
 
 ### Task 4: Hall of Fame + photo frame (NW plaza)
 
 **Files:** `src/arena/hall.ts`, `src/net/crowns.ts` (`standings` already), `tests/space.test.ts`
 
-- [ ] Five plinths in an arc (cylinders 0.8 wide, heights 1.6/1.3/1.1/0.9/0.9), a `crown.glb` on
+- [x] Five plinths in an arc (cylinders 0.8 wide, heights 1.6/1.3/1.1/0.9/0.9), a `crown.glb` on
   #1, a billboard name sign on each refreshed every 2 s from `standings(5)` — "1. Alice  14".
   Empty plinths read "your name here".
-- [ ] A photo frame on the plaza's arena edge: four `WALL_COLOR` boxes making a 4×3 m frame at
+- [x] A photo frame on the plaza's arena edge: four `WALL_COLOR` boxes making a 4×3 m frame at
   y 21.5–24.5 with "STUMBLEZONE" over it; standing inside its zone triggers `wave` once and shows
   the banner "Say cheese" for 2 s. (No screenshot API in the SDK; the frame is for the phone's own.)
-- [ ] Sign: "HALL OF FAME - crowns this session".
+- [x] Sign: "HALL OF FAME - crowns this session".
 
 ### Task 5: Sky Cannon (NE plaza)
 
 **Files:** `src/arena/cannon.ts`
 
-- [ ] A barrel (cylinder 1.6 wide, tilted 15° towards the arena) on the plaza; stepping onto its
+- [x] A barrel (cylinder 1.6 wide, tilted 15° towards the arena) on the plaza; stepping onto its
   pad fires `Physics.applyImpulseToPlayer(Vector3.create(-0.25, 1, -0.25), 26)`, `play('boing')`,
   toast "AIRBORNE". You rise ~15 m, see the whole stadium, land back on the plaza or the lane.
-- [ ] Guard: no fire while a round is live and you are in it.
-- [ ] A test that the impulse's landing estimate (`v²·sin2θ/g` with the SDK's 9.8) stays inside
+- [x] Guard: no fire while a round is live and you are in it.
+- [x] A test that the impulse's landing estimate (`v²·sin2θ/g` with the SDK's 9.8) stays inside
   the plaza+lane footprint; tune strength until it does.
 
 ---
@@ -145,23 +145,23 @@ step rule; this reuses its lib.
 
 **Files:** `src/config.ts` (`SKY_COURSE`), `src/lib/sky.ts`, `tests/sky.test.ts`, `src/arena/sky.ts`
 
-- [ ] `skySteps()`: 14 steps from the lookout, `dx 2.1`, `dy 0.92`, `z` weaving 13.5↔16.5 so the
+- [x] `skySteps()`: 14 steps from the lookout, `dx 2.1`, `dy 0.92`, `z` weaving 13.5↔16.5 so the
   line never crosses the ledge (z 5–11) or the jumbotron. Last step is the Sky Box: 8×8 slab with
   a `Material` alpha 0.35 cyan floor, kerbs, a sign "SKY BOX - the drop is on the south side".
-- [ ] Tests: every gap ≤ 2.4, rise ≤ 1.1; every step z ∈ [13, 17]; top y < 60; no step within
+- [x] Tests: every gap ≤ 2.4, rise ≤ 1.1; every step z ∈ [13, 17]; top y < 60; no step within
   2 m of the ledge slab (x 22–42, y 35–37, z 5–11).
 
 ### Task 7: The Big Drop
 
 **Files:** `src/lib/drop.ts`, `tests/drop.test.ts`, `src/arena/drop.ts`, `src/arena/village.ts`
 
-- [ ] Landing pad 6×6 at (32, 20.08, 15.5), concentric rings (yellow 6, pink 3.6, cyan 1.6).
-- [ ] Lib: `class DropWatch { sample(y, x, z, now); landed(x, z, now): 'perfect' | 'good' | null }`
+- [x] Landing pad 6×6 at (32, 20.08, 15.5), concentric rings (yellow 6, pink 3.6, cyan 1.6).
+- [x] Lib: `class DropWatch { sample(y, x, z, now); landed(x, z, now): 'perfect' | 'good' | null }`
   — records the max height in the last 3 s; a landing counts if that max ≥ pad + 20 m; `perfect`
   within 0.8 m of centre, `good` within 3 m.
-- [ ] Arena: zone over the pad; on enter ask the watch; `perfect` → +2 crowns, `play('crown')`,
+- [x] Arena: zone over the pad; on enter ask the watch; `perfect` → +2 crowns, `play('crown')`,
   confetti 2 s, toast "PERFECT LANDING +2"; `good` → +1 "NICE DROP +1". Guard as always.
-- [ ] Tests: no credit without height; perfect/good radii; a second landing within 10 s of the
+- [x] Tests: no credit without height; perfect/good radii; a second landing within 10 s of the
   first does not pay twice.
 
 ---
@@ -176,17 +176,17 @@ Five errands a visit; each pays one crown, all five pay five more and the title 
 `src/lib/titles.ts` (VILLAGER between SURVIVOR and IRONFOOT), `src/arena/lobby.ts`, hooks in
 tower/lap/drop/village/hats.
 
-- [ ] Errands: `climb` (tower top), `lap` (finish a lap), `stars3` (three stars), `dance`
+- [x] Errands: `climb` (tower top), `lap` (finish a lap), `stars3` (three stars), `dance`
   (a reaction while `hud.dance`), `hat` (wear one), `drop` (any landing). `class Errands {
   done(id): boolean /* true first time */; count(); complete() }`.
-- [ ] Board: "ERRANDS 3/6 - next: run a lap". Toast per errand "ERRAND DONE +1".
-- [ ] Tests: each pays once; completion pays the bonus once; title flips.
+- [x] Board: "ERRANDS 3/6 - next: run a lap". Toast per errand "ERRAND DONE +1".
+- [x] Tests: each pays once; completion pays the bonus once; title flips.
 
 ### Task 9: A host with something to say
 
 **Files:** `src/arena/host.ts`, `src/lib/tips.ts`, `tests/tips.test.ts`
 
-- [ ] An `AvatarShape` at (29, 20, 10.5) facing spawn, `expressionTriggerId: 'wave'` every 20 s,
+- [x] An `AvatarShape` at (29, 20, 10.5) facing spawn, `expressionTriggerId: 'wave'` every 20 s,
   a billboard speech bubble 1.2 m above it cycling `tips.ts` lines every 7 s: the schedule
   ("Spotlight in 0:42"), the daily, the errand you are on, "five cheers sets the crowd off", the
   hat you could unlock next. `nextTip(state, i)` is pure and tested: never repeats consecutively,
@@ -197,21 +197,35 @@ tower/lap/drop/village/hats.
 **Files:** `tools/make-audio.mjs` (+`music-disco`), `src/systems/audio.ts` (Track), `src/arena/village.ts`,
 `src/arena/scenery.ts` (`flashPillars(seconds)`), `src/systems/scheduler.ts`
 
-- [ ] A 124 BPM disco loop (four-on-the-floor, off-beat hats, octave bass) as `music-disco.mp3`,
+- [x] A 124 BPM disco loop (four-on-the-floor, off-beat hats, octave bass) as `music-disco.mp3`,
   played from an `AudioSource` on the Disco Deck entity, looping, volume 0.6 — spatial, so it
   fades in as you walk over. Manifest test covers it automatically.
-- [ ] When the crowd goes wild: the 12 pillar caps go emissive white for 4 s and the four
+- [x] When the crowd goes wild: the 12 pillar caps go emissive white for 4 s and the four
   searchlights double their sweep rate for the same window. Pure cosmetic; one call from the
   scheduler's `consumeWild` branch.
 
 ### Task 11: Docs, tests, budget
 
-- [ ] `tests/space.test.ts` collects every new footprint; README gets a "The stadium, walked"
+- [x] `tests/space.test.ts` collects every new footprint; README gets a "The stadium, walked"
   section and the layout table above; TESTING.md a phone checklist per phase; CREDITS.md any new
   models (the plan reuses what is already downloaded except `music-disco`).
-- [ ] `npm run budget` still under 10 MB total.
+- [x] `npm run budget` still under 10 MB total.
 
 ---
+
+## Outcome
+
+All eleven tasks shipped on 2026-09-08 (117 tests, 5.6 MB of assets). Deviations, all deliberate:
+
+- Lanes are 5 m wide, not 6: a 6 m west lane put its kerb inside the pillar at 180°. Caught by
+  `tests/space.test.ts` before anything was built.
+- The sky course weaves one metre (z 14↔15), not three: a three-metre sidestep with a 2.1 m stride
+  is a 3.7 m jump. The first four steps ramp from the lookout (z 10.1) into the band.
+- The cannon fires straight up (strength 22) rather than leaning towards the arena, so you land
+  where you started; a lean risked dropping people into a live round.
+- The photo frame's "Say cheese" is a toast, not the HUD subtitle, which the scheduler rewrites
+  every frame.
+- The host is an `AvatarShape` with a billboard bubble and no NPC library dependency.
 
 ## Order and cut line
 

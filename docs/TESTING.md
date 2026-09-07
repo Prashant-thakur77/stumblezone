@@ -163,3 +163,18 @@ none of it can be caught in the desktop preview.
 - [ ] Nothing in the village blocks the path from spawn to the podium, the boards, or the pads.
 - [ ] Stumble Tower: every step is reachable with a standing jump on the phone; the base pad starts
       the clock, the star at the top stops it, the time shows in the feed and on the board.
+
+**The ring road and the sky**
+- [ ] Walk from the village onto each lane: no step at the join, kerb on the arena side.
+- [ ] Practice Yard: a tile you stand on sinks after half a second and comes back in four; the
+      light turns red before the toast; the beam nudges, never throws you off the lane.
+- [ ] Speed Lap: start pad, turn pad on the corner, finish at the start; a straight-back finish
+      without the turn does nothing.
+- [ ] Hall of Fame shows the crown board's names on the plinths; the frame makes you wave.
+- [ ] Sky Cannon lands you back on the plaza or the lane, not in the arena. If it overshoots, lower
+      `CANNON_STRENGTH` in `src/arena/cannon.ts`.
+- [ ] Sky Course: every step from a standing jump; the Sky Box floor is see-through; the drop from
+      its south edge lands on the rings and pays.
+- [ ] Sam waves every twenty seconds and the bubble changes every seven.
+- [ ] The disco loop is audible on the deck and gone by the podium.
+- [ ] Five cheers: the pillar caps flash white for four seconds.

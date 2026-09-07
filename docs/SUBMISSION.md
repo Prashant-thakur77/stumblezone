@@ -38,7 +38,7 @@ should let each of them find their criterion in the first paragraph they read.
 | Agus (Regenesis Labs) | mobile UX, accessibility, controls | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
 | Bay Backner (Foundation) | social value, retention, discovery | Six hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
 | Nico E (Foundation) | usability, onboarding, execution | A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
-| MetaRyuk (DAO Council) | creativity, originality, social, retention | The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
+| MetaRyuk (DAO Council) | creativity, originality, social, retention | A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
 
 ## Your first three minutes (what a judge will actually see)
 

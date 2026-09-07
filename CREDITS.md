@@ -45,7 +45,8 @@ rectangle on the device this scene is built for.
 
 ## Audio
 - Announcer voice lines from **Kenney's Voiceover Pack** (kenney.nl) — CC0. Ten clips, male voice.
-- All other sound (music beds and cues) synthesised by `tools/make-audio.mjs` in this repo.
+- All other sound (four music beds including the Disco Deck's loop, the crowd bed and every cue)
+  synthesised by `tools/make-audio.mjs` in this repo.
 
 ## Design reference
 Round concepts are inspired by the party-game genre (memory-tile, sweeper, disappearing-bridge and
