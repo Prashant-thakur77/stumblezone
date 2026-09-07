@@ -101,6 +101,8 @@ const bet = new Bet()
 let rivalAddress = ''
 /** The FINAL TWO call fires once per round, when the field is down to two. */
 let saidFinalTwo = false
+/** "Past your best" fires once per round, when your time beats your personal best mid-round. */
+let saidPastBest = false
 /** How many players have crossed this round's finish line, for the feed's placings. */
 let finishers = 0
 /** While this is in the future the confetti is up because the crowd went wild, not because you won. */
@@ -192,6 +194,7 @@ function beginSlot(slot: number): void {
   if (isFinale(slot)) say('final_round')
   rivalAddress = ''
   saidFinalTwo = false
+  saidPastBest = false
   hud.ggTo = ''
   hud.ggSent = false
   hud.pick = ''
@@ -382,6 +385,16 @@ function schedulerSystem(dt: number): void {
     active.tick(dt, playElapsed, !warm)
     tickPowerups(playElapsed)
 
+    // Solo or not, a personal best is a moment: say it the second you pass it, not at the end.
+    if (!saidPastBest && !spectator.isOut() && !spectatingOnly) {
+      const pb = best(hud.roundName)
+      if (pb > 0 && pb < PLAY_SECONDS * 1000 && playElapsed * 1000 > pb) {
+        saidPastBest = true
+        toast('PAST YOUR BEST - ' + formatSeconds(pb))
+        play('survive')
+      }
+    }
+
     // Two left, with someone beaten: the round has a last act, and the board should say so.
     if (!saidFinalTwo && seen.size >= 3 && seen.size - eliminated.size === 2) {
       saidFinalTwo = true
@@ -549,6 +562,12 @@ function schedulerSystem(dt: number): void {
       toast(settled.label + (settled.crowns > 0 ? '  +' + settled.crowns : ''))
     }
     hud.candidates = []
+
+    // The round's MVP, for the feed: the outright winner, else the first finisher, else nobody.
+    if (seen.size > 1) {
+      const mvp = survivors.length === 1 ? survivors[0] : firstFinisher
+      if (mvp !== '') toast('MVP: ' + (mvp === myAddress() ? 'you' : displayName(mvp)))
+    }
 
     // One named comparison beats any number of seconds. Whoever finished nearest you on the clock
     // is the person you will talk to about this round.

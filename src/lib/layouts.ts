@@ -49,6 +49,17 @@ export type PerfectMatchWave = {
   fruits: number[]
   target: number
   memoryMs: number
+  /** A late change of call: "SWITCH! STAND ON BLUE". Only from the third wave, half the time. */
+  switchTo?: number
+}
+
+/** How long before the judge the call switches. Long enough to move, short enough to panic. */
+export const SWITCH_SECONDS = 1.8
+
+/** The colour that counts at `secondsToJudge`: the switch, once it has been called. */
+export function effectiveTarget(wave: PerfectMatchWave, secondsToJudge: number): number {
+  if (wave.switchTo !== undefined && secondsToJudge <= SWITCH_SECONDS) return wave.switchTo
+  return wave.target
 }
 
 export function perfectMatchWave(seed: number, wave: number): PerfectMatchWave {
@@ -62,9 +73,17 @@ export function perfectMatchWave(seed: number, wave: number): PerfectMatchWave {
   // are not predictably clustered at the start of the board.
   const fruits: number[] = []
   for (let i = 0; i < MIN_SAFE_TILES; i++) fruits.push(target)
+  // A switch needs somewhere safe to switch to, so its colour gets the same guarantee.
+  let switchTo: number | undefined
+  if (wave >= 2 && kinds >= 3 && rng() < 0.5) {
+    switchTo = (target + 1 + Math.floor(rng() * (kinds - 1))) % kinds
+    for (let i = 0; i < MIN_SAFE_TILES; i++) fruits.push(switchTo)
+  }
   while (fruits.length < cells) fruits.push(Math.floor(rng() * kinds))
 
-  return { fruits: shuffle(rng, fruits), target, memoryMs: MEMORY_MS[w] }
+  const out: PerfectMatchWave = { fruits: shuffle(rng, fruits), target, memoryMs: MEMORY_MS[w] }
+  if (switchTo !== undefined) out.switchTo = switchTo
+  return out
 }
 
 /**
@@ -112,4 +131,22 @@ export function sweeperWaves(seed: number): SweeperWave[] {
     gapCol: Math.floor(rng() * SWEEPER_COLUMNS),
     direction: (i % 2 === 0 ? 1 : -1) as 1 | -1
   }))
+}
+
+/** Tip Toe's gold tile: a real tile past the first row, worth a crown to whoever steps on it. */
+export function tipToeGold(seed: number, fakes: boolean[]): number {
+  const rng = mulberry32(seed ^ 0x601d)
+  const real: number[] = []
+  for (let i = TIPTOE_WIDTH; i < fakes.length; i++) if (!fakes[i]) real.push(i)
+  return real[Math.floor(rng() * real.length)]
+}
+
+/** Seconds into play when Hex-Drop's top deck crumbles on its own. */
+export const HEX_CRUMBLE_AT = 60
+/** Which top-deck tiles go in the crumble: about a third, chosen by the seed. */
+export function hexCrumble(seed: number, tiles: number): number[] {
+  const rng = mulberry32(seed ^ 0xc4b1)
+  const out: number[] = []
+  for (let i = 0; i < tiles; i++) if (rng() < 0.33) out.push(i)
+  return out
 }

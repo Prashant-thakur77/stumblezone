@@ -7,7 +7,10 @@
 import { engine, Entity, Transform, MeshRenderer, MeshCollider, Material, VisibilityComponent } from '@dcl/sdk/ecs'
 import { Vector3, Color4 } from '@dcl/sdk/math'
 import { createTileGrid, TileGrid } from '../tiles'
-import { tipToeFakes } from '../../lib/layouts'
+import { tipToeFakes, tipToeGold } from '../../lib/layouts'
+import { award } from '../../net/crowns'
+import { myAddress } from '../../net/sync'
+import { toast } from '../../systems/feed'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -53,6 +56,10 @@ let pending: { index: number; at: number }[] = []
 let clock = 0
 let finished = false
 let startAt = 0
+/** The gold tile: a real tile worth a crown to whoever steps on it, once each. */
+let gold = -1
+let goldTaken = false
+const GOLD = { r: 1.0, g: 0.83, b: 0.25 }
 
 const PAD_DEPTH = 6
 
@@ -147,6 +154,10 @@ export const tipToe: Round = {
     setPadsVisible(true)
     grid.resetAll()
     grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
+    gold = tipToeGold(seed, fakes)
+    goldTaken = false
+    // Gold is on show from the start: a real tile you can see, worth going out of your way for.
+    grid.setColor(gold, GOLD, 1.2)
     onFall(() => {
       if (isOut()) return
       if (!loseLife()) void sendTo(startSpot())
@@ -183,6 +194,13 @@ export const tipToe: Round = {
     if (!t) return
 
     const index = grid.indexAt(t.position)
+    if (index === gold && !goldTaken) {
+      goldTaken = true
+      award(myAddress(), 1)
+      play('crown')
+      toast('GOLD TILE  +1')
+      grid.setColor(gold, TILE_NEUTRAL)
+    }
     if (index >= 0 && !grid.isSunk(index) && fakes[index]) {
       step(index)
       emitTile(index)

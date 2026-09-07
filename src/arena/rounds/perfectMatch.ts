@@ -20,8 +20,7 @@ import {
   PM_WAVE_COUNT,
   PM_BLANK_SECONDS,
   PM_CALL_SECONDS,
-  PM_REVEAL_SECONDS as REVEAL_SECONDS
-} from '../../lib/layouts'
+  PM_REVEAL_SECONDS as REVEAL_SECONDS, effectiveTarget } from '../../lib/layouts'
 import {
   ARENA_CENTER_X,
   ARENA_CENTER_Z,
@@ -38,6 +37,7 @@ import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { setJumbotronColor } from '../scenery'
 import { loseLife, isOut, onFall, sendTo } from '../../systems/spectator'
+import { play } from '../../systems/audio'
 
 let grid: TileGrid
 let waves: PerfectMatchWave[] = []
@@ -47,6 +47,8 @@ let judged = -1
 let shown = -1
 let warned = -1
 let revealed = -1
+/** Which wave has had its switch whistle, so it blows once. */
+let switchedOn = -1
 
 function safeSpot(wave: PerfectMatchWave): Vector3 {
   const i = wave.fruits.indexOf(wave.target)
@@ -92,6 +94,7 @@ export const perfectMatch: Round = {
     shown = -1
     warned = -1
     revealed = -1
+    switchedOn = -1
     grid.setVisible(true)
     grid.resetAll()
     grid.setCheckerboard(TILE_NEUTRAL, TILE_SHADE)
@@ -139,32 +142,40 @@ export const perfectMatch: Round = {
     } else if (t < judgeAt) {
       // The tiles are blank by now, so the called colour has to be named here or the round is
       // pure luck. Memory is tested by the blank board, not by hiding the instruction.
-      setBanner('STAND ON ' + FRUIT_NAMES[wave.target], Math.ceil(judgeAt - t) + '...')
-      setJumbotronColor(FRUIT_COLORS[wave.target])
+      const target = effectiveTarget(wave, judgeAt - t)
+      const switched = target !== wave.target
+      if (switched && switchedOn !== index) {
+        switchedOn = index
+        play('whistle')
+      }
+      setBanner((switched ? 'SWITCH! STAND ON ' : 'STAND ON ') + FRUIT_NAMES[target], Math.ceil(judgeAt - t) + '...')
+      setJumbotronColor(FRUIT_COLORS[target])
       // In the last second every doomed tile starts shuddering. It gives a player who guessed
       // wrong one final beat to jump, and turns a static countdown into a visible threat.
       if (judgeAt - t < 1 && warned !== index) {
         warned = index
         for (let i = 0; i < wave.fruits.length; i++) {
-          if (wave.fruits[i] !== wave.target) grid.warn(i, TILE_WARNING)
+          if (wave.fruits[i] !== target) grid.warn(i, TILE_WARNING)
         }
       }
     } else if (t < judgeAt + REVEAL_SECONDS) {
       // The reveal. Every tile shows its colour again for a beat before the wrong ones go, so you
       // find out whether you were right by looking at the floor rather than by falling through it.
       // This is the moment the round is actually about, and it was missing entirely.
+      const target = effectiveTarget(wave, 0)
       if (revealed < index) {
         revealed = index
         for (let i = 0; i < wave.fruits.length; i++) {
-          grid.setColor(i, FRUIT_COLORS[wave.fruits[i]], wave.fruits[i] === wave.target ? 1.8 : 0)
+          grid.setColor(i, FRUIT_COLORS[wave.fruits[i]], wave.fruits[i] === target ? 1.8 : 0)
         }
       }
-      setBanner('', 'It was ' + FRUIT_NAMES[wave.target])
+      setBanner('', 'It was ' + FRUIT_NAMES[target])
     } else if (judged < index) {
       judged = index
       setJumbotronColor(null)
+      const target = effectiveTarget(wave, 0)
       for (let i = 0; i < wave.fruits.length; i++) {
-        if (wave.fruits[i] !== wave.target) grid.sink(i)
+        if (wave.fruits[i] !== target) grid.sink(i)
       }
       setBanner('', waveLabel + ' cleared')
     }

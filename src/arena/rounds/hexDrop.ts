@@ -27,6 +27,7 @@ import {
 } from '../../config'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
+import { hexCrumble, HEX_CRUMBLE_AT } from '../../lib/layouts'
 import { play } from '../../systems/audio'
 import { eliminate, isOut, onFall } from '../../systems/spectator'
 import { emitTile, onTile } from '../../net/sync'
@@ -42,6 +43,8 @@ type Pending = { layer: number; index: number; at: number }
 let layers: TileGrid[] = []
 let pending: Pending[] = []
 let clock = 0
+let seedNow = 0
+let crumbled = false
 
 function tileKey(layer: number, index: number): number {
   return layer * 1000 + index
@@ -97,7 +100,9 @@ export const hexDrop: Round = {
     })
   },
 
-  start() {
+  start(seed: number) {
+    seedNow = seed
+    crumbled = false
     pending = []
     clock = 0
     for (let i = 0; i < layers.length; i++) {
@@ -137,6 +142,15 @@ export const hexDrop: Round = {
     setBanner('', deck < 0 ? 'Last one standing wins' : 'Level ' + (deck + 1) + ' of ' + HEX_LAYERS)
 
     clock += dt * 1000
+
+    // The crumble: at sixty seconds a third of the top deck goes on its own. Standing still on
+    // the top deck was a strategy; now it is a gamble. Everyone computes the same tiles.
+    if (!crumbled && _elapsed >= HEX_CRUMBLE_AT) {
+      crumbled = true
+      for (const i of hexCrumble(seedNow, HEX_COLS * HEX_ROWS)) markStepped(0, i)
+      play('crack')
+      setBanner('CRUMBLE!', 'The top deck is going')
+    }
 
     // Sink whatever has run out its grace period.
     for (let i = pending.length - 1; i >= 0; i--) {
