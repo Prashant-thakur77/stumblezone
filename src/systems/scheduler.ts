@@ -64,7 +64,7 @@ import { Bet } from '../lib/bet'
 import { emitGG, onGG } from '../net/sync'
 import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
 import { flyover } from './camera'
-import { play, setMusic, setCrowd, say } from './audio'
+import { play, setMusic, setCrowd, setCrowdLevel, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti, flashPillars } from '../arena/scenery'
 import { feed, toast } from './feed'
 import { hype } from './hype'
@@ -99,6 +99,8 @@ let joinedLive = false
 const bet = new Bet()
 /** The player the results card would send a GG to: whoever was nearest you on the clock. */
 let rivalAddress = ''
+/** The FINAL TWO call fires once per round, when the field is down to two. */
+let saidFinalTwo = false
 /** How many players have crossed this round's finish line, for the feed's placings. */
 let finishers = 0
 /** While this is in the future the confetti is up because the crowd went wild, not because you won. */
@@ -189,6 +191,7 @@ function beginSlot(slot: number): void {
   startPowerups(seedForSlot(slot), { x: ARENA_CENTER_X, z: ARENA_CENTER_Z }, active.pickupRadius)
   if (isFinale(slot)) say('final_round')
   rivalAddress = ''
+  saidFinalTwo = false
   hud.ggTo = ''
   hud.ggSent = false
   hud.pick = ''
@@ -238,6 +241,7 @@ function schedulerSystem(dt: number): void {
     hud.toasts = visible
   }
   hud.hype = hype.level(now)
+  setCrowdLevel(hud.hype)
   // The hat panel's rows, only while someone is standing in the market.
   if (hud.shop) hud.hats = shopEntries()
   // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
@@ -378,6 +382,15 @@ function schedulerSystem(dt: number): void {
     active.tick(dt, playElapsed, !warm)
     tickPowerups(playElapsed)
 
+    // Two left, with someone beaten: the round has a last act, and the board should say so.
+    if (!saidFinalTwo && seen.size >= 3 && seen.size - eliminated.size === 2) {
+      saidFinalTwo = true
+      const two = [...seen].filter((a) => !eliminated.has(a)).map(displayName)
+      toast('FINAL TWO: ' + two.join(' vs '))
+      setJumbotronColor({ r: 1.0, g: 0.24, b: 0.62 })
+      play('whistle')
+    }
+
     // A spectator's stake: pick one of the players still in. One pick, then it is a watch.
     if (spectator.isOut()) {
       const picked = bet.picked(slot)
@@ -479,7 +492,11 @@ function schedulerSystem(dt: number): void {
     for (const address of seen) {
       if (address === myAddress() && spectatingOnly) continue
       if (eliminated.has(address)) streaks.eliminated(address)
-      else streaks.qualified(address)
+      else {
+        streaks.qualified(address)
+        // Three in a row is a story the whole room should hear.
+        if (streaks.streak(address) === 3) toast((address === myAddress() ? 'You are' : displayName(address) + ' is') + ' ON FIRE - three in a row')
+      }
     }
     refreshCosmetics(leader(), streaks.hot())
     // The stinger and the crowd's verdict, before any announcer line.

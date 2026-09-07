@@ -7,7 +7,10 @@ import {
   SpotTracker,
   SPOT_HIT_SECONDS,
   SPOT_WARN_SECONDS,
-  SPOT_THIRD_AT
+  SPOT_THIRD_AT,
+  BLACKOUT_AT,
+  BLACKOUT_SECONDS,
+  inBlackout
 } from '../src/lib/spotlight'
 import { DISC_RADIUS } from '../src/config'
 
@@ -39,4 +42,13 @@ test('standing in the light warns, then hits, and stepping out resets', () => {
   assert.equal(s.update(true, SPOT_HIT_SECONDS - 0.1), 'warn')
   assert.equal(s.update(true, 0.2), 'hit')
   assert.equal(s.update(true, 0.1), 'ok')
+})
+
+test('the blackout is a two-second window, and the lights come back somewhere else', () => {
+  assert.ok(!inBlackout(BLACKOUT_AT - 0.1))
+  assert.ok(inBlackout(BLACKOUT_AT))
+  assert.ok(!inBlackout(BLACKOUT_AT + BLACKOUT_SECONDS))
+  const before = spotCentre(4, 0, BLACKOUT_AT - 0.01)
+  const after = spotCentre(4, 0, BLACKOUT_AT + BLACKOUT_SECONDS + 0.01)
+  assert.ok(Math.hypot(before.x - after.x, before.z - after.z) > 1, 'the lights must jump')
 })

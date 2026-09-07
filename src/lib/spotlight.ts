@@ -17,6 +17,13 @@ export const SPOT_HIT_SECONDS = 1.2
 export const SPOT_WARN_SECONDS = 0.6
 export const SPOT_RADIUS = 1.8
 export const SPOT_THIRD_AT = 45
+/** Lights out for two seconds, then they come back somewhere else. Two seconds of pure nerves. */
+export const BLACKOUT_AT = 60
+export const BLACKOUT_SECONDS = 2
+
+export function inBlackout(elapsed: number): boolean {
+  return elapsed >= BLACKOUT_AT && elapsed < BLACKOUT_AT + BLACKOUT_SECONDS
+}
 
 export function spotCount(elapsed: number): number {
   return elapsed >= SPOT_THIRD_AT ? 3 : 2
@@ -37,7 +44,9 @@ export function spotCentre(seed: number, index: number, t: number): { x: number;
   // by 1/sqrt(2) keeps the whole figure inside the walkable ring.
   const r = (DISC_RADIUS - 2) / Math.SQRT2
   // The speed-up warps the clock rather than the shape, so the paths stay inside the stage.
-  const tt = t < SPOT_THIRD_AT ? t : SPOT_THIRD_AT + (t - SPOT_THIRD_AT) * spotSpeed(t)
+  let tt = t < SPOT_THIRD_AT ? t : SPOT_THIRD_AT + (t - SPOT_THIRD_AT) * spotSpeed(t)
+  // After the blackout the lights come back somewhere else: the clock jumps by a seeded amount.
+  if (t >= BLACKOUT_AT + BLACKOUT_SECONDS) tt += 7 + rng() * 9
   return {
     x: r * Math.sin(fx * tt * Math.PI * 2 + px),
     z: r * Math.sin(fz * tt * Math.PI * 2 + pz)

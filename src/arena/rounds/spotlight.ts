@@ -18,7 +18,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, DISC_RADIUS } from '../../config'
-import { spotCentre, spotCount, SpotTracker, SPOT_RADIUS, SPOT_THIRD_AT } from '../../lib/spotlight'
+import { spotCentre, spotCount, SpotTracker, SPOT_RADIUS, SPOT_THIRD_AT, inBlackout, BLACKOUT_AT } from '../../lib/spotlight'
 import { buildDisc, setDiscVisible } from '../disc'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -44,6 +44,7 @@ let tracker = new SpotTracker()
 let seedNow = 0
 let running = false
 let thirdAnnounced = false
+let blackoutAnnounced = false
 /** Warning ticks are throttled: the tracker warns every frame, and 30 ticks a second is a buzz. */
 let lastTickAt = 0
 let clock = 0
@@ -130,6 +131,7 @@ export const spotlight: Round = {
     clock = 0
     lastTickAt = 0
     thirdAnnounced = false
+    blackoutAnnounced = false
     setDiscVisible(disc, true)
     for (let i = 0; i < spots.length; i++) {
       const p = spotCentre(seed, i, 0)
@@ -143,7 +145,14 @@ export const spotlight: Round = {
     if (!running) return
     clock += dt
 
-    const live = spotCount(elapsed)
+    const dark = inBlackout(elapsed)
+    if (dark && !blackoutAnnounced) {
+      blackoutAnnounced = true
+      tracker = new SpotTracker()
+      play('crack')
+      setBanner('BLACKOUT', 'Where will they come back?')
+    }
+    const live = dark ? 0 : spotCount(elapsed)
     for (let i = 0; i < spots.length; i++) {
       const on = i < live
       setSpotVisible(spots[i], on)

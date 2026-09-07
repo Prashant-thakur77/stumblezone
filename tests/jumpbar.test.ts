@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { jumpBarSpeed, jumpBarBeams, JUMPBAR_SECOND_AT } from '../src/lib/jumpbar'
+import { jumpBarSpeed, jumpBarBeams, jumpBarDirection, JUMPBAR_SECOND_AT, JUMPBAR_REVERSE_AT } from '../src/lib/jumpbar'
 import { PLAY_SECONDS } from '../src/config'
 
 test('the beam speeds up across the round and then holds', () => {
@@ -20,4 +20,10 @@ test('beams are seeded, the second one counter-rotates and arrives late', () => 
   assert.ok(a[0].angle >= 0 && a[0].angle < 360)
   assert.notEqual(a[0].angle, c[0].angle)
   assert.equal(JUMPBAR_SECOND_AT, 50)
+})
+
+test('both beams reverse at 70s and stay reversed', () => {
+  assert.equal(jumpBarDirection(1, JUMPBAR_REVERSE_AT - 0.1), 1)
+  assert.equal(jumpBarDirection(1, JUMPBAR_REVERSE_AT), -1)
+  assert.equal(jumpBarDirection(-1, JUMPBAR_REVERSE_AT + 10), 1)
 })

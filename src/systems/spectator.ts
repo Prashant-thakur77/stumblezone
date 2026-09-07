@@ -163,6 +163,13 @@ export function cheer(): void {
   emitCheer(emote)
 }
 
+/** The other verb on the ledge. Everyone hears a groan; the feed says who. */
+export function boo(): void {
+  void triggerEmote({ predefinedEmote: 'shrug' })
+  emitCheer('boo')
+  play('crowd-aww')
+}
+
 /**
  * A chosen reaction, from the results card. Plays locally and goes on the bus so everyone else's
  * feed sees it - and so it counts towards the crowd's hype like any other cheer.
@@ -179,7 +186,14 @@ export function initSpectator(): void {
   onCheer((p, isSelf) => {
     // Every cheer, mine included, feeds the meter: the crowd is the sum of the room.
     hype.cheer(Date.now())
-    if (!isSelf) toast(displayName(p.address) + ' cheers!')
+    if (!isSelf) {
+      if (p.emote === 'boo') {
+        toast(displayName(p.address) + ' boos!')
+        play('crowd-aww')
+      } else {
+        toast(displayName(p.address) + ' cheers!')
+      }
+    }
   })
 
   engine.addSystem(function fallWatcher() {

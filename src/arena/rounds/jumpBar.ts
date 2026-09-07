@@ -23,7 +23,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, DISC_RADIUS } from '../../config'
-import { jumpBarBeams, jumpBarSpeed, JUMPBAR_SECOND_AT } from '../../lib/jumpbar'
+import { jumpBarBeams, jumpBarSpeed, jumpBarDirection, JUMPBAR_SECOND_AT, JUMPBAR_REVERSE_AT } from '../../lib/jumpbar'
 import { buildDisc, setDiscVisible } from '../disc'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
@@ -44,6 +44,7 @@ let running = false
 let clock = 0
 let lastHitAt = -HIT_COOLDOWN_MS
 let secondShown = false
+let reversed = false
 
 function buildBeam(index: number, color: Color4): Beam {
   const pivot = engine.addEntity()
@@ -147,6 +148,7 @@ export const jumpBar: Round = {
     lastHitAt = -HIT_COOLDOWN_MS
     lastSpinAt = 0
     secondShown = false
+    reversed = false
     running = true
     setDiscVisible(disc, true)
     for (let i = 0; i < beams.length; i++) {
@@ -166,7 +168,15 @@ export const jumpBar: Round = {
     if (elapsed - lastSpinAt >= 5) {
       lastSpinAt = elapsed
       const speed = jumpBarSpeed(elapsed)
-      for (let i = 0; i < beams.length; i++) spin(beams[i], speed, layout[i].direction)
+      for (let i = 0; i < beams.length; i++) spin(beams[i], speed, jumpBarDirection(layout[i].direction, elapsed))
+    }
+
+    // The reversal. Re-armed at once, not on the next five-second tick, so it lands with the call.
+    if (!reversed && elapsed >= JUMPBAR_REVERSE_AT) {
+      reversed = true
+      for (let i = 0; i < beams.length; i++) spin(beams[i], jumpBarSpeed(elapsed), jumpBarDirection(layout[i].direction, elapsed))
+      play('whistle')
+      setBanner('REVERSE!', 'The beams turn the other way')
     }
 
     if (!secondShown && elapsed >= JUMPBAR_SECOND_AT) {

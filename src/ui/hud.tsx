@@ -22,7 +22,7 @@
 
 import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
-import { cheer, react } from '../systems/spectator'
+import { cheer, boo, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
 import { wearHat } from '../systems/hats'
 import { pickWinner, sendGG } from '../systems/scheduler'
@@ -220,6 +220,26 @@ function HatShop() {
   )
 }
 
+/** The last five seconds of a round, as big numerals. A clock in a pill is information; this is drama. */
+function LastSeconds() {
+  const show = hud.phase === 'play' && hud.roundClock > 0 && hud.roundClock <= 5
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '10%', left: '35%' },
+        width: '30%',
+        height: 160,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: show ? 'flex' : 'none'
+      }}
+    >
+      <ChunkyText text={String(hud.roundClock)} fontSize={150} width="100%" height={160} color={countdownColor(hud.roundClock)} />
+    </UiEntity>
+  )
+}
+
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
@@ -305,6 +325,7 @@ function Hud() {
 
       <IntroCard />
       <Countdown />
+      <LastSeconds />
       <PlayBanner />
       <Splash />
       <Toasts />
@@ -324,15 +345,26 @@ function Hud() {
           display: hud.out ? 'flex' : 'none'
         }}
       >
-        <Button
-          value="CHEER"
-          variant="primary"
-          fontSize={28}
-          color={C.navy}
-          onMouseDown={cheer}
-          uiTransform={{ width: '100%', height: 64 }}
-          uiBackground={shape(UI_TEX.pill, C.yellow)}
-        />
+        <UiEntity uiTransform={{ width: '100%', height: 64, flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Button
+            value="CHEER"
+            variant="primary"
+            fontSize={26}
+            color={C.navy}
+            onMouseDown={cheer}
+            uiTransform={{ width: '62%', height: 64 }}
+            uiBackground={shape(UI_TEX.pill, C.yellow)}
+          />
+          <Button
+            value="BOO"
+            variant="primary"
+            fontSize={26}
+            color={C.white}
+            onMouseDown={boo}
+            uiTransform={{ width: '34%', height: 64 }}
+            uiBackground={shape(UI_TEX.pill, C.slate)}
+          />
+        </UiEntity>
         {/* One tap to point the camera at the arena. On a phone, dragging a third-person camera
             round to face the round you were just knocked out of is the friction that makes people
             close the app instead of staying to watch the finish. */}

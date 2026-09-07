@@ -9,6 +9,12 @@ import { PLAY_SECONDS } from '../config'
 import { mulberry32 } from './prng'
 
 export const JUMPBAR_SECOND_AT = 50
+/** Both beams reverse here. Rhythm you had learned becomes rhythm you have to relearn. */
+export const JUMPBAR_REVERSE_AT = 70
+
+export function jumpBarDirection(base: 1 | -1, elapsed: number): 1 | -1 {
+  return elapsed >= JUMPBAR_REVERSE_AT ? ((-base) as 1 | -1) : base
+}
 
 const MIN_SPEED = 30
 const MAX_SPEED = 55

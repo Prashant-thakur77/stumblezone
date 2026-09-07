@@ -160,6 +160,15 @@ export function setCrowd(on: boolean): void {
   AudioSource.getMutable(music.get('crowd-bed')!).playing = on
 }
 
+/** How loud the room is, 0..1. The crowd bed rides the hype meter: five cheers and it swells. */
+export function setCrowdLevel(level: number): void {
+  const e = music.get('crowd-bed')
+  if (!e) return
+  const target = 0.28 + 0.32 * Math.max(0, Math.min(1, level))
+  const src = AudioSource.getMutable(e)
+  if (Math.abs(src.volume! - target) > 0.01) src.volume = target
+}
+
 export function play(clip: Clip): void {
   const e = sources.get(clip)
   if (!e) return
