@@ -7,6 +7,15 @@ Everything the submission form asks for, in one place. Copy from here rather tha
 A four-act party gauntlet in Decentraland that never stops: a new round starts every two minutes,
 around the clock, with no server, no lobby and no minimum player count.
 
+## Verified, not claimed
+
+- `npm run verify` on every push (GitHub Actions, green): type check, 126 unit tests, asset budget,
+  and a **headless boot of the real bundle** that drives a player through every round and phase
+  for 14 slots and fails on any throw. It found and fixed a per-frame crash in Sweeper Gates.
+- Measured load from that run: **1,124 entities, 665 mesh renderers, 113 GLTFs, 32 text shapes** -
+  under a quarter of the 16-parcel mobile allowance. Assets: 5.6 MB.
+- Every rounded HUD shape is a texture, because `borderRadius` does not render on the mobile client.
+
 ## The 100-word version
 
 Stumblezone is a Fall Guys-style show that runs on the clock instead of a server. Six rounds, four
@@ -39,6 +48,17 @@ should let each of them find their criterion in the first paragraph they read.
 | Bay Backner (Foundation) | social value, retention, discovery | Six hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
 | Nico E (Foundation) | usability, onboarding, execution | A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
 | MetaRyuk (DAO Council) | creativity, originality, social, retention | A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
+
+## Ten minutes on a phone before you submit (the honest "tested on mobile")
+
+1. Spawn. Read Sam's bubble. Walk onto the Hat Market: panel appears. Walk off: it goes.
+2. Wait for a round. Play it to the end - three hearts, a power-up star if it is a clock-driven
+   round, the last-five numerals. Note whether SWITCH / REVERSE / BLACKOUT / CRUMBLE read.
+3. Fall on purpose next round. On the ledge: CHEER x5 (crowd goes wild), BOO, WATCH ARENA, PICK.
+4. Results: DANCE, GG. Check the feed line on the other phone if you have two.
+5. Between rounds: tower to the top (is every step jumpable?), sky course to the box, the drop.
+6. East lane: lap. West lane: practice patch. Corners: hall, cannon (do you land on the plaza?).
+7. Anything that felt wrong is one constant: see the end of docs/TESTING.md for which.
 
 ## Your first three minutes (what a judge will actually see)
 

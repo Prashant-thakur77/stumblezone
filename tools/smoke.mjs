@@ -17,12 +17,46 @@ const scene = JSON.parse(readFileSync('scene.json', 'utf8'))
 
 // --- ~system mocks: the renderer's side of every host API the bundle calls. --------------------
 const ok = async () => ({})
+
+// --- Load accounting: every PUT the scene sends the renderer, by entity and component. -----------
+// This is the mobile budget measured rather than estimated: distinct entities, and how many carry
+// a MeshRenderer (a draw call each), a GltfContainer, or a TextShape.
+const COMPONENT_NAMES = { 1: 'Transform', 1017: 'MeshRenderer', 1041: 'GltfContainer', 1030: 'TextShape', 1019: 'MeshCollider', 1028: 'AudioSource', 1080: 'AvatarShape' }
+const entities = new Set()
+const perComponent = {}
+const entityHas = {}
+function tally(bytes) {
+  if (!bytes || bytes.length === 0) return
+  const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  let o = 0
+  while (o + 8 <= bytes.byteLength) {
+    const len = v.getUint32(o, true)
+    const type = v.getUint32(o + 4, true)
+    if (len < 8) break
+    if (type === 1 && o + 24 <= bytes.byteLength) {
+      const entity = v.getUint32(o + 8, true)
+      const component = v.getUint32(o + 12, true)
+      if (entity > 512) {
+        entities.add(entity)
+        const key = entity + ':' + component
+        if (!entityHas[key]) {
+          entityHas[key] = true
+          perComponent[component] = (perComponent[component] ?? 0) + 1
+        }
+      }
+    }
+    o += len
+  }
+}
 /** Emotes the scene asked for, by name. `knockOut` only fires on a real elimination. */
 const emotes = {}
 const mocks = {
   '~system/EngineApi': {
     crdtGetState: async () => ({ hasEntities: false, data: [] }),
-    crdtSendToRenderer: async () => ({ data: [] }),
+    crdtSendToRenderer: async ({ data }) => {
+      tally(data)
+      return { data: [] }
+    },
     sendBatch: async () => ({ events: [] }),
     subscribe: ok,
     isServer: async () => ({ isServer: false })
@@ -148,4 +182,15 @@ if (!emotes.knockOut) {
   process.exit(1)
 }
 realError('smoke: emotes ' + JSON.stringify(emotes))
+const load = Object.entries(perComponent)
+  .filter(([id]) => COMPONENT_NAMES[id])
+  .map(([id, n]) => COMPONENT_NAMES[id] + ' ' + n)
+  .join(', ')
+realError('smoke: load - ' + entities.size + ' entities; ' + load)
+// The mobile client's soft entity limit for a 16-parcel scene is about 4,800; a third of that is
+// the comfortable line for a scene that also has to animate.
+if (entities.size > 1600) {
+  realError('smoke: ' + entities.size + ' entities is over the comfortable mobile line (1600)')
+  process.exit(1)
+}
 realError('smoke: booted ' + scene.display.title + ', ran ' + (frames + 300) + ' frames across 14 slots in ' + ms + ' ms, no errors')
