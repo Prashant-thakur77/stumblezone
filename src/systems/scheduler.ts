@@ -60,7 +60,7 @@ import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { Bet } from '../lib/bet'
-import { beatTheHouse, HOUSE_CROWNS } from '../lib/house'
+import { beatTheHouse, houseLine, HOUSE_CROWNS } from '../lib/house'
 import { HeadToHead } from '../lib/rivals'
 import { towerClock } from '../arena/tower'
 import { lapClock } from '../arena/lap'
@@ -382,7 +382,10 @@ function schedulerSystem(dt: number): void {
     setJumbotron('SHOW CHAMPION\n' + displayName(top[0].address) + (top[1] ? '\n2nd ' + displayName(top[1].address) : '') + (top[2] ? '  3rd ' + displayName(top[2].address) : ''))
   } else {
     const fav = phase === 'play' ? crowdFavourite() : ''
-    setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)) + (fav ? '\n' + fav : ''))
+    // On a scored round the board is a live scoreboard: the leader, from the shared reports.
+    const lead = phase === 'play' && active.scored ? scores.leader() : { address: '', points: 0 }
+    const leadLine = lead.address !== '' ? 'LEADER ' + displayName(lead.address) + ' ' + Math.floor(lead.points) : ''
+    setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)) + (leadLine ? '\n' + leadLine : '') + (fav ? '\n' + fav : ''))
   }
   // The board goes gold for a Golden Show, so the stakes are visible from anywhere in the arena
   // and not only to whoever is reading the HUD.
@@ -416,7 +419,7 @@ function schedulerSystem(dt: number): void {
       hud.banner = active.name
       hud.subtitle = isFinale(slot)
         ? 'The show champion is decided here' + (active.twist ? '  ·  ' + active.twist : '')
-        : active.hint + (active.twist ? '  ·  ' + active.twist : '')
+        : active.hint + (active.twist ? '  ·  ' + active.twist : '') + '  ·  ' + houseLine(roundIndex(slot))
     }
     return
   }

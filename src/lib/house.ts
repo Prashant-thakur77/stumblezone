@@ -44,3 +44,13 @@ export function beatTheHouse(roundId: number, survived: boolean, survivedMs: num
   if (lasted >= house) return { beaten: true, label: 'BEAT THE HOUSE  ·  house was ' + secs(house) }
   return { beaten: false, label: 'House on ' + name + ': last ' + secs(house) + ' (you: ' + secs(survivedMs) + ')' }
 }
+
+/** The house, as a phrase for the intro card: "House: last 62s" / "finish under 40s" / "score 25". */
+export function houseLine(roundId: number): string {
+  const points = SCORE_ROUNDS[roundId]
+  if (points !== undefined) return 'House: score ' + points
+  const ms = HOUSE_MS[roundId]
+  if (ms === undefined) return ''
+  const secs = Math.round(ms / 1000) + 's'
+  return FINISH_ROUNDS.has(roundId) ? 'House: finish under ' + secs : 'House: last ' + secs
+}
