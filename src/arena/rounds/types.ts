@@ -34,4 +34,11 @@ export type Round = {
    * say; anything else is the arena deck. Below this, with air underneath, the fall sound plays.
    */
   floorY?: number
+
+  /**
+   * True if a player arriving mid-round can be dropped straight in. That holds when every hazard
+   * is a function of the seed and the clock; it does not when decay is synced per step (Tip Toe,
+   * Hex-Drop), because a latecomer missed those messages and would see tiles that are gone.
+   */
+  joinSafe?: boolean
 }

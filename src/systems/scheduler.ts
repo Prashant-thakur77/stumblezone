@@ -55,6 +55,7 @@ import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds, recordFinaleWin, finaleWinCount } from './records'
 import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
+import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
 import { feed, toast } from './feed'
@@ -85,6 +86,8 @@ let saidSet = false
 let saidHurry = false
 /** True when we arrived after this round had already started, so nothing here counts. */
 let spectatingOnly = false
+/** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
+let joinedLive = false
 /** How many players have crossed this round's finish line, for the feed's placings. */
 let finishers = 0
 /** While this is in the future the confetti is up because the crowd went wild, not because you won. */
@@ -166,12 +169,18 @@ function beginSlot(slot: number): void {
   active.start(seedForSlot(slot))
   if (isFinale(slot)) say('final_round')
 
-  // Joining after the round has already begun means spectating it. Dropping a latecomer onto a
-  // half-decayed board is worse than a clear "you're up next" - and it stops the alive count from
-  // claiming a player who never actually played.
-  const joinedLate = slotElapsed(Date.now()) > INTRO_SECONDS + GET_READY_SECONDS
-  spectatingOnly = joinedLate
-  if (joinedLate) {
+  // Joining after the get-ready freeze. On a round whose hazards come from the clock, a latecomer
+  // inside the join window is dropped straight in - a judge's first impression should be playing,
+  // not a hundred seconds of "you're up next". Otherwise they spectate: dropping someone onto a
+  // half-decayed board is worse than a clear wait, and it stops the alive count claiming a player
+  // who never played.
+  const elapsedNow = slotElapsed(Date.now())
+  const joinedLate = elapsedNow > INTRO_SECONDS + GET_READY_SECONDS
+  joinedLive = joinedLate && canJoinLate(elapsedNow, active.joinSafe === true)
+  spectatingOnly = joinedLate && !joinedLive
+  if (joinedLive) {
+    void spectator.sendTo(active.spawn())
+  } else if (joinedLate) {
     spectator.spectateOnly()
   } else {
     spectator.sendToLobby()
@@ -327,6 +336,17 @@ function schedulerSystem(dt: number): void {
     if (warm) {
       hud.banner = ''
       hud.subtitle = active.hint
+    }
+    // A latecomer who was dropped in live gets the hint for a few seconds, since they skipped the
+    // intro card that everyone else read.
+    if (joinedLive && playElapsed < GET_READY_SECONDS + WARMUP_SECONDS + 6) {
+      hud.banner = 'JOINED LATE - GO!'
+      hud.subtitle = active.hint
+    }
+    // A latecomer on the ledge is told exactly how long the wait is, every second of it.
+    if (spectatingOnly) {
+      hud.banner = 'NEXT ROUND IN ' + Math.ceil(secondsUntilPlay(elapsed)) + 's'
+      hud.subtitle = 'You arrived mid-round - watch from the ledge, you are in for the next one'
     }
 
     // Rounds write whatever suits their own state machine; this has the final word, so no round

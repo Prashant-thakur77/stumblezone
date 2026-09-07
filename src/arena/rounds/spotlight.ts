@@ -106,6 +106,9 @@ function moveSpot(spot: Spot, x: number, z: number): void {
 
 export const spotlight: Round = {
   name: 'Spotlight',
+  // Walls, waves, lights and beams all come from the seed and the clock - a latecomer sees
+  // exactly what everyone else sees, so they play rather than wait.
+  joinSafe: true,
   hint: 'Stay out of the light.',
 
   spawn(): Vector3 {
