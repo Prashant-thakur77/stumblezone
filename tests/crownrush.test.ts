@@ -1,14 +1,19 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zoneAt, pointsFor, Scores, HOP_SECONDS, SCORING_FROM, ZONE_RADIUS_START, ZONE_RADIUS_END } from '../src/lib/crownrush'
+import { zoneAt, pointsFor, Scores, nextHopIn, HOP_SECONDS, SCORING_FROM, ZONE_RADIUS_START, ZONE_RADIUS_END } from '../src/lib/crownrush'
 import { DISC_RADIUS, PLAY_SECONDS } from '../src/config'
 
-test('the zone stays on the stage, hops every twelve seconds, shrinks, and is the same for a seed', () => {
+test('the zone stays wholly on the stage for every seed, hops every twelve seconds, shrinks, and is stable', () => {
+  for (let seed = 0; seed < 400; seed++) {
+    for (let t = SCORING_FROM; t <= PLAY_SECONDS; t += 3) {
+      const z = zoneAt(seed * 7919 + 13, t)
+      assert.ok(Math.hypot(z.x, z.z) + z.radius <= DISC_RADIUS - 0.5, 'zone off the stage, seed ' + seed + ' at ' + t)
+    }
+  }
   let lastHop = -1
   let hops = 0
   for (let t = 0; t <= PLAY_SECONDS; t += 0.5) {
     const z = zoneAt(11, t)
-    assert.ok(Math.hypot(z.x, z.z) + z.radius <= DISC_RADIUS - 0.5, 'zone off the stage at ' + t)
     if (z.hop !== lastHop) {
       lastHop = z.hop
       hops++
@@ -39,4 +44,22 @@ test('scores keep the best report per player and name a leader', () => {
   assert.equal(s.get('a'), 5, 'a stale lower report does not overwrite')
   assert.deepEqual(s.leader(), { address: 'b', points: 7 })
   assert.deepEqual(s.ranked().map((r) => r.address), ['b', 'a'])
+})
+
+test('the hop timer counts to the first hop, then per cycle', () => {
+  assert.equal(nextHopIn(0), SCORING_FROM)
+  assert.equal(nextHopIn(SCORING_FROM), HOP_SECONDS)
+  assert.equal(nextHopIn(SCORING_FROM + HOP_SECONDS - 1), 1)
+})
+
+test('ties break on address so every client names the same winner', () => {
+  const s = new Scores()
+  s.report('zed', 4)
+  s.report('amy', 4)
+  assert.equal(s.leader().address, 'amy')
+  const s2 = new Scores()
+  s2.report('amy', 4)
+  s2.report('zed', 4)
+  assert.equal(s2.leader().address, 'amy')
+  assert.equal(s2.size(), 2)
 })

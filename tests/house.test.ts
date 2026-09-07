@@ -3,10 +3,12 @@ import assert from 'node:assert/strict'
 import { beatTheHouse, HOUSE_MS, SCORE_ROUNDS } from '../src/lib/house'
 import { ROUND_NAMES, PLAY_SECONDS } from '../src/config'
 
-test('every round has a house time inside the round', () => {
+test('every round has exactly one kind of house: a time inside the round, or a score', () => {
   for (let id = 0; id < ROUND_NAMES.length; id++) {
-    assert.ok(HOUSE_MS[id] !== undefined, ROUND_NAMES[id] + ' has no house time')
-    assert.ok(HOUSE_MS[id] > 20000 && HOUSE_MS[id] < PLAY_SECONDS * 1000)
+    const timed = HOUSE_MS[id] !== undefined
+    const scored = SCORE_ROUNDS[id] !== undefined
+    assert.ok(timed !== scored, ROUND_NAMES[id] + ' must have a time or a score, not both or neither')
+    if (timed) assert.ok(HOUSE_MS[id] > 20000 && HOUSE_MS[id] < PLAY_SECONDS * 1000)
   }
 })
 

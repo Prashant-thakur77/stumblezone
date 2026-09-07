@@ -5,16 +5,16 @@
 // the round goes on, so the crowd inside it gets tighter. Nobody is eliminated: the round is
 // about wanting the same floor as someone else, which no other round asks of you.
 
-import { engine, Entity, Transform, MeshRenderer, Material, VisibilityComponent } from '@dcl/sdk/ecs'
+import { engine, Entity, Transform, MeshRenderer, Material } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
-import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y } from '../../config'
-import { zoneAt, pointsFor, SCORING_FROM, HOP_SECONDS, Zone } from '../../lib/crownrush'
+import { ARENA_CENTER_X, ARENA_CENTER_Z, ARENA_Y, GET_READY_SECONDS, PLAY_SECONDS } from '../../config'
+import { zoneAt, pointsFor, nextHopIn, hopAt, radiusAt, Zone } from '../../lib/crownrush'
 import { buildDisc, setDiscVisible } from '../disc'
-import { buildCrown } from '../models'
+import { buildCrown, setVisible } from '../models'
 import { Round } from './types'
 import { setBanner } from '../../ui/state'
 import { setJumbotronColor } from '../scenery'
-import { isOut } from '../../systems/spectator'
+import { isOut, onFall, loseLife, sendTo } from '../../systems/spectator'
 import { play } from '../../systems/audio'
 
 let disc: Entity[] = []
@@ -25,7 +25,11 @@ let running = false
 let points = 0
 let lastHop = -1
 let inside = false
-let clock = 0
+let zone: Zone = { x: 0, z: 0, radius: 3, hop: 0 }
+let writtenRadius = 0
+let shownPoints = -1
+let shownHop = -1
+let shownInside = false
 
 const GOLD = { r: 1.0, g: 0.83, b: 0.25 }
 
@@ -49,14 +53,15 @@ function place(z: Zone): void {
   r.position.z = ARENA_CENTER_Z + z.z
   r.scale.x = z.radius * 2
   r.scale.z = z.radius * 2
+  writtenRadius = z.radius
   const c = Transform.getMutable(crown)
   c.position.x = ARENA_CENTER_X + z.x
   c.position.z = ARENA_CENTER_Z + z.z
 }
 
-function setVisible(on: boolean): void {
-  VisibilityComponent.createOrReplace(ring, { visible: on })
-  VisibilityComponent.createOrReplace(crown, { visible: on })
+function show(on: boolean): void {
+  setVisible(ring, on)
+  setVisible(crown, on)
 }
 
 export const crownRush: Round = {
@@ -81,34 +86,53 @@ export const crownRush: Round = {
     seedNow = seed
     running = true
     points = 0
-    lastHop = -1
+    lastHop = 0
     inside = false
-    clock = 0
+    shownPoints = -1
+    shownHop = -1
+    shownInside = false
+    zone = zoneAt(seed, 0)
     setDiscVisible(disc, true)
-    setVisible(true)
-    place(zoneAt(seed, 0))
+    show(true)
+    place(zone)
+    // Off the stage costs a heart and a walk back; the score stays. Nobody is eliminated here.
+    onFall(() => {
+      if (isOut()) return
+      if (!loseLife()) void sendTo(this.spawn())
+    })
   },
 
   score(): number {
     return points
   },
 
-  tick(dt: number, elapsed: number, playing: boolean) {
+  tick(dt: number, rawElapsed: number, playing: boolean) {
     if (!running) return
-    clock += dt
-    const zone = zoneAt(seedNow, elapsed)
-    if (zone.hop !== lastHop) {
-      lastHop = zone.hop
+    // The clock stops where play stops: the ring must not hop to a phantom spot during results.
+    const elapsed = Math.min(rawElapsed, PLAY_SECONDS)
+
+    // The zone only changes on a hop; the radius shrinks so slowly a write every centimetre is plenty.
+    const hop = hopAt(elapsed)
+    if (hop !== lastHop) {
+      lastHop = hop
+      zone = zoneAt(seedNow, elapsed)
       place(zone)
       if (playing) play('boing')
-    } else if (playing) {
-      // The shrink, a little every frame.
-      const r = Transform.getMutable(ring)
-      r.scale.x = zone.radius * 2
-      r.scale.z = zone.radius * 2
+    } else {
+      zone.radius = radiusAt(elapsed)
+      if (Math.abs(zone.radius - writtenRadius) >= 0.01) {
+        const r = Transform.getMutable(ring)
+        r.scale.x = zone.radius * 2
+        r.scale.z = zone.radius * 2
+        writtenRadius = zone.radius
+      }
     }
+
     if (!playing) {
-      setBanner('', 'Every second in the ring is a point. Most points wins.')
+      // The scheduler owns the banner during the freeze (the 5-4-3-2-1) and after play; the
+      // rules line belongs to the warm-up only.
+      if (rawElapsed >= GET_READY_SECONDS && rawElapsed < PLAY_SECONDS) setBanner('', 'Every second in the ring is a point. Most points wins.')
+      if (rawElapsed >= PLAY_SECONDS) setJumbotronColor(null)
       return
     }
     if (isOut()) return
@@ -124,18 +148,21 @@ export const crownRush: Round = {
       if (inside) play('tick')
     }
     setJumbotronColor(inside ? GOLD : null)
-    const untilHop = elapsed < SCORING_FROM ? SCORING_FROM - elapsed : HOP_SECONDS_LEFT(elapsed)
-    setBanner(inside ? 'IN THE ZONE  ' + Math.floor(points) : 'GET IN THE ZONE  ' + Math.floor(points), 'hops in ' + Math.ceil(untilHop) + 's')
+    // Strings only when a number changes: the banner is rebuilt at most a few times a second.
+    const p = Math.floor(points)
+    const h = Math.ceil(nextHopIn(elapsed))
+    if (p !== shownPoints || h !== shownHop || inside !== shownInside) {
+      shownPoints = p
+      shownHop = h
+      shownInside = inside
+      setBanner((inside ? 'IN THE ZONE  ' : 'GET IN THE ZONE  ') + p, 'hops in ' + h + 's')
+    }
   },
 
   stop() {
     running = false
     setDiscVisible(disc, false)
-    if (ring) setVisible(false)
+    if (ring) show(false)
     setJumbotronColor(null)
   }
-}
-
-function HOP_SECONDS_LEFT(elapsed: number): number {
-  return HOP_SECONDS - ((elapsed - SCORING_FROM) % HOP_SECONDS)
 }

@@ -16,8 +16,7 @@ export const HOUSE_MS: Record<number, number> = {
   3: 55000, // Hex-Drop - outlast the crumble
   4: 65000, // Spotlight - past the third light and the blackout
   5: 72000, // Jump Bar - past the reversal
-  6: 58000, // Copycat - through wave three
-  7: 25000 // Crown Rush - unused: scored rounds use SCORE_ROUNDS (kept so every round has an entry)
+  6: 58000 // Copycat - through wave three
 }
 
 export const FINISH_ROUNDS = new Set([2])
@@ -27,15 +26,16 @@ export const SCORE_ROUNDS: Record<number, number> = { 7: 25 }
 export type HouseResult = { beaten: boolean; label: string }
 
 export function beatTheHouse(roundId: number, survived: boolean, survivedMs: number, finishMs: number | null, points = 0): HouseResult {
-  const house = HOUSE_MS[roundId]
   const name = ROUND_NAMES[roundId] ?? 'the round'
   const secs = (ms: number) => Math.round(ms / 1000) + 's'
-  if (house === undefined) return { beaten: false, label: '' }
+  // Scored rounds first: their house is a number of points, and they have no time entry.
   const target = SCORE_ROUNDS[roundId]
   if (target !== undefined) {
     if (points >= target) return { beaten: true, label: 'BEAT THE HOUSE  ·  ' + Math.floor(points) + ' vs house ' + target }
     return { beaten: false, label: 'House on ' + name + ': score ' + target + ' (you: ' + Math.floor(points) + ')' }
   }
+  const house = HOUSE_MS[roundId]
+  if (house === undefined) return { beaten: false, label: '' }
   if (FINISH_ROUNDS.has(roundId)) {
     if (finishMs !== null && finishMs <= house) return { beaten: true, label: 'BEAT THE HOUSE  ·  ' + secs(finishMs) + ' vs house ' + secs(house) }
     return { beaten: false, label: 'House on ' + name + ': finish under ' + secs(house) }

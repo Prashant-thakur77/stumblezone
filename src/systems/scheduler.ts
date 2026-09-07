@@ -102,7 +102,8 @@ let joinedLive = false
 let joinedAtPlay = 0
 /** Scored rounds: everyone's latest reported score, and when we last sent ours. */
 const scores = new Scores()
-let lastScoreSentAt = -10
+let lastScoreSentAt = -Infinity
+let finalScoreSent = false
 /** Whom we have already replied to with our own presence this slot. */
 let greeted = new Set<string>()
 /** Throttle for the standing line and the hat rows: both sort or filter, neither changes often. */
@@ -163,7 +164,10 @@ export function setupScheduler(roundList: Round[]): void {
   const me = getPlayer()
   if (me && me.name) setName(myAddress(), me.name)
 
-  onScore((p) => scores.report(p.address, p.points))
+  onScore((p) => {
+    seen.add(p.address)
+    scores.report(p.address, p.points)
+  })
 
   // Presence: who is in the field this round. A reply to every newcomer, once, so they learn us.
   onHere((p, isSelf) => {
@@ -272,7 +276,8 @@ function beginSlot(slot: number): void {
   spectatingOnly = joinedLate && !joinedLive
   greeted = new Set<string>()
   scores.reset()
-  lastScoreSentAt = -10
+  lastScoreSentAt = -Infinity
+  finalScoreSent = false
   if (!spectatingOnly) {
     seen.add(myAddress())
     emitHere()
@@ -470,14 +475,14 @@ function schedulerSystem(dt: number): void {
     active.tick(dt, playElapsed, !warm)
     tickPowerups(playElapsed)
 
-    // Scored rounds: our score goes out every few seconds and once more at the end, so every
-    // client settles the same winner from the same numbers.
+    // Scored rounds: our score goes out every five seconds once scoring starts, and once more,
+    // final, on the first results frame. Our own tally is fed from the same emits, so every
+    // client - this one included - settles from the numbers that were actually shared.
     if (active.scored && active.score && !spectator.isOut() && !spectatingOnly) {
-      const mine = active.score()
-      scores.report(myAddress(), mine)
-      const last = hud.roundClock <= 1
-      if (playElapsed - lastScoreSentAt >= 5 || (last && lastScoreSentAt < playElapsed - 1)) {
+      if (playElapsed - lastScoreSentAt >= 5 && playElapsed >= GET_READY_SECONDS + WARMUP_SECONDS) {
         lastScoreSentAt = playElapsed
+        const mine = active.score()
+        scores.report(myAddress(), mine)
         emitScore(mine)
       }
     }
@@ -543,12 +548,25 @@ function schedulerSystem(dt: number): void {
     return
   }
 
-  // Results. A scored round waits a beat for the last scores to land before it settles.
-  if (!scored && active.scored) hud.resultDetail = 'Counting scores...'
-  if (!scored && (!active.scored || elapsed >= INTRO_SECONDS + PLAY_SECONDS + 1.5)) {
+  // Results. A scored round sends its final score on the first results frame - play is over, the
+  // number is final - and waits a beat for everyone else's before it settles.
+  const isScored = active.scored === true && !!active.score
+  if (!scored && isScored && !finalScoreSent) {
+    finalScoreSent = true
+    if (!spectator.isOut() && !spectatingOnly) {
+      const mine = active.score!()
+      scores.report(myAddress(), mine)
+      emitScore(mine)
+    }
+    hud.resultDetail = 'Counting scores...'
+  }
+  if (!scored && (!isScored || elapsed >= INTRO_SECONDS + PLAY_SECONDS + 1.5)) {
     scored = true
     spectator.setRoundLive(false)
-    const survived = !spectator.isOut()
+    // A scored round has no eliminations: "qualified" means you scored. Elsewhere it means alive.
+    const myPoints = isScored ? scores.get(myAddress()) : 0
+    const scoredWinner = isScored ? scores.leader().address : ''
+    const survived = isScored ? myPoints > 0 : !spectator.isOut()
     const golden = isGolden(showIndex(slot))
     const stakes = (isFinale(slot) ? FINALE_MULTIPLIER : 1) * (golden ? GOLDEN_MULTIPLIER : 1)
     if (survived && !spectatingOnly) {
@@ -561,12 +579,10 @@ function schedulerSystem(dt: number): void {
       }
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER * stakes)
-    // A scored round's winner: the top score, if anyone else played.
-    const scoredWinner = active.scored ? scores.leader().address : ''
-    if (active.scored && !spectatingOnly && scoredWinner === myAddress() && scores.ranked().length > 1) {
+    // A scored round's winner: the top score, if anyone else reported one.
+    if (isScored && !spectatingOnly && scoredWinner === myAddress() && scores.size() > 1) {
       award(myAddress(), CROWN_WIN * stakes)
       session.won()
-      say('congratulations')
     }
 
     // Bonuses. Each is announced by name, because a crown that arrives without a reason is just a
@@ -632,13 +648,18 @@ function schedulerSystem(dt: number): void {
     setConfetti(survived)
 
     const survivedMs = Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
-    // A round you watched is not a round you played - it must not set a personal best.
-    const beatIt = spectatingOnly ? false : record(hud.roundName, survivedMs)
+    // A round you watched is not a round you played - it must not set a personal best. A scored
+    // round's best is a score, kept by the same store under a points key.
+    const beatIt = spectatingOnly ? false : isScored ? record(hud.roundName + ' points', Math.round(myPoints * 1000)) : record(hud.roundName, survivedMs)
 
     // One announcer line per result, most specific wins: a sole-survivor win beats a new best,
     // which beats plain qualification. The eliminated heard "you lose" when they fell.
     const onPodium = isFinale(slot) && showStandings(3).some((s) => s.address === myAddress())
-    if (!spectatingOnly && !onPodium) {
+    if (!spectatingOnly && !onPodium && isScored) {
+      if (scoredWinner === myAddress() && scores.size() > 1) say('congratulations')
+      else if (myPoints === 0) say('game_over')
+      else if (beatIt) say('new_highscore')
+    } else if (!spectatingOnly && !onPodium) {
       const wonOutright = survived && seen.size > 1 && eliminated.size === seen.size - 1
       if (wonOutright) say('congratulations')
       else if (survived && beatIt) say('new_highscore')
@@ -647,8 +668,8 @@ function schedulerSystem(dt: number): void {
     }
     hud.resultDetail = spectatingOnly
       ? 'You watched this one. You are in for the next.'
-      : active.scored
-        ? 'Your score ' + Math.floor(scores.get(myAddress())) + (scoredWinner !== '' ? '  ·  winner ' + (scoredWinner === myAddress() ? 'you' : displayName(scoredWinner)) + ' with ' + Math.floor(scores.get(scoredWinner)) : '')
+      : isScored
+        ? scoredResultLine(myPoints, scoredWinner, beatIt)
       : seen.size > 1
       ? (survived ? '+1 crown' : eliminated.size + ' of ' + seen.size + ' went down')
       : beatIt
@@ -657,7 +678,7 @@ function schedulerSystem(dt: number): void {
 
     // The house: the opponent who is always there. Paid and printed like any other bonus.
     if (!spectatingOnly) {
-      const house = beatTheHouse(roundIndex(slot), survived, survivedMs, myFinishMs, scores.get(myAddress()))
+      const house = beatTheHouse(roundIndex(slot), survived, survivedMs, myFinishMs, myPoints)
       if (house.beaten) {
         award(myAddress(), HOUSE_CROWNS * stakes)
         toast('BEAT THE HOUSE  +' + HOUSE_CROWNS * stakes)
@@ -671,7 +692,7 @@ function schedulerSystem(dt: number): void {
 
     // The spectator's pick, settled by the same messages everyone saw. On a scored round the
     // "survivor" is the winner, outright.
-    const survivors = active.scored && scoredWinner !== '' ? [scoredWinner] : [...seen].filter((a) => !eliminated.has(a))
+    const survivors = isScored && scoredWinner !== '' ? [scoredWinner] : [...seen].filter((a) => !eliminated.has(a))
     const settled = bet.resolve(slot, survivors, survivors.length === 1 && seen.size > 1)
     if (settled) {
       if (settled.crowns > 0) {
@@ -749,7 +770,19 @@ function schedulerSystem(dt: number): void {
   // through to something, not merely that you are not dead.
   hud.phase = 'results'
   // A mid-round joiner watched, so they were neither. The card tells them what happens next.
-  hud.banner = spectatingOnly ? 'NEXT ROUND' : spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
+  hud.banner = spectatingOnly
+    ? 'NEXT ROUND'
+    : isScored
+      ? !scored
+        ? 'ROUND OVER'
+        : scores.leader().address === myAddress() && scores.size() > 1
+          ? 'WINNER!'
+          : scores.get(myAddress()) > 0
+            ? 'ROUND OVER'
+            : 'NO POINTS'
+      : spectator.isOut()
+        ? 'ELIMINATED'
+        : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  NEXT: ' + ROUND_NAMES[roundIndex(slot + 1)] + ' in ' + Math.ceil(remaining) + 's'
 }
 
@@ -783,6 +816,13 @@ export function sendGG(): void {
 function ordinal(n: number): string {
   const suffix = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'
   return n + suffix
+}
+
+/** The results line for a scored round. */
+function scoredResultLine(myPoints: number, winner: string, newBest: boolean): string {
+  const mine = 'Your score ' + Math.floor(myPoints) + (newBest ? ' - new best' : '')
+  if (winner === '') return mine
+  return mine + '  ·  winner ' + (winner === myAddress() ? 'you' : displayName(winner)) + ' with ' + Math.floor(scores.get(winner))
 }
 
 /** A round's twist line by name, for the host. */

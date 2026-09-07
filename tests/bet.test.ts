@@ -17,6 +17,6 @@ test('an outright win pays double; a fallen pick pays nothing', () => {
   b.choose('a', 6)
   assert.deepEqual(b.resolve(6, ['a'], true), { crowns: BET_OUTRIGHT, label: 'YOUR PICK WON OUTRIGHT' })
   b.choose('a', 7)
-  assert.deepEqual(b.resolve(7, ['b'], false), { crowns: 0, label: 'YOUR PICK WENT DOWN' })
+  assert.deepEqual(b.resolve(7, ['b'], false), { crowns: 0, label: 'YOUR PICK LOST' })
   assert.equal(b.picked(7), '')
 })

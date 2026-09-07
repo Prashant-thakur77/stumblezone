@@ -27,7 +27,7 @@ export class Bet {
     if (this.slot !== slot || this.pick === '') return null
     const pick = this.pick
     this.pick = ''
-    if (!survivors.includes(pick)) return { crowns: 0, label: 'YOUR PICK WENT DOWN' }
+    if (!survivors.includes(pick)) return { crowns: 0, label: 'YOUR PICK LOST' }
     if (outright && survivors.length === 1) return { crowns: BET_OUTRIGHT, label: 'YOUR PICK WON OUTRIGHT' }
     return { crowns: BET_QUALIFIED, label: 'YOUR PICK QUALIFIED' }
   }

@@ -17,14 +17,32 @@ export const SCORING_FROM = GET_READY_SECONDS + WARMUP_SECONDS
 
 export type Zone = { x: number; z: number; radius: number; hop: number }
 
-/** Where the zone is at `elapsed` seconds into play. Hops land inside the walkable ring. */
+/** The zone's edge never reaches the stage edge: a ring you cannot stand in is not a zone. */
+const EDGE_MARGIN = 0.8
+
+export function hopAt(elapsed: number): number {
+  return Math.max(0, Math.floor((elapsed - SCORING_FROM) / HOP_SECONDS))
+}
+
+/** Seconds until the ring next moves: to the first hop before scoring starts, then per cycle. */
+export function nextHopIn(elapsed: number): number {
+  if (elapsed < SCORING_FROM) return SCORING_FROM - elapsed
+  return HOP_SECONDS - ((elapsed - SCORING_FROM) % HOP_SECONDS)
+}
+
+export function radiusAt(elapsed: number): number {
+  const t = Math.min(1, Math.max(0, (elapsed - SCORING_FROM) / (PLAY_SECONDS - SCORING_FROM)))
+  return ZONE_RADIUS_START + (ZONE_RADIUS_END - ZONE_RADIUS_START) * t
+}
+
+/** Where the zone is at `elapsed` seconds into play. Every hop lands wholly inside the stage. */
 export function zoneAt(seed: number, elapsed: number): Zone {
-  const hop = Math.max(0, Math.floor((elapsed - SCORING_FROM) / HOP_SECONDS))
+  const hop = hopAt(elapsed)
   const rng = mulberry32((seed ^ 0xc801) + hop * 7919)
   const a = rng() * Math.PI * 2
-  const r = 2 + rng() * (DISC_RADIUS - 5)
-  const t = Math.min(1, Math.max(0, (elapsed - SCORING_FROM) / (PLAY_SECONDS - SCORING_FROM)))
-  return { x: Math.cos(a) * r, z: Math.sin(a) * r, radius: ZONE_RADIUS_START + (ZONE_RADIUS_END - ZONE_RADIUS_START) * t, hop }
+  const maxCentre = DISC_RADIUS - EDGE_MARGIN - ZONE_RADIUS_START
+  const r = 2 + rng() * (maxCentre - 2)
+  return { x: Math.cos(a) * r, z: Math.sin(a) * r, radius: radiusAt(elapsed), hop }
 }
 
 /** Points earned this frame by someone `distance` from the zone centre. */
@@ -46,15 +64,21 @@ export class Scores {
     return this.byAddress.get(address) ?? 0
   }
 
-  /** The leader and their score; '' when nobody has scored. Ties go to the earlier reporter. */
+  /** The leader and their score; '' when nobody has scored. Ties break on address, so every client agrees. */
   leader(): { address: string; points: number } {
-    let best = { address: '', points: 0 }
-    for (const [address, points] of this.byAddress) if (points > best.points) best = { address, points }
-    return best
+    const top = this.ranked()[0]
+    return top && top.points > 0 ? top : { address: '', points: 0 }
   }
 
+  /** Highest first; ties by address, the same rule the crown standings use, so no client disagrees. */
   ranked(): { address: string; points: number }[] {
-    return [...this.byAddress].map(([address, points]) => ({ address, points })).sort((a, b) => b.points - a.points)
+    return [...this.byAddress]
+      .map(([address, points]) => ({ address, points }))
+      .sort((a, b) => b.points - a.points || a.address.localeCompare(b.address))
+  }
+
+  size(): number {
+    return this.byAddress.size
   }
 
   reset(): void {
