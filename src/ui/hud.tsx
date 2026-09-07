@@ -24,6 +24,7 @@ import ReactEcs, { ReactEcsRenderer, UiEntity, Label, Button } from '@dcl/sdk/re
 import { hud } from './state'
 import { cheer, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
+import { wearHat } from '../systems/hats'
 import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
@@ -141,7 +142,7 @@ function Reactions() {
         height: 70,
         flexDirection: 'row',
         justifyContent: 'space-around',
-        display: hud.phase === 'results' ? 'flex' : 'none'
+        display: hud.phase === 'results' || hud.dance ? 'flex' : 'none'
       }}
     >
       {buttons.map((b) => (
@@ -156,6 +157,53 @@ function Reactions() {
           uiBackground={shape(UI_TEX.pill, b.color)}
         />
       ))}
+    </UiEntity>
+  )
+}
+
+/**
+ * The Hat Market panel. Every hat is a button: earned ones wear on tap, locked ones say what to go
+ * and do. Two rows of four so it fits a phone in landscape without covering the joystick.
+ */
+function HatShop() {
+  const rows: ReactEcs.JSX.Element[] = hud.hats.map((h) => (
+    <Button
+      key={h.id}
+      value={h.wearing ? h.name + ' - ON' : h.locked ? h.name + '\n' + h.unlock : 'WEAR ' + h.name}
+      variant="primary"
+      fontSize={h.locked ? 16 : 20}
+      color={h.locked ? C.white : C.navy}
+      onMouseDown={() => {
+        if (!h.locked) wearHat(h.wearing ? '' : h.id)
+      }}
+      uiTransform={{ width: '23%', height: 64, margin: { bottom: 8 } }}
+      uiBackground={shape(UI_TEX.pill, h.wearing ? C.green : h.locked ? C.slate : C.yellow)}
+    />
+  ))
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '14%', left: '10%' },
+        width: '80%',
+        height: 170,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        alignContent: 'flex-start',
+        display: hud.shop && hud.phase !== 'play' ? 'flex' : 'none'
+      }}
+    >
+      {rows}
+      <Button
+        value="NO HAT"
+        variant="primary"
+        fontSize={20}
+        color={C.navy}
+        onMouseDown={() => wearHat('')}
+        uiTransform={{ width: '23%', height: 64, margin: { bottom: 8 } }}
+        uiBackground={shape(UI_TEX.pill, C.cyan)}
+      />
     </UiEntity>
   )
 }
@@ -238,6 +286,7 @@ function Hud() {
       <Splash />
       <Toasts />
       <Reactions />
+      <HatShop />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}

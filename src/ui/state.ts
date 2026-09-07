@@ -36,6 +36,12 @@ export type HudState = {
   daily: string
   /** True during a Golden Show: every crown counts double and the card goes gold. */
   golden: boolean
+  /** True while standing in the Hat Market: the hat panel is up. */
+  shop: boolean
+  /** True while standing on the Disco Deck: the reactions row is up. */
+  dance: boolean
+  /** The hat panel's rows, refreshed while the shop is open. */
+  hats: { id: string; name: string; unlock: string; locked: boolean; wearing: boolean }[]
 }
 
 export const hud: HudState = {
@@ -56,7 +62,10 @@ export const hud: HudState = {
   hype: 0,
   fieldLine: '',
   daily: '',
-  golden: false
+  golden: false,
+  shop: false,
+  dance: false,
+  hats: []
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

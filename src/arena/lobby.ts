@@ -38,6 +38,7 @@ import { buildCrown, buildBalloons, buildTree, buildStar, buildLolli, buildInfla
 import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
 import { dailyFor, dayIndex } from '../lib/daily'
+import { starLine } from './village'
 import { slotIndex, slotsUntilGolden, showRounds, showIndex } from '../lib/schedule'
 
 let crownBoard: Entity
@@ -76,8 +77,7 @@ function slab(position: Vector3, scale: Vector3): Entity {
 }
 
 export function buildLobby(): void {
-  // Spawn floor.
-  slab(Vector3.create(ARENA_CENTER_X, LOBBY.y - 0.5, LOBBY.z), Vector3.create(24, 1, 12))
+  // The spawn floor is the village floor now - see village.ts.
 
   // Spectator ledge, high enough to watch the whole arena from.
   slab(Vector3.create(LEDGE.x, LEDGE.y - 0.5, LEDGE.z), Vector3.create(20, 1, 6))
@@ -308,6 +308,8 @@ function refreshBoards(): void {
     nextLines +
     '\n\nTODAY: ' +
     daily.text +
+    '\n' +
+    starLine() +
     '\n' +
     goldenLine
 }

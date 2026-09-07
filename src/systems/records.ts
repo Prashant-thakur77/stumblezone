@@ -9,6 +9,11 @@ const bestSurvival = new Map<string, number>()
 const played = new Map<string, number>()
 
 /** Record a completed round. Returns true if this run beat the previous best. */
+import { Session } from '../lib/session'
+
+/** What this visit adds up to. Lives here so the hats and the scheduler share one copy. */
+export const session = new Session()
+
 /** Finale wins this session. One is enough to be a CHAMPION for the rest of the night. */
 let finaleWins = 0
 

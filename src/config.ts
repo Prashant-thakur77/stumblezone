@@ -91,6 +91,34 @@ export const LEDGE = { x: 32, y: 36, z: 8 }
 /** Where players stand between rounds. */
 export const LOBBY = { x: 32, y: 20, z: 7 }
 
+// --- The village ------------------------------------------------------------
+//
+// A town at lobby height along the south edge: the lobby in the middle, the Hat Market to the
+// west, the Disco Deck to the east, houses along the back. Sized to sit south of the arena ring.
+
+/** The village floor: centre and extents. z 0..18, the full width of the scene. */
+export const VILLAGE_FLOOR = { x: 32, z: 9, width: 64, depth: 18 }
+export const HAT_MARKET = { x: 11, z: 9 }
+export const DISCO_DECK = { x: 53, z: 10 }
+export const DISCO_TILES = 4
+export const DISCO_TILE_SIZE = 2.2
+/** Where the six hat pedestals stand, west to east. */
+export const HAT_PEDESTALS = [0, 1, 2, 3, 4, 5].map((i) => ({ x: HAT_MARKET.x - 6 + i * 2.4, z: HAT_MARKET.z }))
+/** Candidate hiding spots for the daily stars. Five of these are lit each day. */
+export const STAR_SPOTS = [
+  { x: 2, z: 16 },
+  { x: 15, z: 3 },
+  { x: 18, z: 16 },
+  { x: 3, z: 9 },
+  { x: 24, z: 1 },
+  { x: 40, z: 1 },
+  { x: 47, z: 16 },
+  { x: 60, z: 8 },
+  { x: 62, z: 16 },
+  { x: 40, z: 15.5 }
+]
+export const STARS_PER_DAY = 5
+
 /**
  * Standing spots on the podium steps, tallest first. Rank r of the cycle stands at PODIUM_SPOTS[r].
  *

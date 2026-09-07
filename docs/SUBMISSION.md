@@ -36,7 +36,7 @@ should let each of them find their criterion in the first paragraph they read.
 |---|---|---|
 | Giorgio (Regenesis Labs) | performance, mobile-first execution, polish | 3.6 MB of assets, pooled entities built once, engine-side tweens, every HUD shape a texture because the mobile client ignores `borderRadius`. `npm run verify` is green in CI. |
 | Agus (Regenesis Labs) | mobile UX, accessibility, controls | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
-| Bay Backner (Foundation) | social value, retention, discovery | Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
+| Bay Backner (Foundation) | social value, retention, discovery | Six hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
 | Nico E (Foundation) | usability, onboarding, execution | A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
 | MetaRyuk (DAO Council) | creativity, originality, social, retention | The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
 

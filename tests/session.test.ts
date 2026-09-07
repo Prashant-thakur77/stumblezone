@@ -9,7 +9,7 @@ test('a session counts rounds, qualifications, falls and the best streak', () =>
   s.round(true)
   s.round(false)
   s.round(true)
-  assert.deepEqual(s.stats(), { rounds: 4, qualified: 3, fell: 1, bestStreak: 2 })
+  assert.deepEqual(s.stats(), { rounds: 4, qualified: 3, fell: 1, bestStreak: 2, wins: 0 })
   assert.equal(s.summary(), '4 rounds  ·  3 qualified  ·  best streak 2')
 })
 
@@ -19,4 +19,12 @@ test('the best streak survives a later collapse', () => {
   s.round(false)
   s.round(true)
   assert.equal(s.stats().bestStreak, 5)
+})
+
+test('outright wins are counted separately from qualifications', () => {
+  const s = new Session()
+  s.round(true)
+  s.won()
+  assert.equal(s.stats().wins, 1)
+  assert.equal(s.stats().qualified, 1)
 })

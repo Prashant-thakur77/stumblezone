@@ -4,13 +4,14 @@
 // the line worth putting on screen at the end of a show. It costs one object and no storage: a
 // session is a visit, and when the tab closes the visit is over.
 
-export type SessionStats = { rounds: number; qualified: number; fell: number; bestStreak: number }
+export type SessionStats = { rounds: number; qualified: number; fell: number; bestStreak: number; wins: number }
 
 export class Session {
   private rounds = 0
   private qualified = 0
   private streak = 0
   private best = 0
+  private wins = 0
 
   round(survived: boolean): void {
     this.rounds += 1
@@ -23,8 +24,19 @@ export class Session {
     }
   }
 
+  /** An outright win: you were the last one standing with someone else beaten. */
+  won(): void {
+    this.wins += 1
+  }
+
   stats(): SessionStats {
-    return { rounds: this.rounds, qualified: this.qualified, fell: this.rounds - this.qualified, bestStreak: this.best }
+    return {
+      rounds: this.rounds,
+      qualified: this.qualified,
+      fell: this.rounds - this.qualified,
+      bestStreak: this.best,
+      wins: this.wins
+    }
   }
 
   summary(): string {

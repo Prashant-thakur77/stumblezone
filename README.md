@@ -68,6 +68,22 @@ Designed for touch from the first commit, not ported to it.
 - Generous gaps and timers tuned for touch imprecision; the memory phase never drops below 2.5s.
 - Mobile tested from day one via `npm run start -- --mobile`, not in a pass at the end.
 
+## Stumble Village
+
+The scenes that hold a crowd in Decentraland are the ones with a *place* around the game — a mine
+to walk, an island, a garage. The village is that place, at lobby height around the stadium:
+
+- **Hat Market.** Six hats on six pedestals, each earned by something you did in the show — qualify
+  once, fall three times, five crowns, a three-streak, an outright win, a show championship. Step
+  onto the market, tap one, and everyone in the World sees it on your head. Nothing is bought;
+  crowns stay a score.
+- **Disco Deck.** A floor of party tiles that cycle under a mirror ball. Step on and the
+  DANCE / CLAP / SHRUG row appears, so the wait between rounds is a dance floor.
+- **Star Hunt.** Five stars a day, placed by the UTC day's seed on ten spots around the village.
+  Walk through one for a crown; all five for three more. Everyone sees the same stars.
+- Houses, cabins, lamps, bushes and a fountain along the back, so the town reads as a town from the
+  arena and from the ledge.
+
 ## Beyond the format
 
 The genre gives you rounds. These are the things layered on top that make it a *show*:
@@ -210,7 +226,9 @@ src/lib/        pure logic, no SDK imports, fully unit-tested
   field.ts      field readout and rivalries
   titles.ts     PIONEER / IRONFOOT / SURVIVOR / CHAMPION
   streak.ts     qualifying streaks
-src/arena/      tile pool, lobby, the shared round stage, and the six rounds
+  hats.ts       the six hats and what unlocks each
+  stars.ts      the daily star hunt
+src/arena/      tile pool, lobby, village, the shared round stage, and the six rounds
 src/systems/    scheduler, spectator, cosmetics, camera, feed, hype
 src/net/        message bus wrapper and session crown tally
 src/ui/         mobile HUD

@@ -52,7 +52,8 @@ import {
 } from '../net/crowns'
 import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
-import { record, best, formatSeconds, recordFinaleWin, finaleWinCount } from './records'
+import { record, best, formatSeconds, recordFinaleWin, finaleWinCount, session } from './records'
+import { announceHat, shopEntries } from './hats'
 import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
@@ -65,7 +66,6 @@ import { refreshCosmetics } from './cosmetics'
 import { fieldLine, rivalry } from '../lib/field'
 import { dailyFor, dailyDone, dayIndex, DAILY_CROWNS } from '../lib/daily'
 import { bonusesFor } from '../lib/bonus'
-import { Session } from '../lib/session'
 
 let rounds: Round[] = []
 let activeSlot = -1
@@ -98,8 +98,6 @@ const streaks = new Streaks()
 let outMs = new Map<string, number>()
 /** The UTC day whose challenge is already paid for, so it pays once and only once. */
 let dailyPaidDay = -1
-/** What this visit adds up to, shown on the card at the end of every show. */
-const session = new Session()
 /** True if the crowd hit the top of the hype meter at any point this round. */
 let crowdWentWild = false
 /** Whether the previous round knocked us out, for the comeback bonus. */
@@ -151,6 +149,8 @@ function beginSlot(slot: number): void {
   setJumbotronColor(null)
   // A new round means you are playing again, so the arena view goes away with the last one.
   setSpectatorCam(false)
+  // Tell anyone who arrived since the last slot what we are wearing.
+  announceHat()
   spectator.setRoundLive(false)
   spectator.resetForSlot()
   spectator.releaseInput()
@@ -203,6 +203,8 @@ function schedulerSystem(dt: number): void {
     hud.toasts = visible
   }
   hud.hype = hype.level(now)
+  // The hat panel's rows, only while someone is standing in the market.
+  if (hud.shop) hud.hats = shopEntries()
   // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
   // than thirty times a second.
   const today = dayIndex(now)
@@ -373,7 +375,10 @@ function schedulerSystem(dt: number): void {
       award(myAddress(), CROWN_SURVIVE * stakes)
       // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is
       // worth a crown, but it is not a win.
-      if (seen.size > 1 && eliminated.size === seen.size - 1) award(myAddress(), CROWN_WIN * stakes)
+      if (seen.size > 1 && eliminated.size === seen.size - 1) {
+        award(myAddress(), CROWN_WIN * stakes)
+        session.won()
+      }
     }
     if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
 

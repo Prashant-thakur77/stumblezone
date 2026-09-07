@@ -151,3 +151,13 @@ none of it can be caught in the desktop preview.
 - [ ] Join during Tip Toe or Hex-Drop, or after the 40 s window: you land on the ledge and the
       banner reads "NEXT ROUND IN Ns", counting down every second.
 - [ ] A live latecomer who qualifies is counted and scores; one on the ledge is not counted as eliminated.
+
+**Stumble Village**
+- [ ] The floor is continuous from x 0 to 64 at lobby height; no seam at the old lobby edges.
+- [ ] Walk onto the Hat Market: the panel appears with six hats; locked ones show their condition.
+      Qualify once, come back, tap WEAR CAP: the cap sits on your head, not in your face - if it
+      floats or clips, adjust `scale` / `y` for that hat in `src/lib/hats.ts` (one line each).
+- [ ] On a second device, confirm the hat is visible on the first player within one slot.
+- [ ] Step onto the Disco Deck: tiles cycle colour, the ball turns, the reactions row appears.
+- [ ] Walk through a star: it disappears for you only, "STAR 1/5 +1" in the feed, the board updates.
+- [ ] Nothing in the village blocks the path from spawn to the podium, the boards, or the pads.

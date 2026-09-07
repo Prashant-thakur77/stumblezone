@@ -4,6 +4,7 @@
 // and everything after that is driven by the time of day.
 
 import { buildLobby } from './arena/lobby'
+import { buildVillage } from './arena/village'
 import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
@@ -16,12 +17,15 @@ import { initSpectator } from './systems/spectator'
 import { setupCrownSync } from './net/crowns'
 import { setupHud } from './ui/hud'
 import { initAudio } from './systems/audio'
+import { initHats } from './systems/hats'
 
 export function main() {
   initAudio()
   buildScenery()
   buildLobby()
+  buildVillage()
   initSpectator()
+  initHats()
   setupHud()
 
   // Order must match ROUND_NAMES in config.ts - the scheduler indexes both by round id. A show

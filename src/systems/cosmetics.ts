@@ -11,6 +11,7 @@
 
 import { engine, Entity, AvatarAttach, AvatarAnchorPointType, GltfContainer, Transform } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
+import { hatById } from '../lib/hats'
 
 let crownEntity: Entity | null = null
 let crownOn = ''
@@ -60,4 +61,28 @@ export function refreshCosmetics(leaderAddress: string, hot: string[]): void {
     AvatarAttach.create(e, { avatarId: address, anchorPointId: AvatarAnchorPointType.AAPT_NAME_TAG })
     halos.set(address, e)
   }
+}
+
+const hats = new Map<string, Entity>()
+
+/**
+ * Put a hat on an avatar, or take it off with ''. For the local player the attachment carries no
+ * avatarId and follows the local avatar; for everyone else it is keyed by their wallet address.
+ */
+export function setHat(address: string, hatId: string, isSelf: boolean): void {
+  const old = hats.get(address)
+  if (old) {
+    engine.removeEntity(old)
+    hats.delete(address)
+  }
+  const hat = hatById(hatId)
+  if (!hat) return
+  if (!isSelf && !isAvatar(address)) return
+  const e = engine.addEntity()
+  GltfContainer.create(e, { src: hat.model, visibleMeshesCollisionMask: 0, invisibleMeshesCollisionMask: 0 })
+  Transform.create(e, { position: Vector3.create(0, hat.y, 0), scale: Vector3.create(hat.scale, hat.scale, hat.scale) })
+  AvatarAttach.create(e, isSelf
+    ? { anchorPointId: AvatarAnchorPointType.AAPT_HEAD }
+    : { avatarId: address, anchorPointId: AvatarAnchorPointType.AAPT_HEAD })
+  hats.set(address, e)
 }

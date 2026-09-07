@@ -20,6 +20,7 @@ export type Finished = { slot: number; address: string; ms: number }
 export type TileStep = { slot: number; address: string; tileId: number }
 export type Cheer = { slot: number; address: string; emote: string }
 export type Standings = { slot: number; address: string; crowns: [string, number][] }
+export type Wear = { slot: number; address: string; hat: string }
 
 /** Stable identity for this client. Falls back to a per-session id for guests. */
 let cachedAddress = ''
@@ -100,6 +101,20 @@ export function emitStandings(crowns: [string, number][]): void {
 }
 export function onStandings(cb: (p: Standings) => void): void {
   bus.on('standings', (p: Standings) => {
+    if (!p || p.address === myAddress()) return
+    cb(p)
+  })
+}
+
+// --- Hats -------------------------------------------------------------------
+// What someone wears outlives the round, so this is exempt from the slot guard like the standings
+// are. Every client re-sends its hat at each slot start, which is how a latecomer catches up.
+
+export function emitWear(hat: string): void {
+  bus.emit('wear', { slot: currentSlot(), address: myAddress(), hat } as Wear)
+}
+export function onWear(cb: (p: Wear) => void): void {
+  bus.on('wear', (p: Wear) => {
     if (!p || p.address === myAddress()) return
     cb(p)
   })
