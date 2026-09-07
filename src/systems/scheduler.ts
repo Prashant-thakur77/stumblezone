@@ -544,6 +544,7 @@ function schedulerSystem(dt: number): void {
   }
 
   // Results. A scored round waits a beat for the last scores to land before it settles.
+  if (!scored && active.scored) hud.resultDetail = 'Counting scores...'
   if (!scored && (!active.scored || elapsed >= INTRO_SECONDS + PLAY_SECONDS + 1.5)) {
     scored = true
     spectator.setRoundLive(false)
