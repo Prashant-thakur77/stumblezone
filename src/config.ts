@@ -128,6 +128,17 @@ export const EAST_LANE = { x: 61.5, z: 40, width: 5, depth: 44 }
 export const NW_PLAZA = { x: 4, z: 60, size: 8 }
 export const NE_PLAZA = { x: 60, z: 60, size: 8 }
 
+/**
+ * The Sky Course: platforms from the tower's lookout east over the village to the Sky Box.
+ * The line weaves between z 14 and 15 - a metre, so the diagonal stays a phone-sized jump - and
+ * never crosses the spectator ledge (z 5..11).
+ */
+export const SKY_COURSE = { steps: 14, dx: 2.1, dy: 0.92, zMin: 14, zMax: 15 }
+export const SKY_BOX = { size: 8 }
+/** Where the Big Drop lands: a target on the village floor under the Sky Box's south edge. */
+export const DROP_PAD = { x: 32, z: 15.5, size: 6 }
+export const DROP_MIN_HEIGHT = 20
+
 /** The Stumble Tower: a spiral of platforms in the west corner, climbed against the clock. */
 export const TOWER = { x: 2.6, z: 12, radius: 2.1, steps: 12, rise: 1.05, stepDegrees: 55 }
 

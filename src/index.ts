@@ -11,6 +11,8 @@ import { buildLap } from './arena/lap'
 import { buildPractice } from './arena/practice'
 import { buildHall } from './arena/hall'
 import { buildCannon } from './arena/cannon'
+import { buildSky } from './arena/sky'
+import { buildDrop } from './arena/drop'
 import { buildScenery } from './arena/scenery'
 import { perfectMatch } from './arena/rounds/perfectMatch'
 import { sweeper } from './arena/rounds/sweeper'
@@ -36,6 +38,8 @@ export function main() {
   buildPractice()
   buildHall()
   buildCannon()
+  buildSky()
+  buildDrop()
   initSpectator()
   initHats()
   setupHud()
