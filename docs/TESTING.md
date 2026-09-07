@@ -178,3 +178,18 @@ none of it can be caught in the desktop preview.
 - [ ] Sam waves every twenty seconds and the bubble changes every seven.
 - [ ] The disco loop is audible on the deck and gone by the podium.
 - [ ] Five cheers: the pillar caps flash white for four seconds.
+
+**Moments (cycles 1-3)**
+- [ ] The crane shot plays during the round card and hands the camera back before the freeze.
+- [ ] A SHIELD star on Sweeper: take it, get hit - no heart lost, "SHIELD took the hit".
+- [ ] A BOOST star: eight seconds of noticeably faster running; then back to normal.
+- [ ] Perfect Match wave 3+: at least one round in three shows "SWITCH! STAND ON ..." with time
+      to move. If it feels impossible, raise `SWITCH_SECONDS` in `src/lib/layouts.ts`.
+- [ ] Jump Bar at 70 s: "REVERSE!" and both beams turn the other way.
+- [ ] Spotlight at 60 s: two seconds of no lights, then they are somewhere else.
+- [ ] Hex-Drop at 60 s: "CRUMBLE!" and about a third of the top deck falls.
+- [ ] Tip Toe: a gold tile visible from the start pad; stepping on it pays once.
+- [ ] From the ledge: PICK buttons for the players still in; the result pays at the card.
+- [ ] BOO plays the groan on the other device and shows in its feed.
+- [ ] GG on the results card lands as "<name> says GG" on the rival's device.
+- [ ] The last five seconds show as big numerals; the crowd gets louder as HYPE fills.
