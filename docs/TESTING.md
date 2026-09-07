@@ -144,3 +144,10 @@ none of it can be caught in the desktop preview.
 - [ ] Qualify twice in a row and confirm a star appears over your name tag on the other device.
 - [ ] After a finale, the podium crane shot plays for about six seconds and control comes back.
       If the camera sticks, that is `virtualCameraEntity` not being cleared — a hard blocker.
+
+**Late joiners (the judge's first 30 seconds)**
+- [ ] Join during play of Perfect Match, Sweeper, Spotlight or Jump Bar, inside the first 40 s:
+      you spawn in the arena, see "JOINED LATE - GO!", and can lose a heart immediately.
+- [ ] Join during Tip Toe or Hex-Drop, or after the 40 s window: you land on the ledge and the
+      banner reads "NEXT ROUND IN Ns", counting down every second.
+- [ ] A live latecomer who qualifies is counted and scores; one on the ledge is not counted as eliminated.

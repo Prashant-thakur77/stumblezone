@@ -9,6 +9,16 @@ Built for the [Decentraland Friendzone Mobile Buildathon](https://dorahacks.io/h
 
 ---
 
+## For judges — your first three minutes
+
+You will arrive at a random second of a random round. If it is a clock-driven round you are dropped
+straight in ("JOINED LATE - GO!"); if not, the banner counts down to the next one while you bounce
+on the pads. **Walk and jump is the entire control scheme.** Fall, and you land on a ledge over the
+arena with a CHEER button - five cheers in ten seconds sets the stadium off for everyone. Four
+rounds make a show; the show ends on a podium. The whole loop is eight minutes.
+
+Source: `<REPO_URL>` · Video: `<VIDEO_URL>` · Submission notes: [docs/SUBMISSION.md](docs/SUBMISSION.md)
+
 ## What it is
 
 One arena. Four Fall Guys-style rounds, cycling forever on a fixed schedule. A new round starts
