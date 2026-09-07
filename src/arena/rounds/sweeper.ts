@@ -89,6 +89,9 @@ function slab(position: Vector3, scale: Vector3): Entity {
 
 function buildSlab(): Entity {
   const e = engine.addEntity()
+  // Parked below the world until the first tick places it. Without a Transform, the tick's
+  // getMutable throws - the headless smoke test (tools/smoke.mjs) is what caught that.
+  Transform.create(e, { position: Vector3.create(ARENA_CENTER_X, -50, ARENA_CENTER_Z) })
   MeshRenderer.setBox(e)
   MeshCollider.setBox(e)
   Material.setPbrMaterial(e, {

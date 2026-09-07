@@ -246,6 +246,7 @@ npm install
 npm test          # 70 unit tests over the scheduler, PRNG, layouts and show rules
 npm run build     # bundle + type check
 npm run budget    # asset weight against the scene's limits
+npm run smoke     # boots the built scene headless and runs 14 slots of the show; fails on any throw
 npm run start     # desktop preview
 npm run start -- --mobile   # prints a QR to open the scene on your phone
 ```
@@ -297,6 +298,10 @@ src/ui/         mobile HUD
   ending on the finale, and shows differ from one another.
 - **Spotlight paths stay on the stage** — every light, every quarter-second, for the whole round.
   A Lissajous figure whose two axes each swing the full radius would leave the disc at the corners.
+- **A headless boot** (`tools/smoke.mjs`) loads the real bundle with the renderer's host APIs
+  mocked, lets the SDK's own startup call `main()`, and runs 1,100 frames through every round and
+  phase. It found a wall in Sweeper Gates built without a `Transform` — a throw every frame of that
+  round that the type checker, the unit tests and the desktop preview all missed.
 - **The UI never uses `borderRadius`** and every texture it names exists on disk. Both are silent
   failures on a phone: no error, just a flat rectangle or an invisible plate.
 - **Geometry and pacing invariants** — the kill plane must clear every standable surface, every
