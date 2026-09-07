@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { beatTheHouse, HOUSE_MS } from '../src/lib/house'
+import { beatTheHouse, HOUSE_MS, SCORE_ROUNDS } from '../src/lib/house'
 import { ROUND_NAMES, PLAY_SECONDS } from '../src/config'
 
 test('every round has a house time inside the round', () => {
@@ -21,4 +21,9 @@ test('Tip Toe: finish under the house, surviving without finishing is not enough
   assert.ok(beatTheHouse(2, true, 85000, HOUSE_MS[2] - 500).beaten)
   assert.ok(!beatTheHouse(2, true, 85000, HOUSE_MS[2] + 500).beaten)
   assert.ok(!beatTheHouse(2, true, 85000, null).beaten)
+})
+
+test('Crown Rush: the house is a score', () => {
+  assert.ok(beatTheHouse(7, true, 85000, null, SCORE_ROUNDS[7]).beaten)
+  assert.ok(!beatTheHouse(7, true, 85000, null, SCORE_ROUNDS[7] - 1).beaten)
 })

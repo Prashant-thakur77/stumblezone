@@ -5,8 +5,8 @@ Everything the submission form asks for, in one place. Copy from here rather tha
 ## One-liner
 
 The game show that runs itself - and the crowd plays too. A new round every two minutes on the
-clock, no host, no server; fall and you become the crowd; seven rounds including one that uses your
-own avatar's emotes as the controls; a podium, and a village to walk between shows.
+clock, no host, no server; fall and you become the crowd; eight rounds including one that uses your
+own avatar's emotes as the controls and one where players fight over the same three metres of floor; a podium, and a village to walk between shows.
 
 ## Verified, not claimed
 
@@ -81,7 +81,7 @@ Shoot in portrait on one phone, screen-record the other. No voice-over needed; c
 | Time | Shot | Caption |
 |---|---|---|
 | 0–8 s | Lobby: pan from the title across the boards to the arena and the rainbow | **A party show that never stops. A new round every 2 minutes.** |
-| 8–18 s | Intro card, 3-2-1, whistle, Spotlight round | **Seven rounds. Every show draws a different card.** |
+| 8–18 s | Intro card, 3-2-1, whistle, Spotlight round | **Eight rounds. Every show draws a different card.** |
 | 18–30 s | Phone A falls; lands on the ledge; taps CHEER five times | **Fall, and you're not done - you're the crowd.** |
 | 30–38 s | Phone B (still in): confetti fires, "THE CROWD IS GOING WILD" | **Five cheers sets the stadium off. For everyone.** |
 | 38–48 s | Results: QUALIFIED!, "You outlasted Alice by 4s", CLUTCH +1, DANCE | **Names, rivalries, bonuses.** |

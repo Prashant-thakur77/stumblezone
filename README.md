@@ -23,14 +23,14 @@ Source: <https://github.com/Prashant-thakur77/stumblezone> · Video: `<VIDEO_URL
 
 ## What it is
 
-One arena, seven rounds, a village around it. A new round starts **every two minutes**, whether
+One arena, eight rounds, a village around it. A new round starts **every two minutes**, whether
 anyone is watching or not — the schedule is a pure function of the clock, so there is nothing to
 host and nothing to go down. One of the rounds, **Copycat**, could only exist here: the coach
 performs a sequence of poses and you copy it with your *own avatar's* emotes, which the scene reads
 back from the explorer. (The genre debt is to the party-show format; the research is in
 [docs/FALLGUYS-PRESENTATION.md](docs/FALLGUYS-PRESENTATION.md).)
 
-**Seven rounds, four acts.** Each show draws three rounds from the pool below — seeded by the show
+**Eight rounds, four acts.** Each show draws three rounds from the pool below — seeded by the show
 number, ordered easy to hard, never repeating inside a show — and always ends on Hex-Drop, the only
 round whose floor genuinely runs out. Two shows in a row are two different cards.
 
@@ -41,6 +41,7 @@ round whose floor genuinely runs out. Two shows in a row are two different cards
 | **Tip Toe** | Half the bridge tiles are fake and vanish forever once stepped on. Whoever leads sacrifices themselves to reveal the path. |
 | **Spotlight** | The stage goes dark and roaming pools of light hunt you across it. Linger in one and it costs a heart. A third light and a speed-up at 45s. |
 | **Jump Bar** | One low beam sweeps the stage; jump it. At 50s a second beam appears turning the other way. |
+| **Crown Rush** | King of the hill. A crown zone on the stage; every second inside is a point; it hops every 12 s and shrinks. Nobody is eliminated — most points wins. The first round where you contest another player for the same floor. |
 | **Copycat** | A coach performs DANCE > CLAP > WAVE. You copy it, in order, in time, with your own avatar — pose buttons or the emote wheel. Wrong or late costs a heart; the sequence grows. |
 | **Hex-Drop** *(finale)* | Two stacked layers of tiles that fall away seconds after you touch them. Last one standing takes the show. |
 

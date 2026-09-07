@@ -213,3 +213,9 @@ none of it can be caught in the desktop preview.
 - [ ] After a finale: ENCORE toast, pose buttons open for everyone for fifteen seconds.
 - [ ] Copycat's coach is dancing on the stage during the round card; the jumbotron shows the crowd
       favourite once anyone picks.
+
+**Crown Rush**
+- [ ] A gold ring with a crown over it on the stage; standing inside counts up "IN THE ZONE 12";
+      the ring hops every twelve seconds with a boing and gets smaller as the round goes on.
+- [ ] With two devices: both scores show up on each other's results card and the same winner is
+      named on both. The spectator's PICK pays out for the winner.

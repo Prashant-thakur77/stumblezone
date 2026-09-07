@@ -42,6 +42,13 @@ export type Round = {
    */
   joinSafe?: boolean
 
+  /**
+   * A scored round: nobody is eliminated, the highest score wins. The scheduler reads `score()`
+   * during play, shares it over the bus, and settles the winner at results.
+   */
+  scored?: boolean
+  score?(): number
+
   /** The round's mid-round rule change, for the intro card: "Blackout at 60s". Anticipation beats surprise. */
   twist?: string
 

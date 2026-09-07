@@ -24,6 +24,7 @@ export type Wear = { slot: number; address: string; hat: string }
 export type GG = { slot: number; address: string; to: string }
 export type Pick = { slot: number; address: string; to: string }
 export type Here = { slot: number; address: string }
+export type Score = { slot: number; address: string; points: number }
 
 /** Stable identity for this client. Falls back to a per-session id for guests. */
 let cachedAddress = ''
@@ -152,4 +153,12 @@ export function emitHere(): void {
 }
 export function onHere(cb: (p: Here, isSelf: boolean) => void): void {
   on<Here>('here', cb)
+}
+
+// --- Scores (Crown Rush) ----------------------------------------------------
+export function emitScore(points: number): void {
+  bus.emit('score', { slot: currentSlot(), address: myAddress(), points } as Score)
+}
+export function onScore(cb: (p: Score, isSelf: boolean) => void): void {
+  on<Score>('score', cb)
 }

@@ -22,6 +22,7 @@ import { hexDrop } from './arena/rounds/hexDrop'
 import { spotlight } from './arena/rounds/spotlight'
 import { jumpBar } from './arena/rounds/jumpBar'
 import { copycat } from './arena/rounds/copycat'
+import { crownRush } from './arena/rounds/crownRush'
 import { setupScheduler } from './systems/scheduler'
 import { initSpectator } from './systems/spectator'
 import { setupCrownSync } from './net/crowns'
@@ -49,7 +50,7 @@ export function main() {
 
   // Order must match ROUND_NAMES in config.ts - the scheduler indexes both by round id. A show
   // runs three of these plus the finale; which three is drawn from the show's seed.
-  setupScheduler([perfectMatch, sweeper, tipToe, hexDrop, spotlight, jumpBar, copycat])
+  setupScheduler([perfectMatch, sweeper, tipToe, hexDrop, spotlight, jumpBar, copycat, crownRush])
 
   setupCrownSync()
 }
