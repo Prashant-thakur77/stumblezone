@@ -37,7 +37,16 @@ existing lobby in the middle and a district either side:
 - No colliders on anything worn or decorative. The village floor and the shop are the only solids.
 - Village geometry stays inside x,z ∈ [0,64], y ≥ 19, and under the arena ring's south edge.
 
+- **Stumble Tower (added the same day).** Twelve platforms spiralling up the west corner to a
+  lookout, a base pad that starts a stopwatch and a star at the top that stops it. Best time on
+  the board. A test proves every step is a phone-sized jump (gap ≤ 2.4 m, rise ≤ 1.1 m).
+
+## Status
+
+Shipped 2026-09-07 in two commits (`6a61089` village, tower commit after). 97 tests green.
+Phone-tuning left for the user: hat `scale`/`y` per hat in `src/lib/hats.ts`, and the tower's
+step gaps if a standing jump on the phone falls short.
+
 ## Not in scope
 
-A parkour course, an NPC host, a currency. Each is a good next step and none is needed for the
-village to work.
+An NPC host and a currency. Each is a good next step and none is needed for the village to work.
