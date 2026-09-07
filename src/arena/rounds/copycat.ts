@@ -181,7 +181,8 @@ export const copycat: Round = {
       perf.reset()
       play('whistle')
     }
-    hud.poses = !isOut()
+    // Everyone gets the buttons - players to score, spectators to dance along from the ledge.
+    hud.poses = true
     const n = wave.poses.length
     const done = perf.progress()
     setBanner('YOUR TURN  ' + done + '/' + n, done >= n ? 'Done - hold it' : 'Next: ' + LABEL[wave.poses[Math.min(done, n - 1)]] + '  ·  ' + Math.ceil(wave.endAt - elapsed) + 's')

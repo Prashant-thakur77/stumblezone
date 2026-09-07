@@ -22,6 +22,7 @@ export type Cheer = { slot: number; address: string; emote: string }
 export type Standings = { slot: number; address: string; crowns: [string, number][] }
 export type Wear = { slot: number; address: string; hat: string }
 export type GG = { slot: number; address: string; to: string }
+export type Pick = { slot: number; address: string; to: string }
 
 /** Stable identity for this client. Falls back to a per-session id for guests. */
 let cachedAddress = ''
@@ -129,4 +130,13 @@ export function onGG(cb: (p: GG) => void): void {
   on<GG>('gg', (p, isSelf) => {
     if (!isSelf && p.to === myAddress()) cb(p)
   })
+}
+
+// --- Picks ------------------------------------------------------------------
+// A spectator's pick is public: the jumbotron shows who the crowd is backing.
+export function emitPick(to: string): void {
+  bus.emit('pick', { slot: currentSlot(), address: myAddress(), to } as Pick)
+}
+export function onPick(cb: (p: Pick, isSelf: boolean) => void): void {
+  on<Pick>('pick', cb)
 }

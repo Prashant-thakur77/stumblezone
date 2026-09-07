@@ -62,7 +62,7 @@ import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { Bet } from '../lib/bet'
 import { beatTheHouse, HOUSE_CROWNS } from '../lib/house'
-import { emitGG, onGG } from '../net/sync'
+import { emitGG, onGG, emitPick, onPick } from '../net/sync'
 import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
 import { flyover } from './camera'
 import { play, setMusic, setCrowd, setCrowdLevel, say } from './audio'
@@ -100,6 +100,8 @@ let joinedLive = false
 let myFinishMs: number | null = null
 /** A spectator's pick for the round, resolved at results. */
 const bet = new Bet()
+/** Everyone's picks this round, by picker, so the crowd favourite can go on the board. */
+let picks = new Map<string, string>()
 /** The player the results card would send a GG to: whoever was nearest you on the clock. */
 let rivalAddress = ''
 /** The FINAL TWO call fires once per round, when the field is down to two. */
@@ -149,6 +151,10 @@ export function setupScheduler(roundList: Round[]): void {
   if (me && me.name) setName(myAddress(), me.name)
 
   initPowerups()
+  onPick((p, isSelf) => {
+    picks.set(p.address, p.to)
+    if (!isSelf) toast(displayName(p.address) + ' backs ' + displayName(p.to))
+  })
   onGG((p) => {
     toast(displayName(p.address) + ' says GG')
     hype.cheer(Date.now())
@@ -204,6 +210,7 @@ function beginSlot(slot: number): void {
   hud.ggSent = false
   hud.pick = ''
   hud.candidates = []
+  picks = new Map<string, string>()
 
   // Name the person to beat. The board says it; saying it at the whistle makes it a rivalry.
   const lead = leader()
@@ -308,7 +315,8 @@ function schedulerSystem(dt: number): void {
     const top = showStandings(3)
     setJumbotron('SHOW CHAMPION\n' + displayName(top[0].address) + (top[1] ? '\n2nd ' + displayName(top[1].address) : '') + (top[2] ? '  3rd ' + displayName(top[2].address) : ''))
   } else {
-    setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
+    const fav = phase === 'play' ? crowdFavourite() : ''
+    setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)) + (fav ? '\n' + fav : ''))
   }
   // The board goes gold for a Golden Show, so the stakes are visible from anywhere in the arena
   // and not only to whoever is reading the HUD.
@@ -660,6 +668,18 @@ export function pickWinner(address: string): void {
   bet.choose(address, activeSlot)
   toast('You picked ' + displayName(address))
   play('tick')
+  emitPick(address)
+}
+
+/** "CROWD BACKS Alice x3", or '' when nobody has picked. */
+function crowdFavourite(): string {
+  if (picks.size === 0) return ''
+  const counts = new Map<string, number>()
+  for (const to of picks.values()) counts.set(to, (counts.get(to) ?? 0) + 1)
+  let best = ''
+  let n = 0
+  for (const [a, c] of counts) if (c > n) { best = a; n = c }
+  return 'CROWD BACKS ' + displayName(best) + (n > 1 ? ' x' + n : '')
 }
 
 /** Send a GG to the rival on the results card. Once per round. */
