@@ -17,6 +17,8 @@ const scene = JSON.parse(readFileSync('scene.json', 'utf8'))
 
 // --- ~system mocks: the renderer's side of every host API the bundle calls. --------------------
 const ok = async () => ({})
+/** Emotes the scene asked for, by name. `knockOut` only fires on a real elimination. */
+const emotes = {}
 const mocks = {
   '~system/EngineApi': {
     crdtGetState: async () => ({ hasEntities: false, data: [] }),
@@ -37,7 +39,10 @@ const mocks = {
   '~system/CommsApi': { consumeMessages: async () => ({ messages: [] }), getActiveVideoStreams: async () => ({ streams: [] }), publishData: ok, subscribeToTopic: ok },
   '~system/RestrictedActions': {
     movePlayerTo: async () => ({ success: true }),
-    triggerEmote: async () => ({ success: true }),
+    triggerEmote: async ({ predefinedEmote }) => {
+      emotes[predefinedEmote] = (emotes[predefinedEmote] ?? 0) + 1
+      return { success: true }
+    },
     triggerSceneEmote: ok,
     teleportTo: ok,
     changeRealm: ok,
@@ -68,6 +73,44 @@ await m.onStart()
 // main() is NOT called here: the SDK's own startup system calls the exported main() on the first
 // update, exactly as the explorer does. Calling it by hand builds the scene twice.
 
+// --- A player. The renderer owns the player's Transform, so the harness plays renderer: a
+// hand-encoded CRDT PUT_COMPONENT for entity 1 (the player), component 1 (Transform), each frame.
+// This is what makes the fall watcher, the practice tiles, the spotlight pools, the drop pad, the
+// power-ups and every trigger-free position check actually run.
+let lamport = 0
+function playerAt(x, y, z) {
+  const buf = new ArrayBuffer(8 + 16 + 44)
+  const v = new DataView(buf)
+  let o = 0
+  v.setUint32(o, 8 + 16 + 44, true); o += 4 // message length
+  v.setUint32(o, 1, true); o += 4 // PUT_COMPONENT
+  v.setUint32(o, 1, true); o += 4 // entity: the player
+  v.setUint32(o, 1, true); o += 4 // component: Transform
+  v.setUint32(o, ++lamport, true); o += 4 // timestamp
+  v.setUint32(o, 44, true); o += 4 // data length
+  for (const f of [x, y, z, 0, 0, 0, 1, 1, 1, 1]) { v.setFloat32(o, f, true); o += 4 }
+  v.setUint32(o, 0, true) // parent
+  m.rendererTransport.onmessage(new Uint8Array(buf))
+}
+
+/** Where the player is at frame i: a tour of the whole scene, arena during play, village between. */
+function tour(i) {
+  const phase = (fake / 1000) % 120
+  const a = i * 0.05
+  if (phase >= 25 && phase < 105) {
+    // In the arena during play: a slow circle, radius 6, plus a dip below the floor now and then.
+    const dip = i % 97 === 0 ? -30 : 0
+    return [32 + Math.cos(a) * 6, 24.5 + dip, 36 + Math.sin(a) * 6]
+  }
+  // Between rounds: the village, the lanes, the tower, the sky box, the ledge, in rotation.
+  const spots = [
+    [11, 20.2, 9], [53, 20.2, 10], [32, 20.2, 15.5], [2.5, 20.2, 27], [2.5, 20.2, 39], [2.5, 20.2, 52],
+    [61.5, 20.2, 21], [60, 20.2, 61], [4, 20.2, 60], [59, 20.2, 59], [34, 45.6, 15], [32, 36.2, 8], [3, 33.2, 12]
+  ]
+  const s = spots[Math.floor(i / 20) % spots.length]
+  return [s[0] + Math.cos(a) * 0.8, s[1], s[2] + Math.sin(a) * 0.8]
+}
+
 // --- Run the clock through fourteen slots (three and a half shows) at 30 fps, fast. ------------
 // Rounds, phases, the daily and the Golden Show all key off Date.now(); two seconds a frame walks
 // through every branch of the scheduler in a few hundred frames.
@@ -81,11 +124,13 @@ const frames = Math.ceil((14 * SLOT) / 2)
 const t0 = performance.now()
 for (let i = 0; i < frames; i++) {
   fake += 2000
+  playerAt(...tour(i))
   await m.onUpdate(dt)
 }
 // And a few hundred frames at real pace, so systems that throttle on dt get exercised too.
 for (let i = 0; i < 300; i++) {
   fake += 33
+  playerAt(...tour(frames + i))
   await m.onUpdate(dt)
 }
 Date.now = realNow
@@ -96,4 +141,11 @@ if (errors.length > 0) {
   for (const e of errors.slice(0, 10)) realError('  ' + e.split('\n')[0])
   process.exit(1)
 }
+// The injected player dips below the kill plane during play; if that never produced an
+// elimination, the position feed is not reaching the scene and half of this run was hollow.
+if (!emotes.knockOut) {
+  realError('smoke: the player never got knocked out - the injected Transform is not being applied')
+  process.exit(1)
+}
+realError('smoke: emotes ' + JSON.stringify(emotes))
 realError('smoke: booted ' + scene.display.title + ', ran ' + (frames + 300) + ' frames across 14 slots in ' + ms + ' ms, no errors')
