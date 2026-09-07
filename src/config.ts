@@ -103,7 +103,7 @@ export const DISCO_DECK = { x: 53, z: 10 }
 export const DISCO_TILES = 4
 export const DISCO_TILE_SIZE = 2.2
 /** Where the six hat pedestals stand, west to east. */
-export const HAT_PEDESTALS = [0, 1, 2, 3, 4, 5].map((i) => ({ x: HAT_MARKET.x - 6 + i * 2.4, z: HAT_MARKET.z }))
+export const HAT_PEDESTALS = [0, 1, 2, 3, 4, 5, 6].map((i) => ({ x: HAT_MARKET.x - 7.2 + i * 2.4, z: HAT_MARKET.z }))
 /** Candidate hiding spots for the daily stars. Five of these are lit each day. */
 export const STAR_SPOTS = [
   { x: 4, z: 17.5 },

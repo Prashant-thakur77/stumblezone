@@ -81,8 +81,9 @@ Designed for touch from the first commit, not ported to it.
 The scenes that hold a crowd in Decentraland are the ones with a *place* around the game — a mine
 to walk, an island, a garage. The village is that place, at lobby height around the stadium:
 
-- **Hat Market.** Six hats on six pedestals, each earned by something you did in the show — qualify
-  once, fall three times, five crowns, a three-streak, an outright win, a show championship. Step
+- **Hat Market.** Seven hats on seven pedestals, each earned by something you did in the show — qualify
+  once, fall three times, five crowns, a three-streak, an outright win, a show championship, a Crown
+  Rush win (that one is a crown). Step
   onto the market, tap one, and everyone in the World sees it on your head. Nothing is bought;
   crowns stay a score.
 - **Disco Deck.** A floor of party tiles that cycle under a mirror ball. Step on and the

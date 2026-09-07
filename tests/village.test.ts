@@ -4,7 +4,7 @@ import { HATS, hatById, unlockedHats } from '../src/lib/hats'
 import { dailyStars, StarHunt, STAR_CROWNS, STAR_HUNT_BONUS } from '../src/lib/stars'
 import { VILLAGE_FLOOR, HAT_PEDESTALS, DISCO_DECK, DISCO_TILES, DISCO_TILE_SIZE, STAR_SPOTS, STARS_PER_DAY, LOBBY, KILL_Y } from '../src/config'
 
-const none = { qualified: 0, crowns: 0, bestStreak: 0, wins: 0, finaleWins: 0, fell: 0 }
+const none = { qualified: 0, crowns: 0, bestStreak: 0, wins: 0, finaleWins: 0, fell: 0, rushWins: 0 }
 
 test('a new player has no hats; each hat has exactly one thing that unlocks it', () => {
   assert.deepEqual(unlockedHats(none), [])
@@ -15,6 +15,7 @@ test('a new player has no hats; each hat has exactly one thing that unlocks it',
   assert.deepEqual(unlockedHats({ ...none, bestStreak: 3 }).map((h) => h.id), ['wizard'])
   assert.deepEqual(unlockedHats({ ...none, wins: 1 }).map((h) => h.id), ['fox'])
   assert.deepEqual(unlockedHats({ ...none, finaleWins: 1 }).map((h) => h.id), ['atari'])
+  assert.deepEqual(unlockedHats({ ...none, rushWins: 1 }).map((h) => h.id), ['crown'])
   assert.equal(hatById('nope'), undefined)
   assert.equal(hatById('cap')?.name, 'CAP')
 })

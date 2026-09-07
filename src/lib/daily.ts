@@ -12,7 +12,7 @@ export const DAILY_CROWNS = 3
 export type DailyKind = 'qualify' | 'first' | 'survive'
 export type Daily = { id: number; text: string; roundId: number; kind: DailyKind }
 
-/** Seven entries, so the same challenge lands on the same weekday - a rhythm people notice. */
+/** Eight entries, one per round. */
 const POOL: { roundId: number; kind: DailyKind }[] = [
   { roundId: 2, kind: 'first' },
   { roundId: 0, kind: 'qualify' },
@@ -20,7 +20,8 @@ const POOL: { roundId: number; kind: DailyKind }[] = [
   { roundId: 4, kind: 'qualify' },
   { roundId: 5, kind: 'survive' },
   { roundId: 3, kind: 'qualify' },
-  { roundId: 6, kind: 'qualify' }
+  { roundId: 6, kind: 'qualify' },
+  { roundId: 7, kind: 'qualify' }
 ]
 
 export function dayIndex(nowMs: number): number {

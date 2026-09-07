@@ -4,7 +4,7 @@
 // the line worth putting on screen at the end of a show. It costs one object and no storage: a
 // session is a visit, and when the tab closes the visit is over.
 
-export type SessionStats = { rounds: number; qualified: number; fell: number; bestStreak: number; wins: number }
+export type SessionStats = { rounds: number; qualified: number; fell: number; bestStreak: number; wins: number; rushWins: number }
 
 export class Session {
   private rounds = 0
@@ -12,6 +12,7 @@ export class Session {
   private streak = 0
   private best = 0
   private wins = 0
+  private rushWins = 0
 
   round(survived: boolean): void {
     this.rounds += 1
@@ -29,13 +30,19 @@ export class Session {
     this.wins += 1
   }
 
+  /** A Crown Rush win: top score with someone else on the board. */
+  wonRush(): void {
+    this.rushWins += 1
+  }
+
   stats(): SessionStats {
     return {
       rounds: this.rounds,
       qualified: this.qualified,
       fell: this.rounds - this.qualified,
       bestStreak: this.best,
-      wins: this.wins
+      wins: this.wins,
+      rushWins: this.rushWins
     }
   }
 

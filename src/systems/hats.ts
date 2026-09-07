@@ -22,7 +22,8 @@ export function hatStats(): HatStats {
     bestStreak: s.bestStreak,
     wins: s.wins,
     finaleWins: finaleWinCount(),
-    fell: s.fell
+    fell: s.fell,
+    rushWins: s.rushWins
   }
 }
 

@@ -583,6 +583,7 @@ function schedulerSystem(dt: number): void {
     if (isScored && !spectatingOnly && scoredWinner === myAddress() && scores.size() > 1) {
       award(myAddress(), CROWN_WIN * stakes)
       session.won()
+      session.wonRush()
     }
 
     // Bonuses. Each is announced by name, because a crown that arrives without a reason is just a
