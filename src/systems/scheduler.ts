@@ -52,7 +52,7 @@ import {
   displayName,
   leader
 } from '../net/crowns'
-import { getPlayer } from '@dcl/sdk/players'
+import { getPlayer, onEnterScene, onLeaveScene } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds, recordFinaleWin, finaleWinCount, session } from './records'
 import { announceHat, shopEntries } from './hats'
@@ -149,6 +149,17 @@ export function setupScheduler(roundList: Round[]): void {
 
   const me = getPlayer()
   if (me && me.name) setName(myAddress(), me.name)
+
+  // Arrivals and departures are news. A room you can see filling up is a room you stay in.
+  onEnterScene((p) => {
+    if (!p || p.userId === myAddress()) return
+    if (p.name) setName(p.userId, p.name)
+    toast(displayName(p.userId) + ' joined the show')
+  })
+  onLeaveScene((userId) => {
+    if (userId === myAddress()) return
+    toast(displayName(userId) + ' left')
+  })
 
   initPowerups()
   onPick((p, isSelf) => {

@@ -4,6 +4,7 @@
 // Cross-session persistence is a post-submission upgrade and deliberately not a dependency:
 // a dead backend must never stop the game from running.
 
+import { getPlayer } from '@dcl/sdk/players'
 import { emitStandings, onStandings, onStandingsRequested, requestStandings } from './sync'
 
 /** Crowns awarded per outcome. */
@@ -63,6 +64,12 @@ export function displayName(address: string): string {
   const n = names.get(address)
   if (n) return n
   if (address.startsWith('guest-')) return 'Guest ' + address.slice(6, 10)
+  // Anyone in the scene has a profile the explorer already fetched; ask it before showing hex.
+  const p = getPlayer({ userId: address })
+  if (p && p.name) {
+    names.set(address, p.name)
+    return p.name
+  }
   return address.slice(0, 6) + '...' + address.slice(-4)
 }
 

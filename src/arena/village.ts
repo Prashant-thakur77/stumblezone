@@ -207,7 +207,7 @@ function buildDiscoDeck(): void {
     duration: 0,
     easingFunction: EasingFunction.EF_LINEAR
   })
-  sign('DISCO DECK\nStep on and dance', Vector3.create(DISCO_DECK.x, Y + 4.2, DISCO_DECK.z + half + 1), 1.6)
+  sign('DISCO DECK\nStep on and dance - the pose buttons are Copycat practice', Vector3.create(DISCO_DECK.x, Y + 4.2, DISCO_DECK.z + half + 1), 1.6)
 
   zone(
     Vector3.create(DISCO_DECK.x, Y + 1.5, DISCO_DECK.z),
