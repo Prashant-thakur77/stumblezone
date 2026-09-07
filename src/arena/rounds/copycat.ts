@@ -93,6 +93,7 @@ function record(pose: Pose): void {
 export const copycat: Round = {
   name: 'Copycat',
   hint: 'Watch the coach. Do what he does.',
+  twist: 'The sequence grows every wave',
   joinSafe: true,
 
   spawn(): Vector3 {

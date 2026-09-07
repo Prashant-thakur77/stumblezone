@@ -42,6 +42,9 @@ export type Round = {
    */
   joinSafe?: boolean
 
+  /** The round's mid-round rule change, for the intro card: "Blackout at 60s". Anticipation beats surprise. */
+  twist?: string
+
   /**
    * Radius of the flat stage power-ups may appear on, around the arena centre. Absent means no
    * power-ups: Tip Toe and Hex-Drop have no flat stage to put one on.

@@ -74,6 +74,7 @@ export const hexDrop: Round = {
   // Dropping a deck is progress, not a fall. Only the drop off the bottom deck is.
   floorY: ARENA_Y - (HEX_LAYERS - 1) * HEX_LAYER_GAP,
   hint: 'Do not stop moving.',
+  twist: 'The top deck crumbles at 60s',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)

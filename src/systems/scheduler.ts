@@ -303,7 +303,13 @@ function schedulerSystem(dt: number): void {
 
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
-  setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
+  if (phase === 'results' && isFinale(slot) && showStandings(1).length > 0) {
+    // The finale's results are the show's: the champion's name, for the whole stadium.
+    const top = showStandings(3)
+    setJumbotron('SHOW CHAMPION\n' + displayName(top[0].address) + (top[1] ? '\n2nd ' + displayName(top[1].address) : '') + (top[2] ? '  3rd ' + displayName(top[2].address) : ''))
+  } else {
+    setJumbotron(hud.roundName + '\n' + (hud.banner || String(hud.countdown)))
+  }
   // The board goes gold for a Golden Show, so the stakes are visible from anywhere in the arena
   // and not only to whoever is reading the HUD.
   if (goldenShow && phase === 'intro') setJumbotronColor({ r: 1.0, g: 0.83, b: 0.25 })
@@ -334,7 +340,9 @@ function schedulerSystem(dt: number): void {
     } else {
       hud.phase = 'card'
       hud.banner = active.name
-      hud.subtitle = isFinale(slot) ? 'The show champion is decided here' : active.hint
+      hud.subtitle = isFinale(slot)
+        ? 'The show champion is decided here' + (active.twist ? '  ·  ' + active.twist : '')
+        : active.hint + (active.twist ? '  ·  ' + active.twist : '')
     }
     return
   }

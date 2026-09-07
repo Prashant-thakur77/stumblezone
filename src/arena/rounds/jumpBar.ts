@@ -131,6 +131,7 @@ export const jumpBar: Round = {
   joinSafe: true,
   pickupRadius: 10,
   hint: 'Jump the beam.',
+  twist: 'Second beam at 50s, REVERSE at 70s',
 
   spawn(): Vector3 {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1, ARENA_CENTER_Z + DISC_RADIUS - 3)

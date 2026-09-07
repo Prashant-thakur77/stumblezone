@@ -71,6 +71,7 @@ export const perfectMatch: Round = {
   joinSafe: true,
   pickupRadius: 6,
   hint: 'Match the colour.',
+  twist: 'Later waves may SWITCH the call',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z)

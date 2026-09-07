@@ -112,6 +112,7 @@ export const spotlight: Round = {
   joinSafe: true,
   pickupRadius: 10,
   hint: 'Stay out of the light.',
+  twist: 'Third light at 45s, BLACKOUT at 60s',
 
   spawn(): Vector3 {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1, ARENA_CENTER_Z)

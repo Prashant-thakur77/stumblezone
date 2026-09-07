@@ -81,7 +81,7 @@ Shoot in portrait on one phone, screen-record the other. No voice-over needed; c
 | Time | Shot | Caption |
 |---|---|---|
 | 0–8 s | Lobby: pan from the title across the boards to the arena and the rainbow | **A party show that never stops. A new round every 2 minutes.** |
-| 8–18 s | Intro card, 3-2-1, whistle, Spotlight round | **Six rounds. Every show draws a different card.** |
+| 8–18 s | Intro card, 3-2-1, whistle, Spotlight round | **Seven rounds. Every show draws a different card.** |
 | 18–30 s | Phone A falls; lands on the ledge; taps CHEER five times | **Fall, and you're not done - you're the crowd.** |
 | 30–38 s | Phone B (still in): confetti fires, "THE CROWD IS GOING WILD" | **Five cheers sets the stadium off. For everyone.** |
 | 38–48 s | Results: QUALIFIED!, "You outlasted Alice by 4s", CLUTCH +1, DANCE | **Names, rivalries, bonuses.** |
@@ -127,7 +127,7 @@ An event is a listing in the app's Events tab - discovery the scene cannot buy a
    and the show varies itself by seed rather than by anyone's input.
 6. **Retention** — daily challenge, Golden Show every fourth show, titles, streaks, personal bests,
    and a lobby board that tells you what is coming and when.
-7. **Execution** — 70 unit tests over the parts that fail silently, and six rounds sharing one tile
+7. **Execution** — 70 unit tests over the parts that fail silently, and seven rounds sharing one tile
    system, one stage builder and one scheduler.
 
 ## Running it locally

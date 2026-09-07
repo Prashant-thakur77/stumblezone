@@ -222,6 +222,7 @@ export const sweeper: Round = {
   joinSafe: true,
   pickupRadius: 12,
   hint: 'Dodge the walls.',
+  twist: 'Walls speed up every wave',
 
   spawn() {
     return Vector3.create(ARENA_CENTER_X, ARENA_Y + 1.5, ARENA_CENTER_Z - PLATFORM_SIZE / 2 + 3)
