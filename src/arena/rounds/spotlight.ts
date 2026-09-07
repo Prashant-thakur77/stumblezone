@@ -36,6 +36,7 @@ type Spot = {
   /** The bright disc it casts on the floor - the thing players actually read. */
   pool: Entity
   warned: boolean
+  visible: boolean
 }
 
 let disc: Entity[] = []
@@ -80,10 +81,12 @@ function buildSpot(): Spot {
     roughness: 1
   })
 
-  return { rig, pool, warned: false }
+  return { rig, pool, warned: false, visible: true }
 }
 
 function setSpotVisible(spot: Spot, on: boolean): void {
+  if (spot.visible === on) return
+  spot.visible = on
   VisibilityComponent.createOrReplace(spot.rig, { visible: on })
   VisibilityComponent.createOrReplace(spot.pool, { visible: on })
 }
@@ -101,8 +104,12 @@ function paint(spot: Spot, danger: boolean): void {
 }
 
 function moveSpot(spot: Spot, x: number, z: number): void {
-  Transform.getMutable(spot.pool).position = Vector3.create(x, ARENA_Y + 0.06, z)
-  Transform.getMutable(spot.rig).position = Vector3.create(x, ARENA_Y + RIG_HEIGHT, z)
+  const pool = Transform.getMutable(spot.pool).position
+  pool.x = x
+  pool.z = z
+  const rig = Transform.getMutable(spot.rig).position
+  rig.x = x
+  rig.z = z
 }
 
 export const spotlight: Round = {

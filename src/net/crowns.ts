@@ -60,15 +60,23 @@ export function setName(address: string, name: string): void {
   if (name) names.set(address, name)
 }
 
+const misses = new Map<string, number>()
+
 export function displayName(address: string): string {
   const n = names.get(address)
   if (n) return n
   if (address.startsWith('guest-')) return 'Guest ' + address.slice(6, 10)
   // Anyone in the scene has a profile the explorer already fetched; ask it before showing hex.
-  const p = getPlayer({ userId: address })
-  if (p && p.name) {
-    names.set(address, p.name)
-    return p.name
+  // A miss is remembered for a few seconds: the lookup scans every player entity, and this is
+  // called every frame for every name on the field.
+  const missedAt = misses.get(address)
+  if (missedAt === undefined || Date.now() - missedAt > 5000) {
+    const p = getPlayer({ userId: address })
+    if (p && p.name) {
+      names.set(address, p.name)
+      return p.name
+    }
+    misses.set(address, Date.now())
   }
   return address.slice(0, 6) + '...' + address.slice(-4)
 }

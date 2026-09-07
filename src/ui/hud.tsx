@@ -64,7 +64,7 @@ function Countdown() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        display: hud.phase === 'countdown' ? 'flex' : 'none'
+        display: hud.phase === 'countdown' && !hud.welcome ? 'flex' : 'none'
       }}
     >
       <ChunkyText text={hud.banner} fontSize={isNumber ? 200 : 96} width="100%" height={230} color={isNumber ? countdownColor(n) : C.white} />

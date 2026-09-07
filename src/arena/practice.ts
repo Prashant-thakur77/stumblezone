@@ -110,6 +110,8 @@ export function buildPractice(): void {
   engine.addSystem((dt: number) => {
     clock += dt
     const t = Transform.getOrNull(engine.PlayerEntity)
+    // Nothing here needs to move while nobody is on the west lane.
+    if (!t || Math.hypot(t.position.x - X, t.position.z - LIGHT_Z) > 40) return
 
     // Tiles: whichever one the player stands on starts its clock; every tile follows its state.
     if (t && Math.abs(t.position.y - Y) < 1.5) {
@@ -119,9 +121,9 @@ export function buildPractice(): void {
     }
     const states = patch.tick(clock)
     for (let i = 0; i < tiles.length; i++) {
-      const m = Transform.getMutable(tiles[i].e)
       const y = Y + 0.15 - states[i].drop * SINK_DEPTH
-      if (m.position.y !== y) m.position.y = y
+      // getMutable dirties the Transform whether or not anything changed: read first.
+      if (Transform.get(tiles[i].e).position.y !== y) Transform.getMutable(tiles[i].e).position.y = y
       if (states[i].solid && !MeshCollider.has(tiles[i].e)) MeshCollider.setBox(tiles[i].e)
       if (!states[i].solid && MeshCollider.has(tiles[i].e)) MeshCollider.deleteFrom(tiles[i].e)
     }

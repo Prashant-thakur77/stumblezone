@@ -232,8 +232,14 @@ export function setConfetti(on: boolean): void {
 }
 
 /** Tint the jumbotron text. Perfect Match uses this to SHOW the called colour, not just name it. */
+let jumbotronColor = ''
+
 export function setJumbotronColor(color: { r: number; g: number; b: number } | null): void {
   if (!jumbotron) return
+  // A TextShape write is a re-layout on the client; rounds call this every frame, so only on change.
+  const key = color ? color.r + ',' + color.g + ',' + color.b : 'white'
+  if (key === jumbotronColor) return
+  jumbotronColor = key
   const t = TextShape.getMutable(jumbotron)
   t.textColor = color ? Color4.create(color.r, color.g, color.b, 1) : Color4.White()
 }

@@ -97,6 +97,8 @@ let saidHurry = false
 let spectatingOnly = false
 /** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
 let joinedLive = false
+/** Throttle for the standing line and the hat rows: both sort or filter, neither changes often. */
+let sinceLine = 1
 /** Rounds won and lost against each rival this show. */
 const h2h = new HeadToHead()
 /** Our own finish time this round (Tip Toe), or null. */
@@ -187,7 +189,9 @@ function beginSlot(slot: number): void {
   released = false
   frozen = false
   scored = false
-  seen = new Set<string>([myAddress()])
+  // The field. We join it below only if we actually play this round - a spectator on the ledge
+  // is not in the field, and every payout that counts survivors depends on that.
+  seen = new Set<string>()
   eliminated = new Set<string>()
   outMs = new Map<string, number>()
   firstFinisher = ''
@@ -245,6 +249,7 @@ function beginSlot(slot: number): void {
   const joinedLate = elapsedNow > INTRO_SECONDS + GET_READY_SECONDS
   joinedLive = joinedLate && canJoinLate(elapsedNow, active.joinSafe === true)
   spectatingOnly = joinedLate && !joinedLive
+  if (!spectatingOnly) seen.add(myAddress())
   if (joinedLive) {
     void spectator.sendTo(active.spawn())
   } else if (joinedLate) {
@@ -277,8 +282,6 @@ function schedulerSystem(dt: number): void {
   const tower = towerClock()
   const lap = lapClock()
   hud.activity = tower !== '' ? 'TOWER ' + tower : lap !== '' ? 'LAP ' + lap : ''
-  // The hat panel's rows, only while someone is standing in the market.
-  if (hud.shop) hud.hats = shopEntries()
   // The daily line only changes at midnight UTC or when it is cleared, so it is built then rather
   // than thirty times a second.
   const today = dayIndex(now)
@@ -317,7 +320,11 @@ function schedulerSystem(dt: number): void {
   const stillIn = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).map(displayName)
   hud.fieldLine = fieldLine([...(!hud.out && !spectatingOnly ? ['you'] : []), ...stillIn])
 
-  // Your place in the current show. This is the line that makes four rounds feel like one evening.
+  // Your place in the current show, twice a second - it sorts the tally, and it changes rarely.
+  sinceLine += dt
+  if (sinceLine >= 0.5 || hud.showLine === '') {
+    sinceLine = 0
+    if (hud.shop) hud.hats = shopEntries()
   const rank = showRank(myAddress())
   const title = titleFor({
     crowns: crownsFor(myAddress()),
@@ -327,6 +334,7 @@ function schedulerSystem(dt: number): void {
   })
   hud.showLine =
     rank.of > 0 && showStandings(1).length > 0 ? 'SHOW ' + ordinal(rank.place) + ' of ' + rank.of + '  ·  ' + title : title
+  }
 
   // The in-world banner covers the angles the HUD does not: looking up, looking across the arena,
   // or looking down from the spectator ledge.
@@ -505,7 +513,7 @@ function schedulerSystem(dt: number): void {
         session.won()
       }
     }
-    if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER)
+    if (firstFinisher === myAddress()) award(myAddress(), CROWN_FIRST_FINISHER * stakes)
 
     // Bonuses. Each is announced by name, because a crown that arrives without a reason is just a
     // number going up.
@@ -610,10 +618,10 @@ function schedulerSystem(dt: number): void {
     const settled = bet.resolve(slot, survivors, survivors.length === 1 && seen.size > 1)
     if (settled) {
       if (settled.crowns > 0) {
-        award(myAddress(), settled.crowns)
+        award(myAddress(), settled.crowns * stakes)
         play('crown')
       }
-      toast(settled.label + (settled.crowns > 0 ? '  +' + settled.crowns : ''))
+      toast(settled.label + (settled.crowns > 0 ? '  +' + settled.crowns * stakes : ''))
     }
     hud.candidates = []
 
@@ -678,6 +686,8 @@ function schedulerSystem(dt: number): void {
   }
 
   active.tick(dt, SLOT_SECONDS, false)
+  // The encore outranks whatever the round's tick thinks about the pose row.
+  if (isFinale(slot)) hud.poses = true
   // "QUALIFIED" is the party-game word, and it lands harder than "survived" - it says you are
   // through to something, not merely that you are not dead.
   hud.phase = 'results'

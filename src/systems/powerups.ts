@@ -14,6 +14,7 @@ const SHIELD_COLOR = { r: 0.2, g: 0.8, b: 1.0 }
 const BOOST_COLOR = { r: 1.0, g: 0.83, b: 0.25 }
 
 let rigs: { star: Entity; ring: Entity }[] = []
+const shown: boolean[] = [true, true]
 let list: Powerup[] = []
 let centre = { x: 0, z: 0 }
 let active = false
@@ -63,6 +64,8 @@ function paint(rig: { star: Entity; ring: Entity }, c: { r: number; g: number; b
 }
 
 function show(i: number, on: boolean): void {
+  if (shown[i] === on) return
+  shown[i] = on
   VisibilityComponent.createOrReplace(rigs[i].star, { visible: on })
   VisibilityComponent.createOrReplace(rigs[i].ring, { visible: on })
 }
