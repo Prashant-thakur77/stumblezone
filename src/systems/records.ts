@@ -46,3 +46,17 @@ export function timesPlayed(roundName: string): number {
 export function formatSeconds(ms: number): string {
   return (ms / 1000).toFixed(1) + 's'
 }
+
+/** Fastest Stumble Tower climb this session, in ms. Zero until someone reaches the top. */
+let towerBestMs = 0
+
+/** Returns true if this climb is the new best. */
+export function recordTower(ms: number): boolean {
+  if (towerBestMs !== 0 && ms >= towerBestMs) return false
+  towerBestMs = ms
+  return true
+}
+
+export function towerBest(): number {
+  return towerBestMs
+}

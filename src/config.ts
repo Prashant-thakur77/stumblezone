@@ -106,10 +106,10 @@ export const DISCO_TILE_SIZE = 2.2
 export const HAT_PEDESTALS = [0, 1, 2, 3, 4, 5].map((i) => ({ x: HAT_MARKET.x - 6 + i * 2.4, z: HAT_MARKET.z }))
 /** Candidate hiding spots for the daily stars. Five of these are lit each day. */
 export const STAR_SPOTS = [
-  { x: 2, z: 16 },
+  { x: 4, z: 17.5 },
   { x: 15, z: 3 },
   { x: 18, z: 16 },
-  { x: 3, z: 9 },
+  { x: 1.5, z: 7.5 },
   { x: 24, z: 1 },
   { x: 40, z: 1 },
   { x: 47, z: 16 },
@@ -118,6 +118,8 @@ export const STAR_SPOTS = [
   { x: 40, z: 15.5 }
 ]
 export const STARS_PER_DAY = 5
+/** The Stumble Tower: a spiral of platforms in the west corner, climbed against the clock. */
+export const TOWER = { x: 2.6, z: 12, radius: 2.1, steps: 12, rise: 1.05, stepDegrees: 55 }
 
 /**
  * Standing spots on the podium steps, tallest first. Rank r of the cycle stands at PODIUM_SPOTS[r].

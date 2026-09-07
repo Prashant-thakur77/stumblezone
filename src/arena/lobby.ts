@@ -39,6 +39,7 @@ import { upcoming } from '../systems/scheduler'
 import { play } from '../systems/audio'
 import { dailyFor, dayIndex } from '../lib/daily'
 import { starLine } from './village'
+import { towerLine } from './tower'
 import { slotIndex, slotsUntilGolden, showRounds, showIndex } from '../lib/schedule'
 
 let crownBoard: Entity
@@ -310,6 +311,8 @@ function refreshBoards(): void {
     daily.text +
     '\n' +
     starLine() +
+    '\n' +
+    towerLine() +
     '\n' +
     goldenLine
 }

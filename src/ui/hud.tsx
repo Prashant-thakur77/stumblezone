@@ -183,14 +183,15 @@ function HatShop() {
   return (
     <UiEntity
       uiTransform={{
+        // The bottom band, clear of the intro card and the results splash, which own the top.
         positionType: 'absolute',
-        position: { top: '14%', left: '10%' },
-        width: '80%',
-        height: 170,
+        position: { bottom: 20, left: '28%' },
+        width: '60%',
+        height: 150,
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-around',
-        alignContent: 'flex-start',
+        alignContent: 'flex-end',
         display: hud.shop && hud.phase !== 'play' ? 'flex' : 'none'
       }}
     >

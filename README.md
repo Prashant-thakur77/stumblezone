@@ -81,6 +81,9 @@ to walk, an island, a garage. The village is that place, at lobby height around 
   DANCE / CLAP / SHRUG row appears, so the wait between rounds is a dance floor.
 - **Star Hunt.** Five stars a day, placed by the UTC day's seed on ten spots around the village.
   Walk through one for a crown; all five for three more. Everyone sees the same stars.
+- **Stumble Tower.** Twelve platforms spiralling up the west corner, a lookout at the top, and a
+  stopwatch: step on the base pad, reach the star, your time goes on the board. Nothing at stake
+  but the time — it is the thing to do while the board says "NEXT UP in 1:12".
 - Houses, cabins, lamps, bushes and a fountain along the back, so the town reads as a town from the
   arena and from the ledge.
 
@@ -228,6 +231,7 @@ src/lib/        pure logic, no SDK imports, fully unit-tested
   streak.ts     qualifying streaks
   hats.ts       the six hats and what unlocks each
   stars.ts      the daily star hunt
+  tower.ts      the tower spiral, with a test that every step is a phone-sized jump
 src/arena/      tile pool, lobby, village, the shared round stage, and the six rounds
 src/systems/    scheduler, spectator, cosmetics, camera, feed, hype
 src/net/        message bus wrapper and session crown tally

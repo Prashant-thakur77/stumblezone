@@ -161,3 +161,5 @@ none of it can be caught in the desktop preview.
 - [ ] Step onto the Disco Deck: tiles cycle colour, the ball turns, the reactions row appears.
 - [ ] Walk through a star: it disappears for you only, "STAR 1/5 +1" in the feed, the board updates.
 - [ ] Nothing in the village blocks the path from spawn to the podium, the boards, or the pads.
+- [ ] Stumble Tower: every step is reachable with a standing jump on the phone; the base pad starts
+      the clock, the star at the top stops it, the time shows in the feed and on the board.
