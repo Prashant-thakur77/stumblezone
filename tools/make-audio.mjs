@@ -401,6 +401,20 @@ const clips = {
   // A tile giving way underfoot.
   'crack.wav': mix(noise({ seconds: 0.22, decay: 9 }), tone({ seconds: 0.18, from: 300, to: 90, curve: 'exp' })),
 
+  // The switch: two quick rising tones, the sound of a rule changing under you.
+  'switch.wav': mix(
+    tone({ seconds: 0.12, from: 620, to: 930, harmonics: [1, 0.4] }),
+    (() => {
+      const t = tone({ seconds: 0.16, from: 930, to: 1400, harmonics: [1, 0.4] })
+      const out = new Float32Array(n(0.3))
+      const start = n(0.13)
+      for (let i = 0; i < t.length && start + i < out.length; i++) out[start + i] = t[i]
+      return out
+    })()
+  ),
+  // The crumble: a low rumble under a falling tone, for a deck giving way.
+  'rumble.wav': mix(noise({ seconds: 0.9, decay: 3 }), tone({ seconds: 0.9, from: 140, to: 45, harmonics: [1, 0.6, 0.3], curve: 'exp' })),
+
   // Eliminated: three descending minor notes with a wobble. Sad, a little funny, never harsh.
   'eliminated.wav': mix(
     stab(659.25, 0.3, 0.5),

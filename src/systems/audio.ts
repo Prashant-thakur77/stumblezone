@@ -27,6 +27,8 @@ export type Clip =
   | 'boing'
   | 'crowd-cheer'
   | 'crowd-aww'
+  | 'switch'
+  | 'rumble'
 
 /** Looping beds. The crowd bed is layered under the music rather than swapped with it. */
 export type Track = 'music-lobby' | 'music-round' | 'music-tense' | 'crowd-bed' | 'music-disco'
@@ -70,7 +72,9 @@ const VOLUMES: Record<Clip, number> = {
   squeak: 0.5,
   boing: 0.5,
   'crowd-cheer': 0.55,
-  'crowd-aww': 0.5
+  'crowd-aww': 0.5,
+  switch: 0.6,
+  rumble: 0.55
 }
 
 const MUSIC: Track[] = ['music-lobby', 'music-round', 'music-tense']

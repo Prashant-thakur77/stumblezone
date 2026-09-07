@@ -42,7 +42,7 @@ function formatClock(seconds: number): string {
 /** The intro card: tag, name, three-word hint. Gold when it is the final. */
 function IntroCard() {
   return (
-    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={hud.phase === 'card'}>
+    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={hud.phase === 'card' && !hud.welcome}>
       <ChunkyText text={hud.roundTag} fontSize={24} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.cyan} />
       <ChunkyText text={hud.roundName.toUpperCase()} fontSize={86} width="100%" height={110} />
       <ChunkyText text={hud.subtitle} fontSize={32} width="100%" height={50} color={hud.finale || hud.golden ? C.navy : C.yellow} />
@@ -99,7 +99,7 @@ function PlayBanner() {
 function Splash() {
   const out = hud.out
   return (
-    <Card width="64%" height={230} position={{ top: '20%', left: '18%' }} color={out ? C.slate : C.pink} show={hud.phase === 'results'}>
+    <Card width="64%" height={230} position={{ top: '20%', left: '18%' }} color={out ? C.slate : C.pink} show={hud.phase === 'results' && !hud.welcome}>
       <ChunkyText text={hud.banner} fontSize={110} width="100%" height={130} color={out ? C.white : C.yellow} />
       <ChunkyText text={hud.subtitle} fontSize={28} width="100%" height={44} />
     </Card>
@@ -250,8 +250,9 @@ function PoseRow() {
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
-        position: { bottom: 20, left: '22%' },
-        width: '56%',
+        // Right of the feed's corner, left of the joystick's reserved zone.
+        position: { bottom: 20, left: '28%' },
+        width: '50%',
         height: 150,
         flexDirection: 'row',
         flexWrap: 'wrap',

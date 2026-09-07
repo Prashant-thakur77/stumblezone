@@ -148,7 +148,7 @@ export const hexDrop: Round = {
     if (!crumbled && _elapsed >= HEX_CRUMBLE_AT) {
       crumbled = true
       for (const i of hexCrumble(seedNow, HEX_COLS * HEX_ROWS)) markStepped(0, i)
-      play('crack')
+      play('rumble')
       setBanner('CRUMBLE!', 'The top deck is going')
     }
 

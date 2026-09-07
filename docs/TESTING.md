@@ -193,3 +193,11 @@ none of it can be caught in the desktop preview.
 - [ ] BOO plays the groan on the other device and shows in its feed.
 - [ ] GG on the results card lands as "<name> says GG" on the rival's device.
 - [ ] The last five seconds show as big numerals; the crowd gets louder as HYPE fills.
+
+**Copycat, the house, the welcome card**
+- [ ] First spawn: the HOW TO PLAY card, GOT IT dismisses it; it never comes back this session.
+- [ ] Copycat: the coach on the stage performs each pose as it is named; then six buttons appear;
+      tapping them plays the emote on your avatar and advances "YOUR TURN 1/3". A wrong one costs
+      a heart at once; running out of time costs one at the end. The emote wheel counts too.
+- [ ] Results card shows "BEAT THE HOUSE +1" when you outlasted the house time, or the house time
+      you missed. Alone, this is the line that gives the round a score.

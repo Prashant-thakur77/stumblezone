@@ -175,7 +175,7 @@ export const jumpBar: Round = {
     if (!reversed && elapsed >= JUMPBAR_REVERSE_AT) {
       reversed = true
       for (let i = 0; i < beams.length; i++) spin(beams[i], jumpBarSpeed(elapsed), jumpBarDirection(layout[i].direction, elapsed))
-      play('whistle')
+      play('switch')
       setBanner('REVERSE!', 'The beams turn the other way')
     }
 

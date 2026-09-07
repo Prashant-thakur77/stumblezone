@@ -146,7 +146,7 @@ export const perfectMatch: Round = {
       const switched = target !== wave.target
       if (switched && switchedOn !== index) {
         switchedOn = index
-        play('whistle')
+        play('switch')
       }
       setBanner((switched ? 'SWITCH! STAND ON ' : 'STAND ON ') + FRUIT_NAMES[target], Math.ceil(judgeAt - t) + '...')
       setJumbotronColor(FRUIT_COLORS[target])
