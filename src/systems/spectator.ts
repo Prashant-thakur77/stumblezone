@@ -22,6 +22,8 @@ import { displayName } from '../net/crowns'
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
 
 let lives = LIVES_PER_ROUND
+/** A SHIELD power-up: absorbs the next lost heart. */
+let shield = false
 let out = false
 /** Set while a movePlayerTo is in flight, so the fall watcher doesn't fire twice. */
 let relocating = false
@@ -57,6 +59,11 @@ export function isRoundLive(): boolean {
   return roundLive
 }
 
+export function addShield(): void {
+  shield = true
+  hud.shield = true
+}
+
 export function livesLeft(): number {
   return lives
 }
@@ -71,6 +78,8 @@ export function onFall(cb: () => void): void {
 }
 
 export function resetForSlot(): void {
+  shield = false
+  hud.shield = false
   lives = LIVES_PER_ROUND
   out = false
   relocating = false
@@ -94,6 +103,13 @@ export function sendToLobby(): void {
  * 3am still gets a real game rather than a five-second one.
  */
 export function loseLife(): boolean {
+  if (shield) {
+    shield = false
+    hud.shield = false
+    play('survive')
+    toast('SHIELD took the hit')
+    return false
+  }
   if (out) return true
   lives -= 1
   if (lives > 0) {

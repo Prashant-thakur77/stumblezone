@@ -27,6 +27,8 @@ import {
   WARMUP_SECONDS,
   PODIUM_SPOTS,
   ARENA_Y,
+  ARENA_CENTER_X,
+  ARENA_CENTER_Z,
   SHARE_URL
 } from '../config'
 import { Round } from '../arena/rounds/types'
@@ -58,6 +60,10 @@ import { errandsComplete } from './errands'
 import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
+import { Bet } from '../lib/bet'
+import { emitGG, onGG } from '../net/sync'
+import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
+import { flyover } from './camera'
 import { play, setMusic, setCrowd, say } from './audio'
 import { setJumbotron, setJumbotronColor, setConfetti, flashPillars } from '../arena/scenery'
 import { feed, toast } from './feed'
@@ -89,6 +95,10 @@ let saidHurry = false
 let spectatingOnly = false
 /** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
 let joinedLive = false
+/** A spectator's pick for the round, resolved at results. */
+const bet = new Bet()
+/** The player the results card would send a GG to: whoever was nearest you on the clock. */
+let rivalAddress = ''
 /** How many players have crossed this round's finish line, for the feed's placings. */
 let finishers = 0
 /** While this is in the future the confetti is up because the crowd went wild, not because you won. */
@@ -130,12 +140,20 @@ export function setupScheduler(roundList: Round[]): void {
   const me = getPlayer()
   if (me && me.name) setName(myAddress(), me.name)
 
+  initPowerups()
+  onGG((p) => {
+    toast(displayName(p.address) + ' says GG')
+    hype.cheer(Date.now())
+    play('survive')
+  })
+
   engine.addSystem(cameraSystem)
   engine.addSystem(schedulerSystem)
 }
 
 function beginSlot(slot: number): void {
   if (active) active.stop()
+  stopPowerups()
 
   activeSlot = slot
   released = false
@@ -168,7 +186,21 @@ function beginSlot(slot: number): void {
   active = rounds[roundIndex(slot)]
   spectator.setFloorY(active.floorY ?? ARENA_Y)
   active.start(seedForSlot(slot))
+  startPowerups(seedForSlot(slot), { x: ARENA_CENTER_X, z: ARENA_CENTER_Z }, active.pickupRadius)
   if (isFinale(slot)) say('final_round')
+  rivalAddress = ''
+  hud.ggTo = ''
+  hud.ggSent = false
+  hud.pick = ''
+  hud.candidates = []
+
+  // Name the person to beat. The board says it; saying it at the whistle makes it a rivalry.
+  const lead = leader()
+  if (lead !== '' && seen.size >= 1) {
+    const crowns = showStandings(1)[0]?.crowns ?? 0
+    if (lead === myAddress()) toast('You lead the show with ' + crowns)
+    else toast((isFinale(slot) ? 'FINALE: ' : '') + displayName(lead) + ' leads the show with ' + crowns)
+  }
 
   // Joining after the get-ready freeze. On a round whose hazards come from the clock, a latecomer
   // inside the join window is dropped straight in - a judge's first impression should be playing,
@@ -185,6 +217,8 @@ function beginSlot(slot: number): void {
     spectator.spectateOnly()
   } else {
     spectator.sendToLobby()
+    // The establishing shot, for anyone who is here for the card.
+    if (elapsedNow < 8) flyover(6)
   }
 }
 
@@ -342,6 +376,21 @@ function schedulerSystem(dt: number): void {
     // this reason. Rounds receive `playing: false` and hold their hazards.
     const warm = playElapsed < GET_READY_SECONDS + WARMUP_SECONDS
     active.tick(dt, playElapsed, !warm)
+    tickPowerups(playElapsed)
+
+    // A spectator's stake: pick one of the players still in. One pick, then it is a watch.
+    if (spectator.isOut()) {
+      const picked = bet.picked(slot)
+      hud.pick = picked === '' ? '' : displayName(picked)
+      if (picked === '') {
+        const alive = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).slice(0, 4)
+        if (alive.length !== hud.candidates.length || alive.some((a, i) => hud.candidates[i]?.address !== a)) {
+          hud.candidates = alive.map((a) => ({ address: a, name: displayName(a) }))
+        }
+      } else if (hud.candidates.length > 0) {
+        hud.candidates = []
+      }
+    }
     if (warm) {
       hud.banner = ''
       hud.subtitle = active.hint
@@ -472,6 +521,18 @@ function schedulerSystem(dt: number): void {
     // Bonuses go on the splash as well as in the feed - the splash is what a player screenshots.
     if (bonuses.length > 0) hud.resultDetail += '  ·  ' + bonuses.map((b) => b.label).join(' + ')
 
+    // The spectator's pick, settled by the same messages everyone saw.
+    const survivors = [...seen].filter((a) => !eliminated.has(a))
+    const settled = bet.resolve(slot, survivors, survivors.length === 1 && seen.size > 1)
+    if (settled) {
+      if (settled.crowns > 0) {
+        award(myAddress(), settled.crowns)
+        play('crown')
+      }
+      toast(settled.label + (settled.crowns > 0 ? '  +' + settled.crowns : ''))
+    }
+    hud.candidates = []
+
     // One named comparison beats any number of seconds. Whoever finished nearest you on the clock
     // is the person you will talk to about this round.
     if (!spectatingOnly && seen.size > 1) {
@@ -480,6 +541,19 @@ function schedulerSystem(dt: number): void {
         .map((a) => ({ name: displayName(a), outMs: outMs.has(a) ? (outMs.get(a) as number) : null }))
       const line = rivalry({ name: 'you', outMs: survived ? null : Math.round(outAt * 1000) }, others)
       if (line !== '') hud.resultDetail += '  ·  ' + line
+      // The GG goes to the same person: nearest to you on the clock.
+      const mine = survived ? Infinity : Math.round(outAt * 1000)
+      let best = Infinity
+      for (const a of seen) {
+        if (a === myAddress()) continue
+        const t = outMs.has(a) ? (outMs.get(a) as number) : Infinity
+        const d = mine === Infinity && t === Infinity ? 0 : Math.abs(t - mine)
+        if (d < best) {
+          best = d
+          rivalAddress = a
+        }
+      }
+      hud.ggTo = rivalAddress === '' ? '' : displayName(rivalAddress)
     }
 
     spectator.releaseInput()
@@ -517,6 +591,21 @@ function schedulerSystem(dt: number): void {
   // A mid-round joiner watched, so they were neither. The card tells them what happens next.
   hud.banner = spectatingOnly ? 'NEXT ROUND' : spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
   hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
+}
+
+/** A spectator picks who wins. */
+export function pickWinner(address: string): void {
+  bet.choose(address, activeSlot)
+  toast('You picked ' + displayName(address))
+  play('tick')
+}
+
+/** Send a GG to the rival on the results card. Once per round. */
+export function sendGG(): void {
+  if (rivalAddress === '' || hud.ggSent) return
+  hud.ggSent = true
+  emitGG(rivalAddress)
+  toast('GG sent to ' + displayName(rivalAddress))
 }
 
 /** Your own qualifying streak, for the title under your standing. */

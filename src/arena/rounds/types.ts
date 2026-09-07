@@ -41,4 +41,10 @@ export type Round = {
    * Hex-Drop), because a latecomer missed those messages and would see tiles that are gone.
    */
   joinSafe?: boolean
+
+  /**
+   * Radius of the flat stage power-ups may appear on, around the arena centre. Absent means no
+   * power-ups: Tip Toe and Hex-Drop have no flat stage to put one on.
+   */
+  pickupRadius?: number
 }

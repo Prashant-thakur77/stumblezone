@@ -42,6 +42,17 @@ export type HudState = {
   dance: boolean
   /** The hat panel's rows, refreshed while the shop is open. */
   hats: { id: string; name: string; unlock: string; locked: boolean; wearing: boolean }[]
+  /** Players a spectator may pick to win, while they have not picked. */
+  candidates: { address: string; name: string }[]
+  /** The name of your pick this round, or ''. */
+  pick: string
+  /** A SHIELD is armed: the next lost heart is free. */
+  shield: boolean
+  /** Seconds of BOOST left, 0 when none. */
+  boost: number
+  /** Who a GG would go to on the results card (the rival), and whether it went. */
+  ggTo: string
+  ggSent: boolean
 }
 
 export const hud: HudState = {
@@ -65,7 +76,13 @@ export const hud: HudState = {
   golden: false,
   shop: false,
   dance: false,
-  hats: []
+  hats: [],
+  candidates: [],
+  pick: '',
+  shield: false,
+  boost: 0,
+  ggTo: '',
+  ggSent: false
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

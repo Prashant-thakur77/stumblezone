@@ -21,6 +21,7 @@ export type TileStep = { slot: number; address: string; tileId: number }
 export type Cheer = { slot: number; address: string; emote: string }
 export type Standings = { slot: number; address: string; crowns: [string, number][] }
 export type Wear = { slot: number; address: string; hat: string }
+export type GG = { slot: number; address: string; to: string }
 
 /** Stable identity for this client. Falls back to a per-session id for guests. */
 let cachedAddress = ''
@@ -117,5 +118,15 @@ export function onWear(cb: (p: Wear) => void): void {
   bus.on('wear', (p: Wear) => {
     if (!p || p.address === myAddress()) return
     cb(p)
+  })
+}
+
+// --- GG ---------------------------------------------------------------------
+export function emitGG(to: string): void {
+  bus.emit('gg', { slot: currentSlot(), address: myAddress(), to } as GG)
+}
+export function onGG(cb: (p: GG) => void): void {
+  on<GG>('gg', (p, isSelf) => {
+    if (!isSelf && p.to === myAddress()) cb(p)
   })
 }

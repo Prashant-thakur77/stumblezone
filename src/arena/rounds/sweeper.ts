@@ -217,6 +217,7 @@ export const sweeper: Round = {
   // Walls, waves, lights and beams all come from the seed and the clock - a latecomer sees
   // exactly what everyone else sees, so they play rather than wait.
   joinSafe: true,
+  pickupRadius: 12,
   hint: 'Dodge the walls.',
 
   spawn() {

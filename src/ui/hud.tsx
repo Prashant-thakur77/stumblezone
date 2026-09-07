@@ -25,6 +25,7 @@ import { hud } from './state'
 import { cheer, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
 import { wearHat } from '../systems/hats'
+import { pickWinner, sendGG } from '../systems/scheduler'
 import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
@@ -153,10 +154,20 @@ function Reactions() {
           fontSize={24}
           color={C.navy}
           onMouseDown={() => react(b.emote)}
-          uiTransform={{ width: '30%', height: 60 }}
+          uiTransform={{ width: '22%', height: 60 }}
           uiBackground={shape(UI_TEX.pill, b.color)}
         />
       ))}
+      {/* GG to the rival named on the card. It is the one button that reaches one specific person. */}
+      <Button
+        value={hud.ggSent ? 'GG SENT' : 'GG ' + hud.ggTo}
+        variant="primary"
+        fontSize={20}
+        color={C.navy}
+        onMouseDown={sendGG}
+        uiTransform={{ width: '28%', height: 60, display: hud.phase === 'results' && hud.ggTo !== '' ? 'flex' : 'none' }}
+        uiBackground={shape(UI_TEX.pill, hud.ggSent ? C.slate : C.green)}
+      />
     </UiEntity>
   )
 }
@@ -249,6 +260,17 @@ function Hud() {
       <Dots count={Math.max(0, hud.lives)} max={LIVES_PER_ROUND} position={{ top: 16, left: 16 }} show={!hud.out} />
       <Pill text="SPECTATING" width={170} position={{ top: 16, left: 16 }} color={C.slate} fontSize={20} show={hud.out} />
 
+      {/* A power-up in hand. */}
+      <Pill
+        text={hud.boost > 0 ? 'BOOST ' + hud.boost + 's' : 'SHIELD'}
+        width={170}
+        position={{ top: 128, left: 16 }}
+        color={hud.boost > 0 ? C.yellow : C.cyan}
+        textColor={C.navy}
+        fontSize={20}
+        show={!hud.out && (hud.shield || hud.boost > 0)}
+      />
+
       {/* The crowd meter. Bars, not a gauge - a gauge needs a texture per state, bars need none. */}
       <Pill
         text={'HYPE ' + '|'.repeat(Math.max(1, Math.round(hud.hype * 5)))}
@@ -323,6 +345,32 @@ function Hud() {
           uiTransform={{ width: '100%', height: 48, margin: { top: 8 } }}
           uiBackground={shape(UI_TEX.pill, spectatorCamOn() ? C.green : C.cyan)}
         />
+        {/* A stake in the round: pick who wins. One tap, then it is a watch. */}
+        <Pill text={'PICK: ' + hud.pick} width={260} height={40} fontSize={20} color={C.pink} show={hud.pick !== ''} />
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 100,
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            margin: { top: 6 },
+            display: hud.pick === '' && hud.phase === 'play' && hud.candidates.length > 0 ? 'flex' : 'none'
+          }}
+        >
+          {hud.candidates.map((c) => (
+            <Button
+              key={c.address}
+              value={'PICK ' + c.name}
+              variant="primary"
+              fontSize={18}
+              color={C.navy}
+              onMouseDown={() => pickWinner(c.address)}
+              uiTransform={{ width: '48%', height: 42, margin: { bottom: 6, left: 2, right: 2 } }}
+              uiBackground={shape(UI_TEX.pill, C.pink)}
+            />
+          ))}
+        </UiEntity>
       </UiEntity>
     </UiEntity>
   )
