@@ -59,7 +59,7 @@ import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { play, setMusic, setCrowd, say } from './audio'
-import { setJumbotron, setJumbotronColor, setConfetti } from '../arena/scenery'
+import { setJumbotron, setJumbotronColor, setConfetti, flashPillars } from '../arena/scenery'
 import { feed, toast } from './feed'
 import { hype } from './hype'
 import { Streaks } from '../lib/streak'
@@ -220,6 +220,7 @@ function schedulerSystem(dt: number): void {
   if (hype.consumeWild(now)) {
     crowdWentWild = true
     play('crowd-cheer')
+    flashPillars(4)
     toast('THE CROWD IS GOING WILD')
     wildUntil = now + 4000
     setConfetti(true)

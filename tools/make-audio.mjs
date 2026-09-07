@@ -344,6 +344,29 @@ function tenseMusic() {
   return bed(BARS, events)
 }
 
+/**
+ * The Disco Deck's own loop: four-on-the-floor, off-beat hats, an octave bass that never rests,
+ * and the stabs on the "and"s. It plays from a speaker on the deck, so it is spatial - the one
+ * piece of music in the scene that belongs to a place instead of to the show.
+ */
+function discoMusic() {
+  const events = []
+  for (let bar = 0; bar < BARS; bar++) {
+    const degree = PROGRESSION[bar % 4]
+    const semis = degree + lift(bar)
+    bass(events, bar, semis, [1, 0, 1, 0, 1, 0, 1, 0], 0.28)
+    for (let s = 0; s < 8; s++) {
+      const at = bar * BAR + s * STEP
+      if (s % 2 === 0) events.push([at, kick(0.18, 0.55)])
+      else events.push([at, hat(0.06, 0.18)])
+      if (s === 2 || s === 6) events.push([at, snare(0.1, 0.22)])
+    }
+    stabs(events, bar, semis, degree, [1, 3, 5, 7])
+    if (bar % 4 === 3) events.push([bar * BAR + 6 * STEP, squeak(0.14, 1900, 0.16)])
+  }
+  return bed(BARS, events)
+}
+
 /** Eight seconds of a stadium breathing: two slow LFOs on a filtered noise bed. */
 function crowdBed() {
   const total = n(8)
@@ -437,6 +460,7 @@ const clips = {
   'music-lobby.wav': lobbyMusic(),
   'music-round.wav': roundMusic(),
   'music-tense.wav': tenseMusic(),
+  'music-disco.wav': discoMusic(),
   'crowd-bed.wav': crowdBed()
 }
 
@@ -444,7 +468,7 @@ const clips = {
 // the same peak: cues to -3 dB, beds to -1 dB. The per-clip volumes in src/systems/audio.ts do the
 // actual mixing; the files themselves should all be "as loud as a file can be" so that those
 // volumes mean the same thing for every cue.
-for (const name of ['music-lobby.wav', 'music-round.wav', 'music-tense.wav']) {
+for (const name of ['music-lobby.wav', 'music-round.wav', 'music-tense.wav', 'music-disco.wav']) {
   const t = clips[name]
   for (let i = 0; i < t.length; i++) t[i] = Math.tanh(t[i] * 1.2)
 }
@@ -466,7 +490,7 @@ for (const [name, samples] of Object.entries(clips)) {
 // Music goes out as MP3: it is the format the SDK recommends for music, and it is a third the
 // size of the equivalent WAV. Short cues stay WAV, where the decode overhead of MP3 would show up
 // as latency on a retrigger.
-for (const name of ['music-lobby', 'music-round', 'music-tense', 'crowd-bed']) {
+for (const name of ['music-lobby', 'music-round', 'music-tense', 'music-disco', 'crowd-bed']) {
   const wav = `${OUT}/${name}.wav`
   const mp3 = `${OUT}/${name}.mp3`
   try {

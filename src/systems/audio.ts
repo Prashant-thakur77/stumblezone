@@ -29,7 +29,7 @@ export type Clip =
   | 'crowd-aww'
 
 /** Looping beds. The crowd bed is layered under the music rather than swapped with it. */
-export type Track = 'music-lobby' | 'music-round' | 'music-tense' | 'crowd-bed'
+export type Track = 'music-lobby' | 'music-round' | 'music-tense' | 'crowd-bed' | 'music-disco'
 
 /** Announcer lines - CC0 recordings from Kenney's Voiceover Pack, one consistent male voice. */
 export type Voice =

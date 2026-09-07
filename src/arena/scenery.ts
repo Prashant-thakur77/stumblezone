@@ -71,7 +71,41 @@ function cylinder(position: Vector3, scale: Vector3, color: { r: number; g: numb
 let jumbotron: Entity
 let confetti: Entity
 
+/** The pillar caps, kept so the crowd going wild can light them all at once. */
+const caps: { e: Entity; color: { r: number; g: number; b: number } }[] = []
+let flashUntil = 0
+
+/** Every cap goes white-hot for `seconds`, then back to its colour. Pure spectacle, one call. */
+export function flashPillars(seconds: number): void {
+  flashUntil = Date.now() + seconds * 1000
+  for (const c of caps) {
+    Material.setPbrMaterial(c.e, {
+      albedoColor: Color4.White(),
+      emissiveColor: Color3.White(),
+      emissiveIntensity: 4,
+      roughness: 0.3
+    })
+  }
+}
+
+function restorePillars(): void {
+  for (const c of caps) {
+    Material.setPbrMaterial(c.e, {
+      albedoColor: Color4.create(c.color.r, c.color.g, c.color.b, 1),
+      emissiveColor: Color3.create(c.color.r, c.color.g, c.color.b),
+      emissiveIntensity: 1.4,
+      roughness: 0.5
+    })
+  }
+}
+
 export function buildScenery(): void {
+  engine.addSystem(() => {
+    if (flashUntil !== 0 && Date.now() >= flashUntil) {
+      flashUntil = 0
+      restorePillars()
+    }
+  })
   // The ground. Solid and green, 24m below the arena - the thing a falling player watches rush
   // up at them. The kill plane sits 2m above it, so nobody quite lands, but everybody almost does.
   const ground = box(
@@ -125,6 +159,7 @@ export function buildScenery(): void {
       color,
       1.4
     )
+    caps.push({ e: cap, color })
     // Slow continuous spin, each cap a little different. Ambient motion is what stops a static
     // arena reading as a screenshot - and it costs nothing, the engine drives the tween.
     Tween.createOrReplace(cap, {

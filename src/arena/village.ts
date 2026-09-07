@@ -24,7 +24,8 @@ import {
   Font,
   Billboard,
   BillboardMode,
-  GltfContainer
+  GltfContainer,
+  AudioSource
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import {
@@ -193,6 +194,12 @@ function buildDiscoDeck(): void {
     }
   }
   paintDisco()
+
+  // The deck's own music, spatial: it fades in as you walk over and is gone by the podium. The
+  // only sound in the scene that belongs to a place rather than to the show.
+  const speaker = engine.addEntity()
+  Transform.create(speaker, { position: Vector3.create(DISCO_DECK.x, Y + 2, DISCO_DECK.z) })
+  AudioSource.create(speaker, { audioClipUrl: 'assets/Audio/music-disco.mp3', loop: true, playing: true, volume: 0.6 })
 
   const ball = decorModel('assets/Models/disco-ball.glb', Vector3.create(DISCO_DECK.x, Y + 6, DISCO_DECK.z), Vector3.create(1.4, 1.4, 1.4))
   Tween.create(ball, {
