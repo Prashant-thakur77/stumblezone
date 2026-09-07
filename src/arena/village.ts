@@ -49,6 +49,7 @@ import { award } from '../net/crowns'
 import { myAddress } from '../net/sync'
 import { toast } from '../systems/feed'
 import { play } from '../systems/audio'
+import { errandDone } from '../systems/errands'
 
 const Y = LOBBY.y
 const hunt = new StarHunt()
@@ -237,6 +238,7 @@ function buildStarHunt(): void {
       VisibilityComponent.createOrReplace(e, { visible: false })
       award(myAddress(), STAR_CROWNS)
       play('crown')
+      if (hunt.count(day) >= 3) errandDone('stars3')
       if (hunt.complete(day)) {
         award(myAddress(), STAR_HUNT_BONUS)
         toast('STAR HUNT COMPLETE  +' + (STAR_CROWNS + STAR_HUNT_BONUS))

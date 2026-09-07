@@ -26,6 +26,7 @@ import { recordTower, towerBest } from '../systems/records'
 import { toast } from '../systems/feed'
 import { play } from '../systems/audio'
 import { buildStar } from './models'
+import { errandDone } from '../systems/errands'
 
 type TriggerResult = Parameters<Parameters<typeof triggerAreaEventsSystem.onTriggerEnter>[1]>[0]
 
@@ -118,6 +119,7 @@ export function buildTower(): void {
     play(best ? 'crown' : 'qualified')
     toast('TOWER ' + formatTime(ms) + (best ? '  ·  NEW BEST' : ''))
     refreshSign()
+    errandDone('climb')
   })
 
   topSign = engine.addEntity()

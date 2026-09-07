@@ -40,6 +40,8 @@ import { play } from '../systems/audio'
 import { dailyFor, dayIndex } from '../lib/daily'
 import { starLine } from './village'
 import { towerLine } from './tower'
+import { lapLine } from './lap'
+import { errandLine } from '../systems/errands'
 import { slotIndex, slotsUntilGolden, showRounds, showIndex } from '../lib/schedule'
 
 let crownBoard: Entity
@@ -313,6 +315,10 @@ function refreshBoards(): void {
     starLine() +
     '\n' +
     towerLine() +
+    '\n' +
+    lapLine() +
+    '\n' +
+    errandLine() +
     '\n' +
     goldenLine
 }

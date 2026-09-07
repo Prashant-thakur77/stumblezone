@@ -60,3 +60,16 @@ export function recordTower(ms: number): boolean {
 export function towerBest(): number {
   return towerBestMs
 }
+
+/** Fastest Speed Lap this session, in ms. */
+let lapBestMs = 0
+
+export function recordLap(ms: number): boolean {
+  if (lapBestMs !== 0 && ms >= lapBestMs) return false
+  lapBestMs = ms
+  return true
+}
+
+export function lapBest(): number {
+  return lapBestMs
+}

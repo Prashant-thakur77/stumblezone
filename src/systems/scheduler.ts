@@ -54,6 +54,7 @@ import { getPlayer } from '@dcl/sdk/players'
 import { triggerEmote } from '~system/RestrictedActions'
 import { record, best, formatSeconds, recordFinaleWin, finaleWinCount, session } from './records'
 import { announceHat, shopEntries } from './hats'
+import { errandsComplete } from './errands'
 import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
@@ -244,7 +245,12 @@ function schedulerSystem(dt: number): void {
 
   // Your place in the current show. This is the line that makes four rounds feel like one evening.
   const rank = showRank(myAddress())
-  const title = titleFor({ crowns: crownsFor(myAddress()), streak: streaks.streak(myAddress()), finaleWins: finaleWinCount() })
+  const title = titleFor({
+    crowns: crownsFor(myAddress()),
+    streak: streaks.streak(myAddress()),
+    finaleWins: finaleWinCount(),
+    villager: errandsComplete()
+  })
   hud.showLine =
     rank.of > 0 && showStandings(1).length > 0 ? 'SHOW ' + ordinal(rank.place) + ' of ' + rank.of + '  ·  ' + title : title
 

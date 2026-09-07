@@ -15,6 +15,8 @@ import { emitCheer, emitEliminated, onCheer } from '../net/sync'
 import { play, say } from './audio'
 import { toast } from './feed'
 import { hype } from './hype'
+import { hud } from '../ui/state'
+import { errandDone } from './errands'
 import { displayName } from '../net/crowns'
 
 const CHEER_EMOTES = ['clap', 'wave', 'dance', 'headexplode']
@@ -152,6 +154,7 @@ export function cheer(): void {
 export function react(emote: 'disco' | 'clap' | 'shrug'): void {
   void triggerEmote({ predefinedEmote: emote })
   emitCheer(emote)
+  if (hud.dance) errandDone('dance')
 }
 
 export function initSpectator(): void {

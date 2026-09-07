@@ -10,6 +10,7 @@ import { HATS, Hat, HatStats, unlockedHats } from '../lib/hats'
 import { setHat } from './cosmetics'
 import { session, finaleWinCount } from './records'
 import { play } from './audio'
+import { errandDone } from './errands'
 
 let worn = ''
 
@@ -41,7 +42,10 @@ export function wearHat(id: string): void {
   worn = id
   setHat(myAddress(), id, true)
   emitWear(id)
-  if (id !== '') play('boing')
+  if (id !== '') {
+    play('boing')
+    errandDone('hat')
+  }
 }
 
 /** Re-send the hat, for latecomers. Called at every slot start. */
