@@ -61,6 +61,7 @@ import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { Bet } from '../lib/bet'
+import { beatTheHouse, HOUSE_CROWNS } from '../lib/house'
 import { emitGG, onGG } from '../net/sync'
 import { initPowerups, startPowerups, stopPowerups, tickPowerups } from './powerups'
 import { flyover } from './camera'
@@ -95,6 +96,8 @@ let saidHurry = false
 let spectatingOnly = false
 /** True when we arrived mid-round but were dropped in live. Drives the one-off "joined late" line. */
 let joinedLive = false
+/** Our own finish time this round (Tip Toe), or null. */
+let myFinishMs: number | null = null
 /** A spectator's pick for the round, resolved at results. */
 const bet = new Bet()
 /** The player the results card would send a GG to: whoever was nearest you on the clock. */
@@ -137,6 +140,7 @@ export function setupScheduler(roundList: Round[]): void {
   onFinished((p, isSelf) => {
     seen.add(p.address)
     if (!firstFinisher) firstFinisher = p.address
+    if (isSelf) myFinishMs = p.ms
     finishers += 1
     toast((isSelf ? 'You' : displayName(p.address)) + ' finished ' + ordinal(finishers))
   })
@@ -193,6 +197,7 @@ function beginSlot(slot: number): void {
   startPowerups(seedForSlot(slot), { x: ARENA_CENTER_X, z: ARENA_CENTER_Z }, active.pickupRadius)
   if (isFinale(slot)) say('final_round')
   rivalAddress = ''
+  myFinishMs = null
   saidFinalTwo = false
   saidPastBest = false
   hud.ggTo = ''
@@ -336,6 +341,8 @@ function schedulerSystem(dt: number): void {
 
   if (phase === 'play') {
     const playElapsed = elapsed - INTRO_SECONDS
+    // The first-visit card has done its job by the time a round starts.
+    hud.welcome = false
 
     // The get-ready freeze. Two clients whose clocks differ by a second both spend this window
     // locked in place, which is why nothing here needs sub-second agreement.
@@ -547,6 +554,17 @@ function schedulerSystem(dt: number): void {
       : beatIt
         ? 'New best! ' + formatSeconds(survivedMs)
         : formatSeconds(survivedMs) + '  ·  best ' + formatSeconds(best(hud.roundName))
+
+    // The house: the opponent who is always there. Paid and printed like any other bonus.
+    if (!spectatingOnly) {
+      const house = beatTheHouse(roundIndex(slot), survived, survivedMs, myFinishMs)
+      if (house.beaten) {
+        award(myAddress(), HOUSE_CROWNS * stakes)
+        toast('BEAT THE HOUSE  +' + HOUSE_CROWNS * stakes)
+        play('crown')
+      }
+      if (house.label !== '') hud.resultDetail += '  ·  ' + house.label
+    }
 
     // Bonuses go on the splash as well as in the feed - the splash is what a player screenshots.
     if (bonuses.length > 0) hud.resultDetail += '  ·  ' + bonuses.map((b) => b.label).join(' + ')

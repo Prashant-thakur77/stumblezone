@@ -52,6 +52,8 @@ export type HudState = {
   boost: number
   /** Copycat's perform window is open: show the pose buttons. */
   poses: boolean
+  /** The one-time HOW TO PLAY card, up until GOT IT or the first round. */
+  welcome: boolean
   /** Who a GG would go to on the results card (the rival), and whether it went. */
   ggTo: string
   ggSent: boolean
@@ -85,7 +87,8 @@ export const hud: HudState = {
   boost: 0,
   ggTo: '',
   ggSent: false,
-  poses: false
+  poses: false,
+  welcome: true
 }
 
 export function setBanner(banner: string, subtitle = ''): void {

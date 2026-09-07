@@ -276,6 +276,27 @@ function PoseRow() {
   )
 }
 
+/** Three lines and a button, once. For the judge who reads nothing else. */
+function Welcome() {
+  return (
+    <Card width="64%" height={270} position={{ top: '14%', left: '18%' }} color={C.plate} show={hud.welcome && hud.phase !== 'play'}>
+      <ChunkyText text="STUMBLEZONE" fontSize={60} width="100%" height={72} color={C.yellow} />
+      <ChunkyText text="A new round every 2 minutes. Walk and jump - that is all." fontSize={26} width="100%" height={38} />
+      <ChunkyText text="Fall, and you cheer from the ledge. Five cheers and the crowd goes wild." fontSize={26} width="100%" height={38} />
+      <ChunkyText text="Four rounds make a show. Win crowns, earn hats, walk the village." fontSize={26} width="100%" height={38} />
+      <Button
+        value="GOT IT"
+        variant="primary"
+        fontSize={26}
+        color={C.navy}
+        onMouseDown={() => (hud.welcome = false)}
+        uiTransform={{ width: 220, height: 56, margin: { top: 10 } }}
+        uiBackground={shape(UI_TEX.pill, C.yellow)}
+      />
+    </Card>
+  )
+}
+
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
@@ -368,6 +389,7 @@ function Hud() {
       <Reactions />
       <HatShop />
       <PoseRow />
+      <Welcome />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}

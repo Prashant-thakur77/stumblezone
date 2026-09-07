@@ -1,6 +1,8 @@
 # Stumblezone
 
-**A four-act party gauntlet that never stops.** Walk in at any moment, survive the round, win crowns.
+**The game show that runs itself — and the crowd plays too.** A new round every two minutes, on the
+clock, with no host and no server. Fall, and you're not out: you're the crowd, and five cheers set
+the stadium off. Four rounds make a show; the show ends on a podium; around it is a village to walk.
 Built for the [Decentraland Friendzone Mobile Buildathon](https://dorahacks.io/hackathon/friendzone).
 
 > **Play it:** open the Decentraland mobile app and go to **`justchatting.dcl.eth`**, or tap
@@ -21,10 +23,14 @@ Source: <https://github.com/Prashant-thakur77/stumblezone> · Video: `<VIDEO_URL
 
 ## What it is
 
-One arena. Four Fall Guys-style rounds, cycling forever on a fixed schedule. A new round starts
-**every two minutes**, whether anyone is watching or not.
+One arena, seven rounds, a village around it. A new round starts **every two minutes**, whether
+anyone is watching or not — the schedule is a pure function of the clock, so there is nothing to
+host and nothing to go down. One of the rounds, **Copycat**, could only exist here: the coach
+performs a sequence of poses and you copy it with your *own avatar's* emotes, which the scene reads
+back from the explorer. (The genre debt is to the party-show format; the research is in
+[docs/FALLGUYS-PRESENTATION.md](docs/FALLGUYS-PRESENTATION.md).)
 
-**Six rounds, four acts.** Each show draws three rounds from the pool below — seeded by the show
+**Seven rounds, four acts.** Each show draws three rounds from the pool below — seeded by the show
 number, ordered easy to hard, never repeating inside a show — and always ends on Hex-Drop, the only
 round whose floor genuinely runs out. Two shows in a row are two different cards.
 
@@ -35,6 +41,7 @@ round whose floor genuinely runs out. Two shows in a row are two different cards
 | **Tip Toe** | Half the bridge tiles are fake and vanish forever once stepped on. Whoever leads sacrifices themselves to reveal the path. |
 | **Spotlight** | The stage goes dark and roaming pools of light hunt you across it. Linger in one and it costs a heart. A third light and a speed-up at 45s. |
 | **Jump Bar** | One low beam sweeps the stage; jump it. At 50s a second beam appears turning the other way. |
+| **Copycat** | A coach performs DANCE > CLAP > WAVE. You copy it, in order, in time, with your own avatar — pose buttons or the emote wheel. Wrong or late costs a heart; the sequence grows. |
 | **Hex-Drop** *(finale)* | Two stacked layers of tiles that fall away seconds after you touch them. Last one standing takes the show. |
 
 ## What it looks and sounds like
@@ -121,6 +128,8 @@ Places are where you go; these are what happens to you while you're there:
   **gold tile** worth a crown.
 - **Spectators with a stake** — pick who wins from the ledge (+1 if they qualify, +2 outright),
   CHEER or **BOO**, and a **GG** button on the results card that reaches your rival by name.
+- **Beat the House** — every round has a house time; last past it (or finish Tip Toe under it) for
+  a crown, alone or not. The opponent that never logs off.
 - **Call-outs** — "Alice leads the show with 5" at the whistle, **FINAL TWO** when the field is down
   to two, **ON FIRE** at three in a row, **PAST YOUR BEST** the second you beat it, **MVP** at results.
 - **The last five seconds** as 150 px numerals, and a crowd bed that swells with the hype meter.

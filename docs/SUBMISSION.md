@@ -4,8 +4,9 @@ Everything the submission form asks for, in one place. Copy from here rather tha
 
 ## One-liner
 
-A four-act party gauntlet in Decentraland that never stops: a new round starts every two minutes,
-around the clock, with no server, no lobby and no minimum player count.
+The game show that runs itself - and the crowd plays too. A new round every two minutes on the
+clock, no host, no server; fall and you become the crowd; seven rounds including one that uses your
+own avatar's emotes as the controls; a podium, and a village to walk between shows.
 
 ## Verified, not claimed
 
