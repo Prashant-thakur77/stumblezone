@@ -24,3 +24,7 @@ test('with no errand left the lines simply rotate', () => {
   for (let i = 0; i < 6; i++) seen.add(tipAt(base, i))
   assert.equal(seen.size, tipLines(base).length)
 })
+
+test('the schedule line carries the twist when the round has one', () => {
+  assert.equal(tipLines({ ...base, twist: 'Blackout at 60s' })[0], 'Spotlight in 0:42. Blackout at 60s.')
+})

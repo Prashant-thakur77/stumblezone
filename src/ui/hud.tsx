@@ -258,7 +258,7 @@ function PoseRow() {
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         alignContent: 'flex-end',
-        display: hud.poses ? 'flex' : 'none'
+        display: hud.poses || (hud.dance && hud.phase !== 'play') ? 'flex' : 'none'
       }}
     >
       {POSES.map((p, i) => (

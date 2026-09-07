@@ -4,6 +4,8 @@
 
 export type TipState = {
   nextRound: string
+  /** The next round's mid-round rule change, if it has one. */
+  twist?: string
   inSeconds: number
   daily: string
   errand: string | null
@@ -15,7 +17,7 @@ export function tipLines(s: TipState): string[] {
   const m = Math.floor(s.inSeconds / 60)
   const sec = s.inSeconds % 60
   const lines = [
-    s.nextRound + ' in ' + m + ':' + String(sec).padStart(2, '0') + '. Be in the arena for the whistle.',
+    s.nextRound + ' in ' + m + ':' + String(sec).padStart(2, '0') + '. ' + (s.twist ? s.twist + '.' : 'Be in the arena for the whistle.'),
     'Today: ' + s.daily + '. Three crowns.',
     'Fall, and cheer from the ledge. Five cheers in ten seconds and the crowd goes wild.',
     'Four acts make a show. The champion takes the podium.',

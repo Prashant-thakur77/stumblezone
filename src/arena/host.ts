@@ -10,7 +10,7 @@ import { LOBBY, ARENA_CENTER_X, ROUND_NAMES } from '../config'
 import { tipAt } from '../lib/tips'
 import { dailyFor, dayIndex } from '../lib/daily'
 import { unlockedHats, HATS } from '../lib/hats'
-import { upcoming } from '../systems/scheduler'
+import { upcoming, roundTwist } from '../systems/scheduler'
 import { hatStats } from '../systems/hats'
 import { errandNext } from '../systems/errands'
 import { crownsFor } from '../net/crowns'
@@ -83,6 +83,7 @@ export function buildHost(): void {
     TextShape.getMutable(bubble).text = tipAt(
       {
         nextRound: next ? next.name : ROUND_NAMES[0],
+        twist: next ? roundTwist(next.name) : undefined,
         inSeconds: next ? Math.max(0, next.inSeconds) : 0,
         daily: dailyFor(dayIndex(Date.now())).text,
         errand: errand ? errand.text : null,

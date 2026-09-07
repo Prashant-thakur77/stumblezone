@@ -1,6 +1,6 @@
 // Power-ups on the stage: two stars a round, SHIELD and BOOST, each takeable once per player.
 
-import { engine, Entity, Transform, MeshRenderer, Material, VisibilityComponent, AvatarLocomotionSettings } from '@dcl/sdk/ecs'
+import { engine, Entity, Transform, MeshRenderer, Material, VisibilityComponent, AvatarLocomotionSettings, AvatarAttach, AvatarAnchorPointType, GltfContainer } from '@dcl/sdk/ecs'
 import { Vector3, Color4, Color3 } from '@dcl/sdk/math'
 import { ARENA_Y } from '../config'
 import { powerupsFor, Powerup, Collection, BOOST_SECONDS } from '../lib/powerups'
@@ -19,6 +19,39 @@ let centre = { x: 0, z: 0 }
 let active = false
 const taken = new Collection()
 let boostUntil = 0
+/** What the power-ups look like on you: a translucent bubble for SHIELD, a star overhead for BOOST. */
+let bubble: Entity | null = null
+let boostStar: Entity | null = null
+
+function showBubble(on: boolean): void {
+  if (on && !bubble) {
+    bubble = engine.addEntity()
+    Transform.create(bubble, { position: Vector3.create(0, 1, 0), scale: Vector3.create(1.9, 2.3, 1.9) })
+    MeshRenderer.setSphere(bubble)
+    Material.setPbrMaterial(bubble, { albedoColor: Color4.create(0.2, 0.8, 1.0, 0.28), transparencyMode: 2, roughness: 0.1, emissiveColor: Color3.create(0.2, 0.8, 1.0), emissiveIntensity: 0.6 })
+    AvatarAttach.create(bubble, { anchorPointId: AvatarAnchorPointType.AAPT_POSITION })
+  } else if (!on && bubble) {
+    engine.removeEntity(bubble)
+    bubble = null
+  }
+}
+
+function showBoostStar(on: boolean): void {
+  if (on && !boostStar) {
+    boostStar = engine.addEntity()
+    GltfContainer.create(boostStar, { src: 'assets/Models/star.glb', visibleMeshesCollisionMask: 0, invisibleMeshesCollisionMask: 0 })
+    Transform.create(boostStar, { position: Vector3.create(0, 0.6, 0), scale: Vector3.create(0.35, 0.35, 0.35) })
+    AvatarAttach.create(boostStar, { anchorPointId: AvatarAnchorPointType.AAPT_NAME_TAG })
+  } else if (!on && boostStar) {
+    engine.removeEntity(boostStar)
+    boostStar = null
+  }
+}
+
+/** The shield bubble follows the spectator's shield state; called from the tick. */
+export function setShieldVisual(on: boolean): void {
+  showBubble(on)
+}
 
 function buildRig(): { star: Entity; ring: Entity } {
   const star = buildStar(Vector3.create(0, ARENA_Y + 1.4, 0), 0.6)
@@ -65,6 +98,7 @@ export function startPowerups(seed: number, stageCentre: { x: number; z: number 
 export function stopPowerups(): void {
   active = false
   endBoost()
+  showBubble(false)
   for (let i = 0; i < rigs.length; i++) show(i, false)
 }
 
@@ -72,12 +106,14 @@ function endBoost(): void {
   if (boostUntil === 0) return
   boostUntil = 0
   hud.boost = 0
+  showBoostStar(false)
   // Back to the client's defaults (jog 8, run 10, jump 1). Setting only what we changed.
   AvatarLocomotionSettings.createOrReplace(engine.PlayerEntity, { jogSpeed: 8, runSpeed: 10, jumpHeight: 1, runJumpHeight: 1.5 })
 }
 
 /** Called every frame of play with seconds since the whistle. */
 export function tickPowerups(playElapsed: number): void {
+  showBubble(hud.shield)
   if (boostUntil !== 0) {
     hud.boost = Math.max(0, Math.ceil((boostUntil - Date.now()) / 1000))
     if (Date.now() >= boostUntil) endBoost()
@@ -99,6 +135,7 @@ export function tickPowerups(playElapsed: number): void {
     } else {
       boostUntil = Date.now() + BOOST_SECONDS * 1000
       hud.boost = BOOST_SECONDS
+      showBoostStar(true)
       AvatarLocomotionSettings.createOrReplace(engine.PlayerEntity, { jogSpeed: 11, runSpeed: 14, jumpHeight: 1.5, runJumpHeight: 2 })
       play('boing')
       toast('BOOST - ' + BOOST_SECONDS + ' seconds of speed')

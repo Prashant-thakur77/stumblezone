@@ -660,7 +660,7 @@ function schedulerSystem(dt: number): void {
   hud.phase = 'results'
   // A mid-round joiner watched, so they were neither. The card tells them what happens next.
   hud.banner = spectatingOnly ? 'NEXT ROUND' : spectator.isOut() ? 'ELIMINATED' : 'QUALIFIED!'
-  hud.subtitle = hud.resultDetail + '  ·  next in ' + Math.ceil(remaining) + 's'
+  hud.subtitle = hud.resultDetail + '  ·  NEXT: ' + ROUND_NAMES[roundIndex(slot + 1)] + ' in ' + Math.ceil(remaining) + 's'
 }
 
 /** A spectator picks who wins. */
@@ -698,6 +698,11 @@ export function myStreak(): number {
 function ordinal(n: number): string {
   const suffix = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'
   return n + suffix
+}
+
+/** A round's twist line by name, for the host. */
+export function roundTwist(name: string): string | undefined {
+  return rounds.find((r) => r.name === name)?.twist
 }
 
 /** What is coming up, for the lobby schedule sign. */
