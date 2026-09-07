@@ -20,7 +20,7 @@ const POOL: { roundId: number; kind: DailyKind }[] = [
   { roundId: 4, kind: 'qualify' },
   { roundId: 5, kind: 'survive' },
   { roundId: 3, kind: 'qualify' },
-  { roundId: 2, kind: 'qualify' }
+  { roundId: 6, kind: 'qualify' }
 ]
 
 export function dayIndex(nowMs: number): number {

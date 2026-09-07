@@ -26,6 +26,8 @@ import { cheer, boo, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
 import { wearHat } from '../systems/hats'
 import { pickWinner, sendGG } from '../systems/scheduler'
+import { performPose } from '../arena/rounds/copycat'
+import { POSES, Pose } from '../lib/copycat'
 import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
@@ -240,6 +242,40 @@ function LastSeconds() {
   )
 }
 
+/** Copycat's six poses, two rows of three, only while it is your turn. */
+function PoseRow() {
+  const label: Record<Pose, string> = { dance: 'DANCE', clap: 'CLAP', wave: 'WAVE', dab: 'DAB', robot: 'ROBOT', fistpump: 'FIST PUMP' }
+  const colors = [C.pink, C.yellow, C.cyan, C.green, C.pink, C.yellow]
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { bottom: 20, left: '22%' },
+        width: '56%',
+        height: 150,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        alignContent: 'flex-end',
+        display: hud.poses ? 'flex' : 'none'
+      }}
+    >
+      {POSES.map((p, i) => (
+        <Button
+          key={p}
+          value={label[p]}
+          variant="primary"
+          fontSize={22}
+          color={C.navy}
+          onMouseDown={() => performPose(p)}
+          uiTransform={{ width: '31%', height: 64, margin: { bottom: 8 } }}
+          uiBackground={shape(UI_TEX.pill, colors[i])}
+        />
+      ))}
+    </UiEntity>
+  )
+}
+
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
   return (
@@ -331,6 +367,7 @@ function Hud() {
       <Toasts />
       <Reactions />
       <HatShop />
+      <PoseRow />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}
