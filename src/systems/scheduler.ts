@@ -58,6 +58,7 @@ import { announceHat, shopEntries } from './hats'
 import { errandsComplete } from './errands'
 import { titleFor } from '../lib/titles'
 import { podiumShot, cameraSystem, setSpectatorCam } from './camera'
+import { sayMoment } from '../arena/host'
 import { canJoinLate, secondsUntilPlay } from '../lib/join'
 import { Bet } from '../lib/bet'
 import { beatTheHouse, houseLine, HOUSE_CROWNS } from '../lib/house'
@@ -190,6 +191,7 @@ export function setupScheduler(roundList: Round[]): void {
     if (!p || p.userId === myAddress()) return
     if (p.name) setName(p.userId, p.name)
     toast(displayName(p.userId) + ' joined the show')
+    sayMoment({ kind: 'newcomer', name: displayName(p.userId) })
   })
   onLeaveScene((userId) => {
     if (userId === myAddress()) return
@@ -654,7 +656,10 @@ function schedulerSystem(dt: number): void {
       else {
         streaks.qualified(address)
         // Three in a row is a story the whole room should hear.
-        if (streaks.streak(address) === 3) toast((address === myAddress() ? 'You are' : displayName(address) + ' is') + ' ON FIRE - three in a row')
+        if (streaks.streak(address) === 3) {
+          toast((address === myAddress() ? 'You are' : displayName(address) + ' is') + ' ON FIRE - three in a row')
+          sayMoment({ kind: 'streak', name: address === myAddress() ? 'You' : displayName(address), rounds: 3 })
+        }
       }
     }
     refreshCosmetics(leader(), streaks.hot())
@@ -728,6 +733,13 @@ function schedulerSystem(dt: number): void {
     }
     hud.candidates = []
 
+    // The host's line for the round that just ended: the rush winner, else a wipeout worth naming.
+    if (isScored && scoredWinner !== '') {
+      sayMoment({ kind: 'rush', name: scoredWinner === myAddress() ? 'You' : displayName(scoredWinner), points: Math.floor(scores.get(scoredWinner)) })
+    } else if (eliminated.size >= 1) {
+      sayMoment({ kind: 'wipeout', count: eliminated.size })
+    }
+
     // The round's MVP, for the feed: the outright winner, else the first finisher, else nobody.
     if (seen.size > 1) {
       const mvp = survivors.length === 1 ? survivors[0] : firstFinisher
@@ -778,6 +790,8 @@ function schedulerSystem(dt: number): void {
       say('congratulations')
       // The one moment somebody is most likely to tell a friend about this is the moment they win.
       if (rank === 0) hud.resultDetail = 'SHOW CHAMPION  ·  Bring a friend: ' + SHARE_URL + '  ·  ' + hud.resultDetail
+      const champ = showStandings(1)[0]
+      if (champ) sayMoment({ kind: 'champion', name: champ.address === myAddress() ? 'You' : displayName(champ.address), crowns: champ.crowns })
     } else {
       spectator.sendToLobby()
     }

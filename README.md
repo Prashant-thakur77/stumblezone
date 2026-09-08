@@ -103,7 +103,7 @@ feeds crowns, the board and the errand list:
 
 | Where | What |
 |---|---|
-| **West lane** | **Practice Yard** — a 3×3 patch of tiles that sink and return, a roaming light that turns red, a beam that only nudges. No lives: learn the moves, then play. |
+| **West lane** | **Practice Yard** — four stations, one per hazard the show uses: tiles that sink and return, a roaming light that turns red, a beam that only nudges, and a crown zone that hops. No lives, no score: learn the moves, then play. Each sign names the round it teaches. |
 | **East lane** | **Speed Lap** — out to the corner pad and back against the clock. A finish without the turn is nothing, so the course cannot be cut. |
 | **North-west plaza** | **Hall of Fame** — five plinths, the top five names, a crown turning on the first; a photo frame facing the arena. |
 | **North-east plaza** | **Sky Cannon** — step on the pad and it throws you fifteen metres up for the one view a phone camera never gives you. |

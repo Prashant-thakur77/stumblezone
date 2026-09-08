@@ -7,7 +7,7 @@
 import { engine, Entity, Transform, AvatarShape, TextShape, Font, Billboard, BillboardMode } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { LOBBY, ARENA_CENTER_X, ROUND_NAMES } from '../config'
-import { tipAt } from '../lib/tips'
+import { tipAt, commentary, Moment } from '../lib/tips'
 import { dailyFor, dayIndex } from '../lib/daily'
 import { unlockedHats, HATS } from '../lib/hats'
 import { upcoming, roundTwist } from '../systems/scheduler'
@@ -21,6 +21,15 @@ let bubble: Entity
 let host: Entity
 let tick = 0
 let since = 0
+/** Something that just happened, said once before the tips resume. */
+let moment: Moment | null = null
+
+/** The scheduler hands the host a story; he tells it on his next line. */
+export function sayMoment(m: Moment): void {
+  moment = m
+  // Say it now rather than up to seven seconds later - a commentator is not on a timer.
+  since = 99
+}
 let waves = 0
 let sinceWave = 0
 
@@ -77,6 +86,15 @@ export function buildHost(): void {
     if (since < 7) return
     since = 0
     tick += 1
+    if (moment) {
+      const line = commentary(moment)
+      moment = null
+      TextShape.getMutable(bubble).text = line
+      const a = AvatarShape.getMutable(host)
+      a.expressionTriggerId = 'clap'
+      a.expressionTriggerTimestamp = ++waves
+      return
+    }
     const next = upcoming(1)[0]
     const have = new Set(unlockedHats(hatStats()).map((h) => h.id))
     const nextHat = HATS.find((h) => !have.has(h.id))

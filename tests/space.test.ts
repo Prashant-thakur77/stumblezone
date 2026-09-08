@@ -46,3 +46,23 @@ test('the plazas sit in the corners, touching their lane', () => {
   assert.ok(NW_PLAZA.z - NW_PLAZA.size / 2 <= WEST_LANE.z + WEST_LANE.depth / 2, 'a gap between the west lane and its plaza')
   assert.ok(NE_PLAZA.z - NE_PLAZA.size / 2 <= EAST_LANE.z + EAST_LANE.depth / 2, 'a gap between the east lane and its plaza')
 })
+
+test('the practice yard fits down the west lane, in order, with room between stations', () => {
+  // z of each station, from src/arena/practice.ts; the ring hops +/-2.5 and the signs sit 4m back.
+  const stations: [string, number, number][] = [
+    ['patch', 27, 2.5],
+    ['light', 39, 6],
+    ['beam', 52, 4],
+    ['ring', 60, 4.5]
+  ]
+  const laneStart = WEST_LANE.z - WEST_LANE.depth / 2
+  const laneEnd = WEST_LANE.z + WEST_LANE.depth / 2
+  for (const [name, z, reach] of stations) {
+    assert.ok(z - reach >= laneStart, name + ' starts before the lane does')
+    assert.ok(z + reach <= laneEnd, name + ' runs past the end of the lane')
+  }
+  for (let i = 1; i < stations.length; i++) {
+    const gap = stations[i][1] - stations[i - 1][1]
+    assert.ok(gap >= 8, 'only ' + gap + 'm between ' + stations[i - 1][0] + ' and ' + stations[i][0])
+  }
+})

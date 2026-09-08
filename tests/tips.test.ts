@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { tipAt, tipLines } from '../src/lib/tips'
+import { tipAt, tipLines, commentary, Moment } from '../src/lib/tips'
 
 const base = { nextRound: 'Spotlight', inSeconds: 42, daily: 'Qualify in Tip Toe', errand: null, nextHat: 'CAP', crowns: 0 }
 
@@ -32,4 +32,20 @@ test('the schedule line carries the twist when the round has one', () => {
 test('a newcomer is pointed at the practice yard first', () => {
   assert.match(tipLines({ ...base, newcomer: true })[0], /Practice Yard/)
   assert.ok(!tipLines(base).some((l) => /Practice Yard/.test(l)))
+})
+
+test('every moment has a line, and each names its subject', () => {
+  const moments: Moment[] = [
+    { kind: 'champion', name: 'Alice', crowns: 9 },
+    { kind: 'streak', name: 'Bob', rounds: 3 },
+    { kind: 'rush', name: 'Cy', points: 24 },
+    { kind: 'wipeout', count: 4 },
+    { kind: 'newcomer', name: 'Di' }
+  ]
+  for (const m of moments) {
+    const line = commentary(m)
+    assert.ok(line.length > 10 && line.endsWith('.'), 'bad line: ' + line)
+    if ('name' in m) assert.ok(line.includes(m.name))
+  }
+  assert.equal(commentary({ kind: 'wipeout', count: 1 }), 'One down last round.')
 })

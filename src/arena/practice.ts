@@ -31,6 +31,7 @@ const TILE = 1.7
 const PATCH_Z = 27
 const LIGHT_Z = 39
 const BEAM_Z = 52
+const RING_Z = 60
 
 const patch = new Patch(9)
 const tiles: { e: Entity; x: number; z: number }[] = []
@@ -101,11 +102,31 @@ function buildBeam(): void {
   sign('JUMP THE BEAM\nTime the jump. This is Jump Bar and Sweeper Gates.', Vector3.create(X, Y + 3.2, BEAM_Z - 4), 1.2)
 }
 
+/** A crown ring that hops on its own, so Crown Rush's one rule is learned before it counts. */
+let ring: Entity
+let ringHop = -1
+let ringInside = false
+
+function buildRing(): void {
+  ring = engine.addEntity()
+  Transform.create(ring, { position: Vector3.create(X, Y + 0.06, RING_Z), scale: Vector3.create(4.4, 0.06, 4.4) })
+  MeshRenderer.setCylinder(ring)
+  Material.setPbrMaterial(ring, {
+    albedoColor: Color4.create(1.0, 0.83, 0.25, 0.55),
+    transparencyMode: 2,
+    emissiveColor: Color3.create(1.0, 0.83, 0.25),
+    emissiveIntensity: 1.6,
+    roughness: 0.6
+  })
+  sign('CROWN ZONE\nStand inside. It moves. This is Crown Rush.', Vector3.create(X, Y + 3.2, RING_Z - 4), 1.2)
+}
+
 export function buildPractice(): void {
   sign('PRACTICE YARD\nNothing counts here. Try the three hazards, then play.', Vector3.create(X, Y + 4.2, WEST_LANE.z - WEST_LANE.depth / 2 + 2), 1.5)
   buildPatch()
   buildLight()
   buildBeam()
+  buildRing()
 
   engine.addSystem((dt: number) => {
     clock += dt
@@ -126,6 +147,26 @@ export function buildPractice(): void {
       if (Transform.get(tiles[i].e).position.y !== y) Transform.getMutable(tiles[i].e).position.y = y
       if (states[i].solid && !MeshCollider.has(tiles[i].e)) MeshCollider.setBox(tiles[i].e)
       if (!states[i].solid && MeshCollider.has(tiles[i].e)) MeshCollider.deleteFrom(tiles[i].e)
+    }
+
+    // The crown ring hops along the lane every eight seconds, the way the real one hops.
+    const hop = Math.floor(clock / 8)
+    if (hop !== ringHop) {
+      ringHop = hop
+      const r = Transform.getMutable(ring)
+      r.position.z = RING_Z + (hop % 2 === 0 ? -2.5 : 2.5)
+      r.position.x = X + (hop % 4 < 2 ? -1 : 1)
+    }
+    if (t) {
+      const rp = Transform.get(ring).position
+      const inRing = Math.abs(t.position.y - Y) < 1.5 && Math.hypot(t.position.x - rp.x, t.position.z - rp.z) < 2.2
+      if (inRing !== ringInside) {
+        ringInside = inRing
+        if (inRing) {
+          play('tick')
+          toast('In the zone - in Crown Rush that is a point a second')
+        }
+      }
     }
 
     // The light: Spotlight's path squeezed into the lane, and the same warning timer.

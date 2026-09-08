@@ -43,3 +43,31 @@ export function tipAt(s: TipState, i: number): string {
   const idx = s.errand ? Math.floor(i / 2) % rest.length : i % rest.length
   return rest[idx]
 }
+
+/**
+ * A line about something that just happened, for the host to say before he goes back to tips.
+ *
+ * A board tells you the state; a person tells you the story. These are the four events worth a
+ * sentence, in the order a commentator would reach for them.
+ */
+export type Moment =
+  | { kind: 'champion'; name: string; crowns: number }
+  | { kind: 'streak'; name: string; rounds: number }
+  | { kind: 'rush'; name: string; points: number }
+  | { kind: 'wipeout'; count: number }
+  | { kind: 'newcomer'; name: string }
+
+export function commentary(m: Moment): string {
+  switch (m.kind) {
+    case 'champion':
+      return m.name + ' took the show with ' + m.crowns + ' crowns. Someone beat that.'
+    case 'streak':
+      return m.name + ' is ' + m.rounds + ' rounds without falling. Somebody stop them.'
+    case 'rush':
+      return m.name + ' held the crown zone for ' + m.points + ' seconds.'
+    case 'wipeout':
+      return m.count === 1 ? 'One down last round.' : m.count + ' went down last round. Brutal.'
+    case 'newcomer':
+      return 'Welcome ' + m.name + '. Watch one round, then jump in.'
+  }
+}

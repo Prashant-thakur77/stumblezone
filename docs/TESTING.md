@@ -235,3 +235,9 @@ none of it can be caught in the desktop preview.
 - [ ] The card after a finale names tomorrow's daily challenge.
 - [ ] Stand in the Hat Market when a round starts: the panel is gone when you land in the arena,
       and it does not come back until you step on the market again.
+
+**Commentary and the crown trainer**
+- [ ] After a finale Sam names the champion; after a Crown Rush he names who held the zone and for
+      how long; at a three-streak he calls it; when a second player walks in he welcomes them by name.
+- [ ] The Practice Yard's fourth station is a gold ring that hops every eight seconds; standing in
+      it toasts once and explains what it would be worth in Crown Rush.
