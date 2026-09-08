@@ -572,14 +572,15 @@ function schedulerSystem(dt: number): void {
     // A scored round has no eliminations: "qualified" means you scored. Elsewhere it means alive.
     const myPoints = isScored ? scores.get(myAddress()) : 0
     const scoredWinner = isScored ? scores.leader().address : ''
-    const survived = isScored ? myPoints > 0 : !spectator.isOut()
+    // Falling off the stage three times is out on any round; on a scored one you also need a point.
+    const survived = isScored ? myPoints > 0 && !spectator.isOut() : !spectator.isOut()
     const golden = isGolden(showIndex(slot))
     const stakes = (isFinale(slot) ? FINALE_MULTIPLIER : 1) * (golden ? GOLDEN_MULTIPLIER : 1)
     if (survived && !spectatingOnly) {
       award(myAddress(), CROWN_SURVIVE * stakes)
       // Sole survivor takes the round. Requires someone to have been beaten - surviving alone is
-      // worth a crown, but it is not a win.
-      if (seen.size > 1 && eliminated.size === seen.size - 1) {
+      // worth a crown, but it is not a win. A scored round's win is decided on points below.
+      if (!isScored && seen.size > 1 && eliminated.size === seen.size - 1) {
         award(myAddress(), CROWN_WIN * stakes)
         session.won()
       }
@@ -783,11 +784,13 @@ function schedulerSystem(dt: number): void {
     : isScored
       ? !scored
         ? 'ROUND OVER'
-        : scores.leader().address === myAddress() && scores.size() > 1
-          ? 'WINNER!'
-          : scores.get(myAddress()) > 0
-            ? 'ROUND OVER'
-            : 'NO POINTS'
+        : spectator.isOut()
+          ? 'ELIMINATED'
+          : scores.leader().address === myAddress() && scores.size() > 1
+            ? 'WINNER!'
+            : scores.get(myAddress()) > 0
+              ? 'ROUND OVER'
+              : 'NO POINTS'
       : spectator.isOut()
         ? 'ELIMINATED'
         : 'QUALIFIED!'
