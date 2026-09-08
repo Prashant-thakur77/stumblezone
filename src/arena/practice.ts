@@ -122,7 +122,7 @@ function buildRing(): void {
 }
 
 export function buildPractice(): void {
-  sign('PRACTICE YARD\nNothing counts here. Try the three hazards, then play.', Vector3.create(X, Y + 4.2, WEST_LANE.z - WEST_LANE.depth / 2 + 2), 1.5)
+  sign('PRACTICE YARD\nNothing counts here. Four stations, one per hazard.', Vector3.create(X, Y + 4.2, WEST_LANE.z - WEST_LANE.depth / 2 + 2), 1.5)
   buildPatch()
   buildLight()
   buildBeam()
