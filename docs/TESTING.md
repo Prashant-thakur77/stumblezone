@@ -227,3 +227,11 @@ none of it can be caught in the desktop preview.
 - [ ] The last five seconds show the numeral *below* the round name, not over it.
 - [ ] The welcome card goes away on GOT IT, at the first whistle, or after thirty seconds.
 - [ ] Eliminated during Copycat: you get the pose buttons, not the cheer buttons underneath them.
+
+**Onboarding and signage (Day 2)**
+- [ ] The round card reads: name, what to do, which control, then the twist and the house target.
+- [ ] Three signposts are readable from the spawn point without walking.
+- [ ] Before your first round Sam's first line points at the Practice Yard; after it, he stops.
+- [ ] The card after a finale names tomorrow's daily challenge.
+- [ ] Stand in the Hat Market when a round starts: the panel is gone when you land in the arena,
+      and it does not come back until you step on the market again.

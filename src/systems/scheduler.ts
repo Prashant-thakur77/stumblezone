@@ -262,6 +262,9 @@ function beginSlot(slot: number): void {
   hud.pick = ''
   hud.candidates = []
   hud.poses = false
+  // Everyone is about to be teleported to the arena; no village panel survives that.
+  hud.shop = false
+  hud.dance = false
   picks = new Map<string, string>()
 
   // Name the person to beat. The board says it; saying it at the whistle makes it a rivalry.

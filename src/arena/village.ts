@@ -281,6 +281,16 @@ export function buildVillage(): void {
   buildStarHunt()
 
   engine.addSystem((dt: number) => {
+    // A teleport out of a trigger area does not reliably fire its exit event, and the round start
+    // teleports everyone: without this, a player who was standing in the market when the whistle
+    // blew would have the hat panel open for the rest of the session.
+    const t = Transform.getOrNull(engine.PlayerEntity)
+    if (t) {
+      if (hud.shop && (Math.abs(t.position.x - HAT_MARKET.x) > 9 || Math.abs(t.position.z - HAT_MARKET.z) > 4 || Math.abs(t.position.y - Y) > 3)) hud.shop = false
+      const halfDeck = (DISCO_TILES * DISCO_TILE_SIZE) / 2 + 1
+      if (hud.dance && (Math.abs(t.position.x - DISCO_DECK.x) > halfDeck || Math.abs(t.position.z - DISCO_DECK.z) > halfDeck || Math.abs(t.position.y - Y) > 3)) hud.dance = false
+    }
+
     // The disco cycles three times a second - fast enough to read as lights, slow enough that
     // sixteen material writes cost nothing.
     discoClock += dt
