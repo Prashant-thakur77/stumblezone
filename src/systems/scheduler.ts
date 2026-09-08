@@ -614,11 +614,12 @@ function schedulerSystem(dt: number): void {
 
     // The daily. Paid once per UTC day, on the first round that clears it.
     if (!spectatingOnly && dailyPaidDay !== dayIndex(now)) {
+      // "Survived" here is the results block's own definition: scored a point on a scored round.
       const cleared = dailyDone(dailyFor(dayIndex(now)), {
         roundId: roundIndex(slot),
-        survived: !spectator.isOut(),
+        survived,
         first: firstFinisher === myAddress(),
-        survivedMs: Math.round((!spectator.isOut() ? PLAY_SECONDS : outAt) * 1000)
+        survivedMs: Math.round((survived ? PLAY_SECONDS : outAt) * 1000)
       })
       if (cleared) {
         dailyPaidDay = dayIndex(now)
