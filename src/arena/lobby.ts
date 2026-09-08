@@ -91,10 +91,10 @@ export function buildLobby(): void {
 
   sign('STUMBLEZONE', Vector3.create(ARENA_CENTER_X, LOBBY.y + 6, SIGN_Z), 8)
   sign(
-    'Qualify to win crowns. New round every 2 minutes.\n' +
-      'Fall and you cheer from the ledge - 5 cheers in 10s and the crowd goes wild.\n' +
-      'Four acts make a show. The show champion takes the podium.\n' +
-      'Bounce on the pads while you wait!',
+    'Walk and jump. That is the whole game.\n' +
+      'A round starts every 2 minutes - you are teleported in.\n' +
+      'Fall, and you cheer from the ledge. Five cheers and the crowd goes wild.\n' +
+      'Four rounds make a show, and the show ends on a podium.',
     Vector3.create(ARENA_CENTER_X, LOBBY.y + 3.4, SIGN_Z),
     2.5
   )
@@ -105,6 +105,12 @@ export function buildLobby(): void {
   // A party game is only as good as the number of people in it, so the way to bring someone is
   // written on the wall rather than left in a README nobody in-world will read.
   sign('BRING A FRIEND\n' + SHARE_URL, Vector3.create(ARENA_CENTER_X, LOBBY.y + 2.2, SIGN_Z), 1.1)
+
+  // Three signposts facing the spawn point, because a newcomer's first question is "where do I go".
+  // Left, right, ahead: the yard where nothing counts, the market, and the arena itself.
+  sign('<<  PRACTICE YARD\nLearn the hazards. No lives here.', Vector3.create(ARENA_CENTER_X - 11, LOBBY.y + 2.6, LOBBY.z - 1), 1.2)
+  sign('HAT MARKET  <<\nWear what you win', Vector3.create(ARENA_CENTER_X - 11, LOBBY.y + 1.4, LOBBY.z - 1), 1.2)
+  sign('DISCO DECK  >>\nSTUMBLE TOWER  >>', Vector3.create(ARENA_CENTER_X + 11, LOBBY.y + 2.2, LOBBY.z - 1), 1.2)
 
   // Toys (docs/FALLGUYS-PRESENTATION.md, Part 4). A spinning star crowns the title, two smiling
   // lollipops flank it, and a pair of inflatables sit in the back corners: things with faces and

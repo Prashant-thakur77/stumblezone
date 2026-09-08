@@ -72,6 +72,7 @@ export const perfectMatch: Round = {
   joinSafe: true,
   pickupRadius: 6,
   hint: 'Match the colour.',
+  control: 'Walk',
   twist: 'Later waves may SWITCH the call',
 
   spawn() {

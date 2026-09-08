@@ -12,6 +12,7 @@ import { dailyFor, dayIndex } from '../lib/daily'
 import { unlockedHats, HATS } from '../lib/hats'
 import { upcoming, roundTwist } from '../systems/scheduler'
 import { hatStats } from '../systems/hats'
+import { session } from '../systems/records'
 import { errandNext } from '../systems/errands'
 import { crownsFor } from '../net/crowns'
 import { myAddress } from '../net/sync'
@@ -82,6 +83,7 @@ export function buildHost(): void {
     const errand = errandNext()
     TextShape.getMutable(bubble).text = tipAt(
       {
+        newcomer: session.stats().rounds === 0,
         nextRound: next ? next.name : ROUND_NAMES[0],
         twist: next ? roundTwist(next.name) : undefined,
         inSeconds: next ? Math.max(0, next.inSeconds) : 0,

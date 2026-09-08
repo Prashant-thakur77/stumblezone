@@ -428,9 +428,11 @@ function schedulerSystem(dt: number): void {
     } else {
       hud.phase = 'card'
       hud.banner = active.name
-      hud.subtitle = isFinale(slot)
-        ? 'The show champion is decided here' + (active.twist ? '  ·  ' + active.twist : '')
-        : active.hint + (active.twist ? '  ·  ' + active.twist : '') + '  ·  ' + houseLine(roundIndex(slot))
+      // What to do, what to press, what changes mid-round, and what to beat: the whole round in a line.
+      hud.subtitle = active.hint + '  ·  ' + active.control
+      hud.detail = isFinale(slot)
+        ? 'The show champion is decided here'
+        : (active.twist ? active.twist + '  ·  ' : '') + houseLine(roundIndex(slot))
     }
     return
   }
@@ -755,8 +757,13 @@ function schedulerSystem(dt: number): void {
     // rank comes from the shared crown tally, so every client agrees who stands where and everyone
     // sees the same three avatars arrive on the steps.
     const cycleEnd = isFinale(slot)
-    // The end of a show is where a visit gets summed up, win or lose.
-    if (cycleEnd && !spectatingOnly) hud.resultDetail += '  ·  ' + session.summary()
+    // The end of a show is where a visit gets summed up, win or lose - and the only moment worth
+    // spending on tomorrow: name the next daily, since that is the reason to come back.
+    if (cycleEnd && !spectatingOnly) {
+      hud.resultDetail += '  ·  ' + session.summary()
+      const tomorrow = dailyFor(dayIndex(now) + 1)
+      hud.resultDetail += '  ·  TOMORROW: ' + tomorrow.text
+    }
     const rank = cycleEnd ? showStandings(3).findIndex((s) => s.address === myAddress()) : -1
     if (rank >= 0) {
       const spot = PODIUM_SPOTS[rank]

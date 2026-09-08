@@ -223,6 +223,7 @@ export const sweeper: Round = {
   // The floor is two end strips and a 10m causeway; only the causeway is a disc around the centre.
   pickupRadius: 4.5,
   hint: 'Dodge the walls.',
+  control: 'Walk and jump',
   twist: 'Walls speed up every wave',
 
   spawn() {

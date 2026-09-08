@@ -45,8 +45,9 @@ function IntroCard({ show }: { show: boolean }) {
   return (
     <Card width="60%" height={250} position={{ top: '22%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={show}>
       <ChunkyText text={hud.roundTag} fontSize={24} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.cyan} />
-      <ChunkyText text={hud.roundName.toUpperCase()} fontSize={86} width="100%" height={110} />
-      <ChunkyText text={hud.subtitle} fontSize={26} width="100%" height={50} color={hud.finale || hud.golden ? C.navy : C.yellow} />
+      <ChunkyText text={hud.roundName.toUpperCase()} fontSize={80} width="100%" height={96} />
+      <ChunkyText text={hud.subtitle} fontSize={30} width="100%" height={42} color={hud.finale || hud.golden ? C.navy : C.yellow} />
+      <ChunkyText text={hud.detail} fontSize={22} width="100%" height={36} color={hud.finale || hud.golden ? C.navy : C.white} />
     </Card>
   )
 }

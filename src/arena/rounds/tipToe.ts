@@ -103,6 +103,7 @@ function step(index: number): void {
 export const tipToe: Round = {
   name: 'Tip Toe',
   hint: 'Find the path.',
+  control: 'Walk',
   twist: 'One gold tile is worth a crown',
 
   spawn() {

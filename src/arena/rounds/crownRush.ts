@@ -67,6 +67,7 @@ function show(on: boolean): void {
 export const crownRush: Round = {
   name: 'Crown Rush',
   hint: 'Stand in the crown zone.',
+  control: 'Walk',
   twist: 'The zone hops every 12s and shrinks',
   joinSafe: true,
   scored: true,

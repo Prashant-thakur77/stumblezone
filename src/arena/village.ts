@@ -143,7 +143,7 @@ function buildBackdrop(): void {
 
 /** One pedestal per hat, a floating hat on each, and the zone that opens the panel. */
 function buildHatMarket(): void {
-  sign('HAT MARKET\nEarn them in the show. Step up to wear one.', Vector3.create(HAT_MARKET.x, Y + 4.2, HAT_MARKET.z + 3), 1.6)
+  sign('HAT MARKET\nStep on the platform, then tap a hat to wear it', Vector3.create(HAT_MARKET.x, Y + 4.2, HAT_MARKET.z + 3), 1.6)
 
   for (let i = 0; i < HATS.length; i++) {
     const hat = HATS[i]
@@ -206,7 +206,7 @@ function buildDiscoDeck(): void {
     duration: 0,
     easingFunction: EasingFunction.EF_LINEAR
   })
-  sign('DISCO DECK\nStep on and dance - the pose buttons are Copycat practice', Vector3.create(DISCO_DECK.x, Y + 4.2, DISCO_DECK.z + half + 1), 1.6)
+  sign('DISCO DECK\nStep on, then tap a pose - this is Copycat practice', Vector3.create(DISCO_DECK.x, Y + 4.2, DISCO_DECK.z + half + 1), 1.6)
 
   zone(
     Vector3.create(DISCO_DECK.x, Y + 1.5, DISCO_DECK.z),

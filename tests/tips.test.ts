@@ -28,3 +28,8 @@ test('with no errand left the lines simply rotate', () => {
 test('the schedule line carries the twist when the round has one', () => {
   assert.equal(tipLines({ ...base, twist: 'Blackout at 60s' })[0], 'Spotlight in 0:42. Blackout at 60s.')
 })
+
+test('a newcomer is pointed at the practice yard first', () => {
+  assert.match(tipLines({ ...base, newcomer: true })[0], /Practice Yard/)
+  assert.ok(!tipLines(base).some((l) => /Practice Yard/.test(l)))
+})

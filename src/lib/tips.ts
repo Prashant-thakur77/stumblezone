@@ -3,6 +3,8 @@
 // while errands remain, and never the same line twice in a row.
 
 export type TipState = {
+  /** True until the player has played a round: the tips lean on where to go, not on the meta. */
+  newcomer?: boolean
   nextRound: string
   /** The next round's mid-round rule change, if it has one. */
   twist?: string
@@ -23,6 +25,10 @@ export function tipLines(s: TipState): string[] {
     'Four acts make a show. The champion takes the podium.',
     s.crowns > 0 ? 'You have ' + s.crowns + ' crowns. The board is behind me.' : 'Qualify once and you have a crown.'
   ]
+  if (s.newcomer) {
+    // A first-timer needs one thing: somewhere to go that costs nothing while they wait.
+    lines.unshift('New here? The Practice Yard is on the left - nothing counts there.')
+  }
   if (s.errand) lines.unshift('Errand: ' + s.errand + '.')
   if (s.nextHat) lines.push('Next hat: ' + s.nextHat + '.')
   return lines

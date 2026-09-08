@@ -61,7 +61,7 @@ function pad(position: Vector3, size: number, onEnter: () => void): void {
 
 function refreshSign(): void {
   const best = towerBest()
-  TextShape.getMutable(topSign).text = 'STUMBLE TOWER\n' + (best > 0 ? 'best ' + formatTime(best) : 'Climb it against the clock')
+  TextShape.getMutable(topSign).text = 'STUMBLE TOWER\n' + (best > 0 ? 'best ' + formatTime(best) : 'Step on the gold pad to start the clock')
 }
 
 /** The running climb, as a stopwatch, or '' when the clock is not running. */

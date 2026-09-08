@@ -119,6 +119,7 @@ export const spotlight: Round = {
   joinSafe: true,
   pickupRadius: 10,
   hint: 'Stay out of the light.',
+  control: 'Walk',
   twist: 'Third light at 45s, BLACKOUT at 60s',
 
   spawn(): Vector3 {

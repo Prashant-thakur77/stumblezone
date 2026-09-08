@@ -58,7 +58,7 @@ function buildPatch(): void {
     Material.setPbrMaterial(e, { albedoColor: Color4.create(c.r, c.g, c.b, 1), roughness: 0.35, specularIntensity: 1 })
     tiles.push({ e, x, z })
   }
-  sign('SINKING TILES\nStand still and see', Vector3.create(X, Y + 3.2, PATCH_Z - 3.2), 1.2)
+  sign('SINKING TILES\nStand on one. This is Hex-Drop and Tip Toe.', Vector3.create(X, Y + 3.2, PATCH_Z - 3.2), 1.2)
 }
 
 function buildLight(): void {
@@ -66,7 +66,7 @@ function buildLight(): void {
   Transform.create(pool, { position: Vector3.create(X, Y + 0.06, LIGHT_Z), scale: Vector3.create(SPOT_RADIUS * 2, 0.06, SPOT_RADIUS * 2) })
   MeshRenderer.setCylinder(pool)
   paint(false)
-  sign('ROAMING LIGHT\nDo not stand in it', Vector3.create(X, Y + 3.2, LIGHT_Z - 6), 1.2)
+  sign('ROAMING LIGHT\nStep out before it turns red. This is Spotlight.', Vector3.create(X, Y + 3.2, LIGHT_Z - 6), 1.2)
 }
 
 function paint(danger: boolean): void {
@@ -98,11 +98,11 @@ function buildBeam(): void {
     // A nudge, not a shove: the lane is five metres wide and the point is the timing, not the fall.
     Physics.applyKnockbackToPlayer(Vector3.create(X, Y, BEAM_Z), 4, 3)
   })
-  sign('JUMP THE BEAM\nIt only nudges here', Vector3.create(X, Y + 3.2, BEAM_Z - 4), 1.2)
+  sign('JUMP THE BEAM\nTime the jump. This is Jump Bar and Sweeper Gates.', Vector3.create(X, Y + 3.2, BEAM_Z - 4), 1.2)
 }
 
 export function buildPractice(): void {
-  sign('PRACTICE YARD\nNo lives here. Learn the moves, then play.', Vector3.create(X, Y + 4.2, WEST_LANE.z - WEST_LANE.depth / 2 + 2), 1.5)
+  sign('PRACTICE YARD\nNothing counts here. Try the three hazards, then play.', Vector3.create(X, Y + 4.2, WEST_LANE.z - WEST_LANE.depth / 2 + 2), 1.5)
   buildPatch()
   buildLight()
   buildBeam()

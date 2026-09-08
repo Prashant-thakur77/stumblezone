@@ -27,7 +27,7 @@ export function buildDrop(): void {
   ring(GOOD_RADIUS, { r: 1, g: 0.83, b: 0.25 }, LOBBY.y + 0.03)
   ring(1.8, { r: 1, g: 0.24, b: 0.62 }, LOBBY.y + 0.06)
   ring(PERFECT_RADIUS, { r: 0.2, g: 0.8, b: 1 }, LOBBY.y + 0.09)
-  sign('BIG DROP\nFrom the Sky Box. Land in the middle.', Vector3.create(DROP_PAD.x, LOBBY.y + 2.6, DROP_PAD.z + 2), 1.1)
+  sign('BIG DROP\nJump from the Sky Box above. Land in the blue ring.', Vector3.create(DROP_PAD.x, LOBBY.y + 2.6, DROP_PAD.z + 2), 1.1)
 
   zone(Vector3.create(DROP_PAD.x, LOBBY.y + 1, DROP_PAD.z), Vector3.create(GOOD_RADIUS * 2, 2, GOOD_RADIUS * 2), () => {
     if (isRoundLive() && !isOut()) return

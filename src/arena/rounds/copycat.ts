@@ -97,6 +97,7 @@ function record(pose: Pose): void {
 export const copycat: Round = {
   name: 'Copycat',
   hint: 'Watch the coach, then tap the poses.',
+  control: 'Tap the poses',
   twist: 'The sequence grows every wave',
   joinSafe: true,
 

@@ -9,6 +9,12 @@ export type Round = {
   hint: string
 
   /**
+   * The control this round needs, in two or three words: "Walk", "Walk and jump", "Tap the poses".
+   * A card that says what to press answers the only question a first-timer actually has.
+   */
+  control: string
+
+  /**
    * Where players are placed when the round begins.
    *
    * Rounds are not walked to. The lobby and the arena are deliberately separate spaces and the

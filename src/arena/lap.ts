@@ -36,7 +36,7 @@ export function lapLine(): string {
 }
 
 export function buildLap(): void {
-  sign('SPEED LAP\nTo the corner and back', Vector3.create(START.x, LOBBY.y + 3.6, START.z + 2.5), 1.5)
+  sign('SPEED LAP\nStep here, touch the far pad, come back', Vector3.create(START.x, LOBBY.y + 3.6, START.z + 2.5), 1.5)
 
   pad(START.x, LOBBY.y, START.z, 2.4, { r: 1, g: 0.83, b: 0.25 }, () => {
     if (isRoundLive() && !isOut()) return

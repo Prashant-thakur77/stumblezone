@@ -27,7 +27,7 @@ export function buildCannon(): void {
   MeshRenderer.setCylinder(barrel)
   Material.setPbrMaterial(barrel, { albedoColor: Color4.create(WALL_COLOR.r, WALL_COLOR.g, WALL_COLOR.b, 1), roughness: 0.4, specularIntensity: 1 })
 
-  sign('SKY CANNON\nStep on the pad', Vector3.create(x, Y + 4, z - 2.5), 1.5)
+  sign('SKY CANNON\nStep on the pad. It throws you up for the view.', Vector3.create(x, Y + 4, z - 2.5), 1.5)
   let lastShot = 0
   pad(x, Y, z, 2.2, { r: 1, g: 0.45, b: 0.3 }, () => {
     if (isRoundLive() && !isOut()) return
