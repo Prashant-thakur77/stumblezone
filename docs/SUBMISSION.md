@@ -15,7 +15,7 @@ own avatar's emotes as the controls and one where players fight over the same th
   for 14 slots and fails on any throw. It found and fixed a per-frame crash in Sweeper Gates.
 - A **two-client run** wires two copies of the bundle together over the message bus and asserts
   they agree on tallies and winners - it found and fixed the standings sync.
-- Measured load from that run: **1,124 entities, 665 mesh renderers, 113 GLTFs, 32 text shapes** -
+- Measured load from that run: **1,189 entities, 673 mesh renderers, 115 GLTFs, 33 text shapes** -
   under a quarter of the 16-parcel mobile allowance. Assets: 5.6 MB.
 - Every rounded HUD shape is a texture, because `borderRadius` does not render on the mobile client.
 
@@ -48,7 +48,7 @@ should let each of them find their criterion in the first paragraph they read.
 |---|---|---|
 | Giorgio (Regenesis Labs) | performance, mobile-first execution, polish | 3.6 MB of assets, pooled entities built once, engine-side tweens, every HUD shape a texture because the mobile client ignores `borderRadius`. `npm run verify` is green in CI. |
 | Agus (Regenesis Labs) | mobile UX, accessibility, controls | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
-| Bay Backner (Foundation) | social value, retention, discovery | Six hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
+| Bay Backner (Foundation) | social value, retention, discovery | Seven hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
 | Nico E (Foundation) | usability, onboarding, execution | A one-time HOW TO PLAY card, a host with a speech bubble, Beat-the-House so a solo tester always has an opponent. A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
 | MetaRyuk (DAO Council) | creativity, originality, social, retention | **Copycat**: a round only Decentraland can host - the coach performs poses, you copy them with your own avatar's emotes, and the scene reads them back from the explorer. A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
 

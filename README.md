@@ -281,7 +281,7 @@ src/lib/        pure logic, no SDK imports, fully unit-tested
   field.ts      field readout and rivalries
   titles.ts     PIONEER / IRONFOOT / SURVIVOR / CHAMPION
   streak.ts     qualifying streaks
-  hats.ts       the six hats and what unlocks each
+  hats.ts       the seven hats and what unlocks each
   stars.ts      the daily star hunt
   tower.ts      the tower spiral, with a test that every step is a phone-sized jump
   sky.ts        the sky course, same rule, plus the box over the drop pad

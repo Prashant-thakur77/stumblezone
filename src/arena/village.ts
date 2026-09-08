@@ -141,7 +141,7 @@ function buildBackdrop(): void {
   buildTree(Vector3.create(60, Y - 0.5, 12), 1.1)
 }
 
-/** Six pedestals, a floating hat on each, and the zone that opens the panel. */
+/** One pedestal per hat, a floating hat on each, and the zone that opens the panel. */
 function buildHatMarket(): void {
   sign('HAT MARKET\nEarn them in the show. Step up to wear one.', Vector3.create(HAT_MARKET.x, Y + 4.2, HAT_MARKET.z + 3), 1.6)
 
