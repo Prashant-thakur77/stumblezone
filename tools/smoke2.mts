@@ -122,7 +122,10 @@ while (ROUND_NAMES[roundIndex(startSlot + 1)] !== 'Crown Rush') startSlot++
 let fake = startSlot * SLOT_SECONDS * 1000
 const realNow = Date.now
 Date.now = () => fake
-const dt = 1 / 30
+// The fast loop moves the clock two seconds per frame, so dt says so too: a scored round counts
+// seconds in the zone from dt, and a dt of a thirtieth would make a whole round worth one point.
+const dt = 2
+const settleDt = 1 / 30
 
 /** A stands in the Crown Rush zone; B stands on the stage but out of it. Elsewhere both stand centre. */
 function positions(): [number, number, number][] {
@@ -144,6 +147,31 @@ function positions(): [number, number, number][] {
 }
 
 const slots = 12
+// A third peer nobody controls: it says, wears, picks, cheers and scores like any client would,
+// once per slot, so every receive handler runs on a payload that did not come from this build.
+const PEER = '0xcccccccccccccccccccccccccccccccccccccccc'
+let peerInjectedSlot = -1
+function injectPeer(slot: number, elapsed: number) {
+  if (peerInjectedSlot === slot || elapsed < 30) return
+  peerInjectedSlot = slot
+  const msgs: [string, Record<string, unknown>][] = [
+    ['here', {}],
+    ['cheer', { emote: 'clap' }],
+    ['cheer', { emote: 'boo' }],
+    ['wear', { hat: 'cap' }],
+    ['pick', { to: clients[0].address }],
+    ['gg', { to: clients[0].address }],
+    ['score', { points: 3 }],
+    ['tile', { tileId: 0 }],
+    ['finished', { ms: 12000 }],
+    ['eliminated', { ms: 15000 }],
+    ['standings', { crowns: [[PEER, 9]], show: Math.floor(slot / 4), showCrowns: [[PEER, 2]] }]
+  ]
+  for (const [message, extra] of msgs) {
+    const raw = JSON.stringify({ message, payload: { slot, address: PEER, ...extra } })
+    for (const c of clients) c.inbox.push(raw)
+  }
+}
 const frames = Math.ceil((slots * SLOT_SECONDS) / 2)
 const rushSlots = new Set<number>()
 for (let i = 0; i < frames; i++) {
@@ -151,6 +179,7 @@ for (let i = 0; i < frames; i++) {
   const slot = slotIndex(fake)
   if (ROUND_NAMES[roundIndex(slot)] === 'Crown Rush') rushSlots.add(slot)
   const pos = positions()
+  injectPeer(slot, slotElapsed(fake))
   for (let k = 0; k < clients.length; k++) {
     current = clients[k]
     playerAt(clients[k], ...pos[k])
@@ -163,7 +192,7 @@ for (let i = 0; i < 90; i++) {
   fake += 33
   for (const c of clients) {
     current = c
-    await c.m.onUpdate(dt)
+    await c.m.onUpdate(settleDt)
   }
 }
 for (const c of clients) c.inbox.push(JSON.stringify({ message: 'hello', payload: { slot: slotIndex(fake), address: 'newcomer' } }))
@@ -171,7 +200,7 @@ for (let i = 0; i < 3; i++) {
   fake += 33
   for (const c of clients) {
     current = c
-    await c.m.onUpdate(dt)
+    await c.m.onUpdate(settleDt)
   }
 }
 Date.now = realNow
@@ -224,6 +253,20 @@ const showA = tally(lastShow(clients[0]) ?? [])
 const showB = tally(lastShow(clients[1]) ?? [])
 for (const c of clients) {
   if ((showA[c.address] ?? -1) !== (showB[c.address] ?? -1)) fail('clients disagree on ' + c.name + "'s show crowns: " + showA[c.address] + ' vs ' + showB[c.address])
+}
+
+// 2b. The third peer's crowns reached both clients through the merge.
+if ((ta[PEER] ?? 0) < 9 || (tb[PEER] ?? 0) < 9) fail('the third peer\'s standings were not merged: A ' + ta[PEER] + ', B ' + tb[PEER])
+
+// Per-slot trace, for when a check fails: what each client scored and broadcast.
+if (process.env.SMOKE2_TRACE) {
+  for (const slot of [...rushSlots]) {
+    for (const c of clients) {
+      const sc = c.sent.filter((m) => m.message === 'score' && m.payload.slot === slot).map((m) => Math.round(m.payload.points))
+      const st = c.sent.filter((m) => m.message === 'standings' && m.payload.slot >= slot && m.payload.slot <= slot + 1).map((m) => JSON.stringify(m.payload.crowns))
+      realError('  slot ' + slot + ' ' + c.name + ' scores ' + JSON.stringify(sc) + ' standings ' + st.join(' | '))
+    }
+  }
 }
 
 // 3. Crown Rush: if it ran, A (in the zone) reported more points than B, on both clients' scores.

@@ -152,7 +152,9 @@ const start = Date.now()
 let fake = start
 const realNow = Date.now
 Date.now = () => fake
-const dt = 1 / 30
+// The fast loop moves the clock two seconds a frame, and says so in dt; the slow loop is real-time.
+const dt = 2
+const slowDt = 1 / 30
 const SLOT = 120
 const frames = Math.ceil((14 * SLOT) / 2)
 const t0 = performance.now()
@@ -165,7 +167,7 @@ for (let i = 0; i < frames; i++) {
 for (let i = 0; i < 300; i++) {
   fake += 33
   playerAt(...tour(frames + i))
-  await m.onUpdate(dt)
+  await m.onUpdate(slowDt)
 }
 Date.now = realNow
 

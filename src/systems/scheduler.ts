@@ -109,6 +109,8 @@ let finalScoreSent = false
 let greeted = new Set<string>()
 /** Throttle for the standing line and the hat rows: both sort or filter, neither changes often. */
 let sinceLine = 1
+/** Throttle for the feed and the named field readout. */
+let sinceFeed = 1
 /** Rounds won and lost against each rival this show. */
 const h2h = new HeadToHead()
 /** Our own finish time this round (Tip Toe), or null. */
@@ -306,11 +308,17 @@ function schedulerSystem(dt: number): void {
   if (slot !== activeSlot) beginSlot(slot)
   if (!active) return
 
-  // The feed changes a few times a round, not every frame; rebuilding the array is cheap but
-  // handing the UI a new one every frame makes it re-render the whole corner.
-  const visible = feed.visible(now)
-  if (visible.length !== hud.toasts.length || visible.some((t, i) => t !== hud.toasts[i])) {
-    hud.toasts = visible
+  // The feed and the field readout change a few times a round, not every frame: four times a
+  // second is plenty, and it saves the arrays and strings the other 26 frames would build.
+  sinceFeed += dt
+  if (sinceFeed >= 0.25) {
+    sinceFeed = 0
+    const visible = feed.visible(now)
+    if (visible.length !== hud.toasts.length || visible.some((t, i) => t !== hud.toasts[i])) {
+      hud.toasts = visible
+    }
+    const stillIn = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).map(displayName)
+    hud.fieldLine = fieldLine([...(!hud.out && !spectatingOnly ? ['you'] : []), ...stillIn])
   }
   hud.hype = hype.level(now)
   setCrowdLevel(hud.hype)
@@ -354,9 +362,7 @@ function schedulerSystem(dt: number): void {
   hud.lives = spectator.livesLeft()
   hud.out = spectator.isOut()
   hud.alive = Math.max(1, seen.size - eliminated.size)
-  // Names, not just a count: knowing you are down to you and Alice is the whole tension.
-  const stillIn = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).map(displayName)
-  hud.fieldLine = fieldLine([...(!hud.out && !spectatingOnly ? ['you'] : []), ...stillIn])
+
 
   // Your place in the current show, twice a second - it sorts the tally, and it changes rarely.
   sinceLine += dt
