@@ -18,7 +18,7 @@ own avatar's emotes as the controls and one where players fight over the same th
   winner - it found that the crown tallies were only ever shared when someone joined.
 - A **two-client run** wires two copies of the bundle together over the message bus and asserts
   they agree on tallies and winners - it found and fixed the standings sync.
-- Measured load from that run: **1,205 entities, 674 mesh renderers, 116 GLTFs, 37 text shapes** -
+- Measured load from that run: **1,196 entities, 673 mesh renderers, 115 GLTFs, 37 text shapes** -
   under a quarter of the 16-parcel mobile allowance. Assets: 5.6 MB.
 - Every rounded HUD shape is a texture, because `borderRadius` does not render on the mobile client.
 - A box-overlap check of the HUD's virtual canvas: **zero pairs can collide**, because the centre of
