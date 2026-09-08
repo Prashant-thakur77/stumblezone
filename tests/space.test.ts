@@ -49,11 +49,12 @@ test('the plazas sit in the corners, touching their lane', () => {
 
 test('the practice yard fits down the west lane, in order, with room between stations', () => {
   // z of each station, from src/arena/practice.ts; the ring hops +/-2.5 and the signs sit 4m back.
+  // name, centre z, how far it reaches either way (hop + radius, or the sign behind it)
   const stations: [string, number, number][] = [
     ['patch', 27, 2.5],
     ['light', 39, 6],
-    ['beam', 52, 4],
-    ['ring', 60, 4.5]
+    ['beam', 50, 4],
+    ['ring', 58, 3.7]
   ]
   const laneStart = WEST_LANE.z - WEST_LANE.depth / 2
   const laneEnd = WEST_LANE.z + WEST_LANE.depth / 2

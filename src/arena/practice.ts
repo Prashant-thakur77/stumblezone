@@ -30,8 +30,8 @@ const X = WEST_LANE.x
 const TILE = 1.7
 const PATCH_Z = 27
 const LIGHT_Z = 39
-const BEAM_Z = 52
-const RING_Z = 60
+const BEAM_Z = 50
+const RING_Z = 58
 
 const patch = new Patch(9)
 const tiles: { e: Entity; x: number; z: number }[] = []
@@ -154,7 +154,7 @@ export function buildPractice(): void {
     if (hop !== ringHop) {
       ringHop = hop
       const r = Transform.getMutable(ring)
-      r.position.z = RING_Z + (hop % 2 === 0 ? -2.5 : 2.5)
+      r.position.z = RING_Z + (hop % 2 === 0 ? -1.5 : 1.5)
       r.position.x = X + (hop % 4 < 2 ? -1 : 1)
     }
     if (t) {
