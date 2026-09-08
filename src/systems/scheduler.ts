@@ -111,6 +111,8 @@ let greeted = new Set<string>()
 let sinceLine = 1
 /** Throttle for the feed and the named field readout. */
 let sinceFeed = 1
+/** When the one-time welcome card gives up waiting for GOT IT. */
+let welcomeUntil = 0
 /** Rounds won and lost against each rival this show. */
 const h2h = new HeadToHead()
 /** Our own finish time this round (Tip Toe), or null. */
@@ -205,6 +207,8 @@ export function setupScheduler(roundList: Round[]): void {
     play('survive')
   })
 
+  // The welcome card is a greeting, not a gate: it goes on its own after half a minute.
+  welcomeUntil = Date.now() + 30000
   engine.addSystem(cameraSystem)
   engine.addSystem(schedulerSystem)
 }
@@ -320,6 +324,7 @@ function schedulerSystem(dt: number): void {
     const stillIn = [...seen].filter((a) => a !== myAddress() && !eliminated.has(a)).map(displayName)
     hud.fieldLine = fieldLine([...(!hud.out && !spectatingOnly ? ['you'] : []), ...stillIn])
   }
+  if (hud.welcome && now > welcomeUntil) hud.welcome = false
   hud.hype = hype.level(now)
   setCrowdLevel(hud.hype)
   // Crowns changed? Everyone hears about it within two seconds.

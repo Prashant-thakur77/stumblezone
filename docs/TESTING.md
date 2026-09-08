@@ -219,3 +219,11 @@ none of it can be caught in the desktop preview.
       the ring hops every twelve seconds with a boing and gets smaller as the round goes on.
 - [ ] With two devices: both scores show up on each other's results card and the same winner is
       named on both. The spectator's PICK pays out for the winner.
+
+**The simplified HUD (Day 1)**
+- [ ] Nothing ever overlaps: at most one card in the centre and one panel above the joystick.
+- [ ] During a live round the corners are quiet - no daily, no show standing, no round tag, no
+      stopwatch; they come back the moment the round ends.
+- [ ] The last five seconds show the numeral *below* the round name, not over it.
+- [ ] The welcome card goes away on GOT IT, at the first whistle, or after thirty seconds.
+- [ ] Eliminated during Copycat: you get the pose buttons, not the cheer buttons underneath them.

@@ -32,6 +32,7 @@ import { Color4 } from '@dcl/sdk/math'
 import { C, countdownColor } from './theme'
 import { Pill, Card, ChunkyText, Dots, shape, UI_TEX } from './parts'
 import { LIVES_PER_ROUND } from '../config'
+import { centreCard, bottomBand, showsMeta } from '../lib/layout'
 
 function formatClock(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -40,9 +41,9 @@ function formatClock(seconds: number): string {
 }
 
 /** The intro card: tag, name, three-word hint. Gold when it is the final. */
-function IntroCard() {
+function IntroCard({ show }: { show: boolean }) {
   return (
-    <Card width="60%" height={250} position={{ top: '20%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={hud.phase === 'card' && !hud.welcome}>
+    <Card width="60%" height={250} position={{ top: '22%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={show}>
       <ChunkyText text={hud.roundTag} fontSize={24} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.cyan} />
       <ChunkyText text={hud.roundName.toUpperCase()} fontSize={86} width="100%" height={110} />
       <ChunkyText text={hud.subtitle} fontSize={26} width="100%" height={50} color={hud.finale || hud.golden ? C.navy : C.yellow} />
@@ -51,20 +52,20 @@ function IntroCard() {
 }
 
 /** 3 - 2 - 1 in three colours. The banner carries the numeral; nothing else is on screen. */
-function Countdown() {
+function Countdown({ show }: { show: boolean }) {
   const n = parseInt(hud.banner, 10)
   const isNumber = !isNaN(n)
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
-        position: { top: '18%', left: '20%' },
+        position: { top: '22%', left: '20%' },
         width: '60%',
-        height: 300,
+        height: 290,
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        display: hud.phase === 'countdown' && !hud.welcome ? 'flex' : 'none'
+        display: show ? 'flex' : 'none'
       }}
     >
       <ChunkyText text={hud.banner} fontSize={isNumber ? 200 : 96} width="100%" height={230} color={isNumber ? countdownColor(n) : C.white} />
@@ -74,13 +75,12 @@ function Countdown() {
 }
 
 /** The in-play centre line: the round's instruction, above true centre so it never fights the controls. */
-function PlayBanner() {
-  const show = hud.phase === 'play' && (hud.banner !== '' || hud.subtitle !== '')
+function PlayBanner({ show }: { show: boolean }) {
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
-        position: { top: '22%', left: '15%' },
+        position: { top: '24%', left: '15%' },
         width: '70%',
         height: 150,
         flexDirection: 'column',
@@ -96,10 +96,10 @@ function PlayBanner() {
 }
 
 /** QUALIFIED! in pink and gold, ELIMINATED in slate. The whole centre of the screen, for 15 seconds. */
-function Splash() {
+function Splash({ show }: { show: boolean }) {
   const out = hud.out
   return (
-    <Card width="64%" height={230} position={{ top: '20%', left: '18%' }} color={out ? C.slate : C.pink} show={hud.phase === 'results' && !hud.welcome}>
+    <Card width="64%" height={230} position={{ top: '22%', left: '18%' }} color={out ? C.slate : C.pink} show={show}>
       <ChunkyText text={hud.banner} fontSize={110} width="100%" height={130} color={out ? C.white : C.yellow} />
       <ChunkyText text={hud.subtitle} fontSize={28} width="100%" height={44} />
     </Card>
@@ -145,7 +145,7 @@ function Reactions() {
         height: 70,
         flexDirection: 'row',
         justifyContent: 'space-around',
-        display: hud.phase === 'results' || hud.dance ? 'flex' : 'none'
+        display: hud.phase === 'results' ? 'flex' : 'none'
       }}
     >
       {buttons.map((b) => (
@@ -178,7 +178,7 @@ function Reactions() {
  * The Hat Market panel. Every hat is a button: earned ones wear on tap, locked ones say what to go
  * and do. Two rows of four so it fits a phone in landscape without covering the joystick.
  */
-function HatShop() {
+function HatShop({ show }: { show: boolean }) {
   const rows: ReactEcs.JSX.Element[] = hud.hats.map((h) => (
     <Button
       key={h.id}
@@ -205,7 +205,7 @@ function HatShop() {
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         alignContent: 'flex-end',
-        display: hud.shop && hud.phase !== 'play' ? 'flex' : 'none'
+        display: show ? 'flex' : 'none'
       }}
     >
       {rows}
@@ -223,13 +223,12 @@ function HatShop() {
 }
 
 /** The last five seconds of a round, as big numerals. A clock in a pill is information; this is drama. */
-function LastSeconds() {
-  const show = hud.phase === 'play' && hud.roundClock > 0 && hud.roundClock <= 5
+function LastSeconds({ show }: { show: boolean }) {
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
-        position: { top: '10%', left: '35%' },
+        position: { top: '26%', left: '35%' },
         width: '30%',
         height: 160,
         justifyContent: 'center',
@@ -243,7 +242,7 @@ function LastSeconds() {
 }
 
 /** Copycat's six poses, two rows of three, only while it is your turn. */
-function PoseRow() {
+function PoseRow({ show }: { show: boolean }) {
   const label: Record<Pose, string> = { dance: 'DANCE', clap: 'CLAP', wave: 'WAVE', dab: 'DAB', robot: 'ROBOT', fistpump: 'FIST PUMP' }
   const colors = [C.pink, C.yellow, C.cyan, C.green, C.pink, C.yellow]
   return (
@@ -258,7 +257,7 @@ function PoseRow() {
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         alignContent: 'flex-end',
-        display: hud.poses || (hud.dance && hud.phase !== 'play') ? 'flex' : 'none'
+        display: show ? 'flex' : 'none'
       }}
     >
       {POSES.map((p, i) => (
@@ -278,9 +277,9 @@ function PoseRow() {
 }
 
 /** Three lines and a button, once. For the judge who reads nothing else. */
-function Welcome() {
+function Welcome({ show }: { show: boolean }) {
   return (
-    <Card width="64%" height={270} position={{ top: '14%', left: '18%' }} color={C.plate} show={hud.welcome && hud.phase !== 'play'}>
+    <Card width="60%" height={264} position={{ top: '22%', left: '20%' }} color={C.plate} show={show}>
       <ChunkyText text="STUMBLEZONE" fontSize={60} width="100%" height={72} color={C.yellow} />
       <ChunkyText text="A new round every 2 minutes. Walk and jump - that is all." fontSize={26} width="100%" height={38} />
       <ChunkyText text="Fall, and you cheer from the ledge. Five cheers and the crowd goes wild." fontSize={26} width="100%" height={38} />
@@ -300,6 +299,10 @@ function Welcome() {
 
 function Hud() {
   const tense = hud.roundClock > 0 && hud.roundClock <= 15
+  // Two regions, one owner each (src/lib/layout.ts). Nothing below writes another's exclusion rule.
+  const centre = centreCard({ phase: hud.phase, welcome: hud.welcome, roundClock: hud.roundClock, banner: hud.banner !== '' || hud.subtitle !== '' })
+  const band = bottomBand({ phase: hud.phase, poses: hud.poses, shop: hud.shop, dance: hud.dance, out: hud.out })
+  const meta = showsMeta(hud.phase)
   return (
     <UiEntity uiTransform={{ width: '100%', height: '100%', positionType: 'absolute' }}>
       {/* Top centre: what round this is, and how long is left in it. A full-width row that
@@ -321,10 +324,10 @@ function Hud() {
           fontSize={18}
           color={hud.finale || hud.golden ? C.yellow : C.plate}
           textColor={hud.finale || hud.golden ? C.navy : C.white}
-          show={hud.roundTag !== ''}
+          show={meta && hud.roundTag !== ''}
         />
         <Pill text={hud.roundName.toUpperCase()} width={360} color={C.pink} fontSize={24} />
-        <Pill text={hud.activity} width={220} color={C.green} textColor={C.navy} fontSize={24} show={hud.activity !== ''} />
+        <Pill text={hud.activity} width={220} color={C.green} textColor={C.navy} fontSize={24} show={meta && hud.activity !== ''} />
         <Pill
           text={formatClock(hud.roundClock)}
           width={150}
@@ -369,7 +372,7 @@ function Hud() {
         textColor={C.navy}
         fontSize={20}
       />
-      <Pill text={hud.showLine} width={300} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={hud.showLine !== ''} />
+      <Pill text={hud.showLine} width={300} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={meta && hud.showLine !== ''} />
 
       {/* Today's challenge. It is the one line on this HUD that is about tomorrow. */}
       <Pill
@@ -379,19 +382,19 @@ function Hud() {
         color={hud.daily === 'DAILY: DONE' ? C.green : C.plate}
         textColor={hud.daily === 'DAILY: DONE' ? C.navy : C.white}
         fontSize={18}
-        show={hud.daily !== '' && hud.phase !== 'play'}
+        show={meta && hud.daily !== ''}
       />
 
-      <IntroCard />
-      <Countdown />
-      <LastSeconds />
-      <PlayBanner />
-      <Splash />
+      <IntroCard show={centre === 'card'} />
+      <Countdown show={centre === 'countdown'} />
+      <LastSeconds show={centre === 'last5'} />
+      <PlayBanner show={centre === 'play'} />
+      <Splash show={centre === 'results'} />
+      <Welcome show={centre === 'welcome'} />
       <Toasts />
       <Reactions />
-      <HatShop />
-      <PoseRow />
-      <Welcome />
+      <HatShop show={band === 'shop'} />
+      <PoseRow show={band === 'poses'} />
 
       {/* Spectator cheer. A real on-screen button, not a "press E" instruction - a thumb needs
           something to hit, and this is the only thing an eliminated player can do. */}
@@ -403,7 +406,7 @@ function Hud() {
           height: 110,
           flexDirection: 'column',
           alignItems: 'center',
-          display: hud.out ? 'flex' : 'none'
+          display: band === 'spectator' ? 'flex' : 'none'
         }}
       >
         <UiEntity uiTransform={{ width: '100%', height: 64, flexDirection: 'row', justifyContent: 'space-between' }}>

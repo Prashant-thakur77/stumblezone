@@ -320,6 +320,10 @@ src/ui/         mobile HUD
   it, runs twelve slots, and asserts both clients agree on every crown tally and name the same
   winner. Its first run found that crowns were only ever shared when someone joined - and that the
   per-show tally was never shared at all, so every client's "show leader" was itself.
+- **Two screen regions, one owner each** (`src/lib/layout.ts`). The centre and the band above the
+  joystick each show exactly one thing, decided by a pure function whose test enumerates every
+  combination of flags. A box-overlap check of the virtual canvas found six pairs that could
+  collide before this; there are none now.
 - **The UI never uses `borderRadius`** and every texture it names exists on disk. Both are silent
   failures on a phone: no error, just a flat rectangle or an invisible plate.
 - **Geometry and pacing invariants** — the kill plane must clear every standable surface, every
