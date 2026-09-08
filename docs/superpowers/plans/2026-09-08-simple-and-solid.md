@@ -54,6 +54,17 @@ add the control ("Walk", "Walk and jump", "Tap the poses") so the card answers *
 **Task 2.4 — cut anything that confuses.** A pass with fresh eyes over every string on screen:
 if a line does not tell a player what to do or what just happened, it goes.
 
+## Day 1 and 2: done (2026-09-08)
+
+Day 1: `src/lib/layout.ts` owns the centre and the bottom band; six overlapping pairs became zero
+(re-checked with the same box test); the corners go quiet during a live round; the welcome card
+times out; village panels can no longer stick open after the round-start teleport.
+
+Day 2: every round card carries its control; three signposts at spawn; Sam points first-timers at
+the Practice Yard and commentates champions, streaks, crown-zone holds, wipeouts and arrivals; the
+yard gained a crown-zone station so every hazard in the show is rehearsable; the last card of a
+show names tomorrow's daily; every sign says what to press.
+
 ## Day 3 (Sep 10) — proof and submission
 
 - Phone pass (docs/TESTING.md), fix what it finds, redeploy, and **submit the BUIDL**.

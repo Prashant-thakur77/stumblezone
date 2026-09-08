@@ -10,14 +10,19 @@ own avatar's emotes as the controls and one where players fight over the same th
 
 ## Verified, not claimed
 
-- `npm run verify` on every push (GitHub Actions, green): type check, 126 unit tests, asset budget,
-  and a **headless boot of the real bundle** that drives a player through every round and phase
-  for 14 slots and fails on any throw. It found and fixed a per-frame crash in Sweeper Gates.
+- `npm run verify` on every push (GitHub Actions, green): type check, **152 unit tests**, asset
+  budget, and **two headless runs of the real bundle**. The single-client run drives a player
+  through every round, place and phase for 14 slots and fails on any throw - it found a per-frame
+  crash in Sweeper Gates. The two-client run wires two copies of the scene together over the
+  message bus, plus a third scripted peer, and asserts they agree on every crown and name the same
+  winner - it found that the crown tallies were only ever shared when someone joined.
 - A **two-client run** wires two copies of the bundle together over the message bus and asserts
   they agree on tallies and winners - it found and fixed the standings sync.
-- Measured load from that run: **1,189 entities, 673 mesh renderers, 115 GLTFs, 33 text shapes** -
+- Measured load from that run: **1,205 entities, 674 mesh renderers, 116 GLTFs, 37 text shapes** -
   under a quarter of the 16-parcel mobile allowance. Assets: 5.6 MB.
 - Every rounded HUD shape is a texture, because `borderRadius` does not render on the mobile client.
+- A box-overlap check of the HUD's virtual canvas: **zero pairs can collide**, because the centre of
+  the screen and the band above the joystick each have exactly one owner (`src/lib/layout.ts`).
 
 ## The 100-word version
 
@@ -49,7 +54,7 @@ should let each of them find their criterion in the first paragraph they read.
 | Giorgio (Regenesis Labs) | performance, mobile-first execution, polish | 3.6 MB of assets, pooled entities built once, engine-side tweens, every HUD shape a texture because the mobile client ignores `borderRadius`. `npm run verify` is green in CI. |
 | Agus (Regenesis Labs) | mobile UX, accessibility, controls | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
 | Bay Backner (Foundation) | social value, retention, discovery | Seven hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
-| Nico E (Foundation) | usability, onboarding, execution | A one-time HOW TO PLAY card, a host with a speech bubble, Beat-the-House so a solo tester always has an opponent. A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
+| Nico E (Foundation) | usability, onboarding, execution | A one-time HOW TO PLAY card; signposts at the spawn point; a Practice Yard with a station per hazard, each naming the round it teaches; every round card says which control it needs; a host who points first-timers at the yard and then commentates. Beat-the-House so a solo tester always has an opponent. A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
 | MetaRyuk (DAO Council) | creativity, originality, social, retention | **Copycat**: a round only Decentraland can host - the coach performs poses, you copy them with your own avatar's emotes, and the scene reads them back from the explorer. A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
 
 ## Ten minutes on a phone before you submit (the honest "tested on mobile")
@@ -65,6 +70,8 @@ should let each of them find their criterion in the first paragraph they read.
 
 ## Your first three minutes (what a judge will actually see)
 
+0. **Before anything** A HOW TO PLAY card (three lines, GOT IT, or it goes on its own), and three
+   signposts: the Practice Yard left, the market left, the deck and tower right.
 1. **0:00** Spawn in the lobby facing the arena. The title, the schedule board ("THIS SHOW: ... > Hex-Drop",
    "NEXT UP", "TODAY: ..."), the crown board, the podium. Bounce on a jump pad.
 2. **0:00–0:40** Either the intro card of the next round (tag, name, three-word hint, 3-2-1), or -
