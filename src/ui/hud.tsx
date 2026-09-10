@@ -22,6 +22,7 @@
 
 import ReactEcs, { ReactEcsRenderer, UiEntity, Button } from '@dcl/sdk/react-ecs'
 import { hud } from './state'
+import { packLines } from '../lib/text'
 import { cheer, boo, react } from '../systems/spectator'
 import { setSpectatorCam, spectatorCamOn } from '../systems/camera'
 import { wearHat } from '../systems/hats'
@@ -46,7 +47,8 @@ function IntroCard({ show }: { show: boolean }) {
     <Card width="60%" height={250} position={{ top: '22%', left: '20%' }} color={hud.finale || hud.golden ? C.yellow : C.plate} show={show}>
       <ChunkyText text={hud.roundTag} fontSize={24} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.cyan} />
       <ChunkyText text={hud.roundName.toUpperCase()} fontSize={80} width="100%" height={96} />
-      <ChunkyText text={hud.subtitle} fontSize={30} width="100%" height={42} color={hud.finale || hud.golden ? C.navy : C.yellow} />
+      {/* 26pt, not 30: Copycat's hint plus its control wrapped onto the detail line on a phone. */}
+      <ChunkyText text={hud.subtitle} fontSize={26} width="100%" height={40} color={hud.finale || hud.golden ? C.navy : C.yellow} />
       <ChunkyText text={hud.detail} fontSize={22} width="100%" height={36} color={hud.finale || hud.golden ? C.navy : C.white} />
     </Card>
   )
@@ -96,13 +98,22 @@ function PlayBanner({ show }: { show: boolean }) {
   )
 }
 
-/** QUALIFIED! in pink and gold, ELIMINATED in slate. The whole centre of the screen, for 15 seconds. */
+/**
+ * QUALIFIED! in pink and gold, ELIMINATED in slate. The centre of the screen, for 15 seconds.
+ *
+ * The detail under the word is packed into at most three lines that fit the plate. A single Label
+ * does not wrap, so the old one-line subtitle ran off both edges of the card and under the
+ * reaction buttons - the phone recording made that impossible to miss.
+ */
 function Splash({ show }: { show: boolean }) {
   const out = hud.out
+  const lines = packLines(hud.subtitle, 58, 3)
   return (
-    <Card width="64%" height={230} position={{ top: '22%', left: '18%' }} color={out ? C.slate : C.pink} show={show}>
-      <ChunkyText text={hud.banner} fontSize={110} width="100%" height={130} color={out ? C.white : C.yellow} />
-      <ChunkyText text={hud.subtitle} fontSize={28} width="100%" height={44} />
+    <Card width="64%" height={290} position={{ top: '20%', left: '18%' }} color={out ? C.slate : C.pink} show={show}>
+      <ChunkyText text={hud.banner} fontSize={104} width="100%" height={124} color={out ? C.white : C.yellow} />
+      {lines.map((line, i) => (
+        <ChunkyText key={i} text={line} fontSize={23} width="100%" height={32} />
+      ))}
     </Card>
   )
 }
@@ -141,7 +152,8 @@ function Reactions() {
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
-        position: { top: '50%', left: '25%' },
+        // Directly under the results card (20% + 290px), never on top of it.
+        position: { top: '48.5%', left: '25%' },
         width: '50%',
         height: 70,
         flexDirection: 'row',
@@ -375,14 +387,16 @@ function Hud() {
       />
       <Pill text={hud.showLine} width={300} position={{ top: 72, right: 16 }} color={C.yellow} textColor={C.navy} fontSize={20} show={meta && hud.showLine !== ''} />
 
-      {/* Today's challenge. It is the one line on this HUD that is about tomorrow. */}
+      {/* Today's challenge. Small, in the corner, sized so its longest text fits inside the pill:
+          at 340px and 18pt it ran past the edge of a phone screen. */}
       <Pill
         text={hud.daily}
-        width={340}
+        width={300}
+        height={34}
         position={{ top: 128, right: 16 }}
-        color={hud.daily === 'DAILY: DONE' ? C.green : C.plate}
-        textColor={hud.daily === 'DAILY: DONE' ? C.navy : C.white}
-        fontSize={18}
+        color={hud.dailyDone ? C.green : C.plate}
+        textColor={hud.dailyDone ? C.navy : C.white}
+        fontSize={15}
         show={meta && hud.daily !== ''}
       />
 

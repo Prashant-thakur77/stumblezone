@@ -345,7 +345,8 @@ function schedulerSystem(dt: number): void {
   if (today !== dailyShownDay || doneToday !== dailyShownDone) {
     dailyShownDay = today
     dailyShownDone = doneToday
-    hud.daily = doneToday ? 'DAILY: DONE' : 'DAILY: ' + dailyFor(today).text.toUpperCase()
+    hud.dailyDone = doneToday
+    hud.daily = doneToday ? 'Daily: done  +' + DAILY_CROWNS : 'Daily: ' + dailyFor(today).text
   }
   // The crowd's own moment. Five cheers in ten seconds and the stadium answers: a roar, confetti
   // over the arena and the board saying so, for four seconds.
@@ -829,7 +830,9 @@ function schedulerSystem(dt: number): void {
       : spectator.isOut()
         ? 'ELIMINATED'
         : 'QUALIFIED!'
-  hud.subtitle = hud.resultDetail + '  ·  NEXT: ' + ROUND_NAMES[roundIndex(slot + 1)] + ' in ' + Math.ceil(remaining) + 's'
+  // NEXT goes first: the card packs its detail into three lines and drops the rest, and what is
+  // coming up is the one fact nobody should lose.
+  hud.subtitle = 'NEXT: ' + ROUND_NAMES[roundIndex(slot + 1)] + ' in ' + Math.ceil(remaining) + 's' + '  ·  ' + hud.resultDetail
 }
 
 /** A spectator picks who wins. */

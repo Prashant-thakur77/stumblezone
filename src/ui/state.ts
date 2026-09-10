@@ -32,8 +32,9 @@ export type HudState = {
   hype: number
   /** Who is still standing, by name: "IN: you, Alice, Bob +2". */
   fieldLine: string
-  /** Today's challenge, or "DAILY: DONE" once it is cleared. */
+  /** Today's challenge as a short line, or "Daily: done" once it is cleared. */
   daily: string
+  dailyDone: boolean
   /** True during a Golden Show: every crown counts double and the card goes gold. */
   golden: boolean
   /** True while standing in the Hat Market: the hat panel is up. */
@@ -81,6 +82,7 @@ export const hud: HudState = {
   hype: 0,
   fieldLine: '',
   daily: '',
+  dailyDone: false,
   golden: false,
   shop: false,
   dance: false,

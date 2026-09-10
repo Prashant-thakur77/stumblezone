@@ -82,6 +82,7 @@ export function Plate(props: PlateProps) {
 }
 
 type ChunkyProps = {
+  key?: number | string
   text: string
   fontSize: number
   width: Size
