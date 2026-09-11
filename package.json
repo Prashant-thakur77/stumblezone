@@ -1,7 +1,7 @@
 {
   "name": "stumblezone",
   "version": "1.0.0",
-  "description": "A four-round party gauntlet for Decentraland, built mobile-first.",
+  "description": "A party game show for Decentraland Mobile that runs itself: a new round every two minutes, no host, no server.",
   "scripts": {
     "start": "sdk-commands start",
     "deploy": "sdk-commands deploy",
@@ -33,5 +33,18 @@
   "volta": {
     "node": "22.23.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Prashant-thakur77/stumblezone.git"
+  },
+  "homepage": "https://decentraland.org/jump/?realm=justchatting.dcl.eth",
+  "keywords": [
+    "decentraland",
+    "sdk7",
+    "mobile",
+    "game",
+    "party",
+    "multiplayer"
+  ]
 }

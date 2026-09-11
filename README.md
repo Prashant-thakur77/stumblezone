@@ -307,7 +307,7 @@ Deploying to a World is one command, signed in the browser with the wallet that 
 npm run deploy -- --target-content https://worlds-content-server.decentraland.org
 ```
 
-See [docs/DEPLOY-SETUP.md](docs/DEPLOY-SETUP.md). No key is ever stored in this repository or in CI.
+See [docs/DEPLOY.md](docs/DEPLOY.md). No key is ever stored in this repository or in CI.
 
 ---
 

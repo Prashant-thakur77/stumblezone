@@ -1,7 +1,9 @@
 # The demo video — what to show, what to say
 
-**Length: 75 seconds.** Judges watch dozens; the first fifteen seconds decide whether they watch
-the rest. Portrait, shot on a phone, because the whole claim of this project is that it was built
+**Two cuts exist: a 75-second teaser (this shot list) and the 3:52 walkthrough that was submitted,
+which keeps the loading screen, explains every round, the crowd, the village and the tech, with a
+narrated voice track and captions in a letterbox band so nothing covers the gameplay.** The
+first fifteen seconds decide whether a viewer watches the rest. Portrait, shot on a phone, because the whole claim of this project is that it was built
 for one.
 
 ---
@@ -70,4 +72,4 @@ strong. Everything else in the table is unchanged.
 ## Where it goes
 
 Upload unlisted to YouTube (or Drive with link-sharing on), paste the URL into the DoraHacks BUIDL
-page's demo-video field, and into `docs/SUBMISSION.md` where it says `<VIDEO_URL>`.
+page's demo-video field.

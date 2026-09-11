@@ -39,7 +39,7 @@ built for a phone: walk and jump, nothing else.
 |---|---|
 | Play (mobile app or desktop) | `justchatting.dcl.eth` — <https://decentraland.org/jump/?realm=justchatting.dcl.eth> |
 | Source | <https://github.com/Prashant-thakur77/stumblezone> |
-| Video | `<VIDEO_URL>` — 75 s, script below |
+| Video | 3:52 walkthrough, linked from the DoraHacks BUIDL page; shot list in [docs/VIDEO.md](VIDEO.md) |
 | Design and research | [docs/VISION.md](VISION.md), [docs/FALLGUYS-PRESENTATION.md](FALLGUYS-PRESENTATION.md) |
 | Architecture | [docs/ARCHITECTURE.md](ARCHITECTURE.md) |
 | Credits and licences | [CREDITS.md](../CREDITS.md) |
@@ -83,20 +83,6 @@ should let each of them find their criterion in the first paragraph they read.
 5. **Results** QUALIFIED! or ELIMINATED, a named rivalry line, bonuses by name, DANCE / CLAP / SHRUG.
 6. **After four acts** The podium, the crane shot, the champion's card with the share link.
 
-## Video script (75 seconds, two phones)
-
-Shoot in portrait on one phone, screen-record the other. No voice-over needed; captions carry it.
-
-| Time | Shot | Caption |
-|---|---|---|
-| 0–8 s | Lobby: pan from the title across the boards to the arena and the rainbow | **A party show that never stops. A new round every 2 minutes.** |
-| 8–18 s | Intro card, 3-2-1, whistle, Spotlight round | **Eight rounds. Every show draws a different card.** |
-| 18–30 s | Phone A falls; lands on the ledge; taps CHEER five times | **Fall, and you're not done - you're the crowd.** |
-| 30–38 s | Phone B (still in): confetti fires, "THE CROWD IS GOING WILD" | **Five cheers sets the stadium off. For everyone.** |
-| 38–48 s | Results: QUALIFIED!, "You outlasted Alice by 4s", CLUTCH +1, DANCE | **Names, rivalries, bonuses.** |
-| 48–58 s | Hex-Drop finale, last tile, podium crane shot, crown on the winner's head | **Four acts. One champion. Then it starts again.** |
-| 58–68 s | Lobby board: TODAY's challenge, GOLDEN SHOW countdown | **A reason to come back tomorrow.** |
-| 68–75 s | The jump link on screen | **justchatting.dcl.eth - open it on your phone.** |
 
 ## Announcement text (Friendzone Discord channel / forum)
 

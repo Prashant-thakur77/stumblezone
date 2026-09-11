@@ -83,7 +83,7 @@ Rounds fire on UTC wall-clock, computed client-side with no server: 120-second s
 - Social: shared spectacle rounds, spectator ledge with a view (eliminated players watch and heckle in voice), Tip Toe's sacrificial pathfinding, podium emote moment, crown races between friends.
 - Mobile UX: countdowns and round names in huge center-screen text, safe-area layout, three-line onboarding sign.
 - Performance: one arena, instanced tiles from shared meshes, one texture atlas, tween-driven motion. Comfortably inside mobile budgets.
-- Creativity: competitors in the BUIDL list have obbies and arenas; nobody has an auto-cycling multi-round gauntlet with a solo score-attack mode.
+- Creativity: an auto-cycling multi-round gauntlet with a real solo mode, scheduled by the clock rather than a host.
 - Retention: daily crowns, daily challenge, PBs and ghost times, the schedule itself ("Hex-Drop is in 3 minutes, wait for it").
 - Execution: four rounds sharing one tile system is a small codebase pretending to be a big game. That's the point.
 
@@ -164,9 +164,8 @@ Roughly 60% of the code is `tiles.ts` and the scheduler; the four rounds are thi
 | github.com/decentraland-scenes/beer-dispenser | P2P object messaging between players. |
 | github.com/decentraland-scenes/Awesome-Repository | Index of every official example scene — check here before building anything from scratch. |
 
-Note on the decentraland-scenes examples above: most are SDK6-era. Read them for the pattern, then write SDK7 with goerli-plaza syntax (or let Claude Code translate — the migrate-legacy-sdk6-scenes doc covers exactly this).
+Note on the decentraland-scenes examples above: most are SDK6-era. Read them for the pattern, then write SDK7 with goerli-plaza syntax.
 
-The Friendzone competitor repos (tower-obby, SkyBounce, arena-lounge, slipstream and friends) are the field to beat, and per the buildathon's originality rule they stay read-only.
 
 ---
 

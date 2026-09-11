@@ -1,7 +1,9 @@
 # Credits
 
 ## Code
-All gameplay code in `src/` written for this buildathon. No third-party gameplay code is vendored.
+All gameplay code in `src/` was written for this buildathon; no third-party gameplay code is
+vendored. Development used the official `decentraland/sdk-skills` reference and AI pair-programming
+assistance (Claude Code) for drafting and review; every line was run on a real phone before it shipped.
 
 ## Engine and tooling
 - **Decentraland SDK7** (`@dcl/sdk`) — Decentraland Foundation
