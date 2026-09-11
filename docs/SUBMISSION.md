@@ -44,18 +44,17 @@ built for a phone: walk and jump, nothing else.
 | Architecture | [docs/ARCHITECTURE.md](ARCHITECTURE.md) |
 | Credits and licences | [CREDITS.md](../CREDITS.md) |
 
-## The five judges, and the line for each
+## The judging criteria, and where each one shows
 
-The Sept 5 forum update named the judges and what each one is looking for. The BUIDL description
-should let each of them find their criterion in the first paragraph they read.
+The BUIDL description should let a reader find every criterion in the first paragraph they read.
 
-| Judge | Looks for | The sentence for them |
+| Criterion | What it asks | Where it shows |
 |---|---|---|
-| Giorgio (Regenesis Labs) | performance, mobile-first execution, polish | 3.6 MB of assets, pooled entities built once, engine-side tweens, every HUD shape a texture because the mobile client ignores `borderRadius`. `npm run verify` is green in CI. |
-| Agus (Regenesis Labs) | mobile UX, accessibility, controls | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
-| Bay Backner (Foundation) | social value, retention, discovery | Seven hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
-| Nico E (Foundation) | usability, onboarding, execution | A one-time HOW TO PLAY card; signposts at the spawn point; a Practice Yard with a station per hazard, each naming the round it teaches; every round card says which control it needs; a host who points first-timers at the yard and then commentates. Beat-the-House so a solo tester always has an opponent. A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 86 tests over the things that fail silently. |
-| MetaRyuk (DAO Council) | creativity, originality, social, retention | **Copycat**: a round only Decentraland can host - the coach performs poses, you copy them with your own avatar's emotes, and the scene reads them back from the explorer. A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
+| Performance and mobile-first execution | 3.6 MB of assets, pooled entities built once, engine-side tweens, every HUD shape a texture because the mobile client ignores `borderRadius`. `npm run verify` is green in CI. |
+| Mobile UX and accessibility | Walk and jump is the whole control scheme. One-tap WATCH ARENA for spectators. Colours are named in words. Nothing near the joystick. |
+| Social value, retention and discovery | Seven hats earned in the show and worn where everyone sees them; a village with a dance floor and a daily star hunt. Spectators drive a hype meter that sets the stadium off; a named feed; worn crowns; a daily challenge and a Golden Show every fourth show; a share link on the wall. |
+| Usability, onboarding and execution | A one-time HOW TO PLAY card; signposts at the spawn point; a Practice Yard with a station per hazard, each naming the round it teaches; every round card says which control it needs; a host who points first-timers at the yard and then commentates. Beat-the-House so a solo tester always has an opponent. A latecomer is dropped into a live round, not parked on a ledge. The hint is on the card, the sign, and the jumbotron. 156 tests over the things that fail silently. |
+| Creativity and originality | **Copycat**: a round only Decentraland can host - the coach performs poses, you copy them with your own avatar's emotes, and the scene reads them back from the explorer. A whole stadium to walk: a practice yard, a speed lap, a hall of fame, a sky cannon, a sky course and a big drop, tied together by six errands and a host who tells you which one you are on. The schedule is a pure function of UTC - no host, no server, nothing to go down - and every show draws a different card. |
 
 ## Ten minutes on a phone before you submit (the honest "tested on mobile")
 

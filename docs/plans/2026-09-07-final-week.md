@@ -1,7 +1,7 @@
 # Win the Buildathon — final-week plan (2026-09-07)
 
 > Judging runs Sep 5–11 in the Decentraland mobile app. Results Sep 13. Everything below is
-> ordered by how much it moves a judge's score per hour spent. Items marked **(you)** need the
+> ordered by how much it improves the experience per hour spent. Items marked **(you)** need the
 > wallet, a phone, or an account and cannot be done from this repo.
 
 **Spec:** `docs/specs/2026-09-02-beyond-fall-guys-design.md` (all six tracks shipped,
@@ -9,9 +9,9 @@
 
 ## What the research says
 
-- Judges (forum update, Sep 5): Giorgio — performance, mobile-first, polish · Agus — mobile UX,
-  controls · Bay Backner — social value, retention, discovery · Nico E — usability, onboarding,
-  execution · MetaRyuk — creativity, social, retention. All test **in the mobile app**.
+- The published criteria: performance and mobile-first polish · mobile UX and controls · social
+  value, retention, discovery · usability, onboarding, execution · creativity. Judging happens
+  **in the mobile app**.
 - Hackathon judges form an opinion in the first 30 seconds and see the README when they cannot
   play; a 60–90 s video is the single highest-leverage artefact; submit early, not at the wire.
 - Top 10 may be featured in the mobile app's **Discover** section — the thumbnail is the pitch there.
