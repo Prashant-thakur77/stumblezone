@@ -22,3 +22,8 @@ src
 cursor.config
 cursorignore
 .github
+docs
+tools
+tests
+agent
+dclcontext
