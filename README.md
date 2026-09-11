@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://decentraland.org/jump/?realm=justchatting.dcl.eth"><img alt="Play on Decentraland" src="https://img.shields.io/badge/Play-justchatting.dcl.eth-ff3d9e?style=for-the-badge"></a>
   <a href="#getting-started"><img alt="Decentraland SDK7" src="https://img.shields.io/badge/Decentraland-SDK7-33ccff?style=for-the-badge"></a>
+  <a href="https://github.com/Prashant-thakur77/stumblezone/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Prashant-thakur77/stumblezone/actions/workflows/ci.yml/badge.svg"></a>
   <a href="#testing"><img alt="156 tests" src="https://img.shields.io/badge/tests-156%20passing-5edc80?style=for-the-badge"></a>
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/licence-MIT-ffd440?style=for-the-badge"></a>
 </p>
@@ -47,6 +48,7 @@
 - [Testing](#testing)
 - [Judging criteria](#judging-criteria)
 - [Roadmap](#roadmap)
+- [Contributing](#contributing)
 - [Credits and licence](#credits-and-licence)
 
 ---
@@ -411,6 +413,14 @@ Post-buildathon, this is a candidate for the DCL Regenesis Labs Grants Program a
 Success Program.
 
 ---
+
+## Contributing
+
+Pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first — it is short, and it
+explains the rules the tests enforce (pure logic in `src/lib/`, no `borderRadius`, test on a phone).
+Bugs and ideas go through the [issue templates](.github/ISSUE_TEMPLATE). This project follows the
+[Contributor Covenant](CODE_OF_CONDUCT.md); security reports go to the address in
+[SECURITY.md](SECURITY.md). Changes a player would notice are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits and licence
 
